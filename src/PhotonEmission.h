@@ -23,6 +23,7 @@ class PhotonEmission {
     std::string output_path;
 
     int neta;
+    int nm;
     int np, nphi, nrapidity;
     int norder;
 
@@ -44,20 +45,21 @@ class PhotonEmission {
     std::vector<double> pi_photon_Tb;
     std::vector<double> bulkPi_Tb;
 
-    std::vector<double> dNd2pT_eq;
-    std::vector<double> dNd2pT;
-    double ***dNd2pTdphidy_eq;
+    double **dNd2pTd2M_eq;
+    double **dNd2pTd2M;
+    double ****dNd2pTdphidy_eq;
     double **vnpT_cos_eq, **vnpT_sin_eq;
-    double ***dNd2pTdphidy;
+    double ****dNd2pTdphidy;
     double **vnpT_cos, **vnpT_sin;
 
-    double dNdy_eq, dNdy_tot;
+    std::vector<double> dNd2Mdy_eq, dNd2Mdy_tot;
     std::vector<double> vn_sin_eq;
     std::vector<double> vn_cos_eq;
     std::vector<double> vn_cos_tot;
     std::vector<double> vn_sin_tot;
 
     //photon production processes
+    std::unique_ptr<ThermalPhoton> dilepton_QGP_LO;
     std::unique_ptr<ThermalPhoton> photon_QGP_2_to_2;
     std::unique_ptr<ThermalPhoton> photon_QGP_collinear;
     std::unique_ptr<ThermalPhoton> photon_HG_meson;

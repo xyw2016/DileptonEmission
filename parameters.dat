@@ -6,7 +6,7 @@ hydro_flag = 2                # read in mode for hydro medium
 hydro_nskip_tau = 1           # read in hydro slice every hydro_nskip_tau 
                               # steps from the medium file
                               # (only works for hydro_flag = 1)
-#
+# hydro profile
 Xmin = -15.0                  # minimum points along x direction
 dx = 0.3                      # lattice spacing along x direction
 Ymin = -15.0                  # minimum points along y direction
@@ -19,9 +19,12 @@ neta = 10                     # number of points in eta direction
 eta_i = 0.0                   # beginning value of eta slice
 eta_f = 3.0                   # end value of eta slice
 
+# photon kinematics
 np = 20                       # number of points for photon momentum
 nphi = 40                     # number of points for angles of photons momenta
 nrapidity = 1                 # number of points for photon rapidity
+
+nm = 15                       # number of points for dilepton invariant mass
 
 photon_q_i = 0.2              # the smallest photon momentum to be calculated
 photon_q_f = 4.0              # the largest photon momentum to be calculated
@@ -29,6 +32,9 @@ photon_phi_q_i = 0.0          # the smallest angle of photon momentum
 photon_phi_q_f = 6.2831853    # the largest angle of photon momentum
 photon_y_i = 0.0              # the smallest photon rapidity
 photon_y_f = 0.0              # the largest photon rapidity
+
+dilepton_mass_i = 0.2         # the smallest dilepton invariant mass
+dilepton_mass_f = 3.0         # the largest dilepton invariant mass
 
 norder = 10                   # calculate photon vn to norder
 turn_on_muB = 1               # flag to include muB dependence in photon rates

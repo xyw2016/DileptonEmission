@@ -48,6 +48,10 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
     lattice_3D_ideal.clear();
     lattice_new_.clear();
 
+    cout << "----------------------------------------" << endl;
+    cout << "-- Parameters list for hydro profile:"    << endl;
+    cout << "----------------------------------------" << endl;
+
     // read in setups of the hydro simulation
     hydroWhichHydro = whichHydro;
     if (hydroWhichHydro < 10) {

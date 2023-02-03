@@ -17,6 +17,7 @@ class ThermalPhoton {
     int np, nphi, nrapidity;
     int norder;
     int neta;
+    int nm;
     std::string rate_path_;
 
     double dy;
@@ -45,10 +46,11 @@ class ThermalPhoton {
     std::string emissionProcess_name;
     double *p, *p_weight;
     double *phi, *phi_weight;
+    double *M, *M_weight;
     std::vector<double> y;
     std::vector<double> theta;
 
-    double ***dNd2pTdphidy_eq, ***dNd2pTdphidy_vis, ***dNd2pTdphidy_tot;
+    double ****dNd2pTdphidy_eq, ***dNd2pTdphidy_vis, ***dNd2pTdphidy_tot;
     double ***dNd2pTdphidy_bulkvis;
     double ***dNd2pTdphidy_vis_deltaf_restricted;
     double ***dNd2pTdphidy_bulkvis_deltaf_restricted;
@@ -131,27 +133,31 @@ class ThermalPhoton {
     double getPhoton_pweight(int i) {return(p_weight[i]);}
     double getPhotonphi(int i) {return(phi[i]);}
     double getPhoton_phiweight(int i) {return(phi_weight[i]);}
+    double getDileptonMass(int i) {return(M[i]);}
+    double getDilepton_Massweight(int i) {return(M_weight[i]);}
     double getPhotontheta(int i) {return(theta[i]);}
     double getPhotonrapidity(int i) {return(y[i]);}
-    double getPhotonSpMatrix_eq(int i, int j, int k) {
-        return(dNd2pTdphidy_eq[i][j][k]);
+    double getPhotonSpMatrix_eq(int i, int j, int k, int l) {
+        return(dNd2pTdphidy_eq[i][j][k][l]);
     }
     double getPhotonSpMatrix_tot(int i, int j, int k) {
         return(dNd2pTdphidy_tot[i][j][k]);
     }
 
     virtual void analyticRates(double T, std::vector<double> &Eq,
-                               std::vector<double> &eqrate_ptr);
+        double *M_ll, std::vector<double> &eqrate_ptr, int nm,
+        int np, int nphi, int nrapidity);
     virtual void NetBaryonCorrection(double T, double muB,
                                      std::vector<double> &Eq,
                                      std::vector<double> &eqrate_ptr) {}
 
     virtual void analyticRatesShearVis(double T, std::vector<double> &Eq,
-                                       std::vector<double> &eqrate_ptr);
+        double *M_ll, std::vector<double> &eqrate_ptr);
     virtual void analyticRatesBulkVis(double T, std::vector<double> &Eq,
-                                      std::vector<double> &eqrate_ptr);
+        double *M_ll, std::vector<double> &eqrate_ptr);
 
     void getPhotonemissionRate(std::vector<double> &Eq,
+                               double *M_ll,
                                std::vector<double> &pi_zz,
                                std::vector<double> &bulkPi,
                                const double T, const double muB,
@@ -163,7 +169,7 @@ class ThermalPhoton {
         std::vector<double> &bulkPi, int Tb_length, double T,
         std::vector<double> &volume, double fraction);
     void calThermalPhotonemission_3d(
-        std::vector<double> &Eq, std::vector<double> &pi_zz,
+        std::vector<double> &Eq, double *M_ll, std::vector<double> &pi_zz,
         std::vector<double> &bulkPi, double T, double muB, double volume,
         double fraction);
     void calThermalPhotonemissiondTdtau(

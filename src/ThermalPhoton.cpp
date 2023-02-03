@@ -20,9 +20,11 @@
 using namespace std;
 using ARSENAL::createA2DMatrix;
 using ARSENAL::createA3DMatrix;
+using ARSENAL::createA4DMatrix;
 using ARSENAL::createA5DMatrix;
 using ARSENAL::deleteA2DMatrix;
 using ARSENAL::deleteA3DMatrix;
+using ARSENAL::deleteA4DMatrix;
 using ARSENAL::deleteA5DMatrix;
 
 ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
@@ -31,6 +33,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     emissionProcess_name = emissionProcess;
 
     neta = paraRdr->getVal("neta");
+    nm = paraRdr->getVal("nm");
     np = paraRdr->getVal("np");
     nphi = paraRdr->getVal("nphi");
     nrapidity = paraRdr->getVal("nrapidity");
@@ -48,6 +51,10 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     double phi_f = paraRdr->getVal("photon_phi_q_f");
     double y_i = paraRdr->getVal("photon_y_i");
     double y_f = paraRdr->getVal("photon_y_f");
+
+    double m_i = paraRdr->getVal("dilepton_mass_i");
+    double m_f = paraRdr->getVal("dilepton_mass_f");
+
     if (nrapidity > 1) {
         dy = (y_f - y_i)/(nrapidity - 1 + 1e-100);
     } else {
@@ -58,9 +65,12 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     p_weight = new double [np];
     phi = new double [nphi];
     phi_weight = new double [nphi];
+    M = new double [nm];
+    M_weight = new double [nm];
 
     gauss_quadrature(np, 1, 0.0, 0.0, p_i, p_f, p, p_weight);
     gauss_quadrature(nphi, 1, 0.0, 0.0, phi_i, phi_f, phi, phi_weight);
+    gauss_quadrature(nm, 1, 0.0, 0.0, m_i, m_f, M, M_weight);
 
     y.resize(nrapidity, 0);
     theta.resize(nrapidity, 0);
@@ -69,12 +79,12 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
         theta[i] = acos(tanh(y[i]));  //rapidity's corresponding polar angle
     }
 
-    dNd2pTdphidy_eq = createA3DMatrix(np, nphi, nrapidity, 0.);
-    dNd2pTdphidy_vis = createA3DMatrix(np, nphi, nrapidity, 0.);
-    dNd2pTdphidy_vis_deltaf_restricted = createA3DMatrix(np, nphi, nrapidity, 0.);
-    dNd2pTdphidy_bulkvis = createA3DMatrix(np, nphi, nrapidity, 0.);
-    dNd2pTdphidy_bulkvis_deltaf_restricted = createA3DMatrix(np, nphi, nrapidity, 0.);
-    dNd2pTdphidy_tot = createA3DMatrix(np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_eq = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
+    // dNd2pTdphidy_vis = createA3DMatrix(np, nphi, nrapidity, 0.);
+    // dNd2pTdphidy_vis_deltaf_restricted = createA3DMatrix(np, nphi, nrapidity, 0.);
+    // dNd2pTdphidy_bulkvis = createA3DMatrix(np, nphi, nrapidity, 0.);
+    // dNd2pTdphidy_bulkvis_deltaf_restricted = createA3DMatrix(np, nphi, nrapidity, 0.);
+    // dNd2pTdphidy_tot = createA3DMatrix(np, nphi, nrapidity, 0.);
 
     // vnypT_cos_eq = createA3DMatrix(norder, np, nrapidity, 0.);
     // vnypT_sin_eq = createA3DMatrix(norder, np, nrapidity, 0.);
@@ -202,12 +212,12 @@ ThermalPhoton::~ThermalPhoton() {
     delete [] phi;
     delete [] phi_weight;
 
-    deleteA3DMatrix(dNd2pTdphidy_eq, np, nphi);
-    deleteA3DMatrix(dNd2pTdphidy_vis, np, nphi);
-    deleteA3DMatrix(dNd2pTdphidy_vis_deltaf_restricted, np, nphi);
-    deleteA3DMatrix(dNd2pTdphidy_bulkvis, np, nphi);
-    deleteA3DMatrix(dNd2pTdphidy_bulkvis_deltaf_restricted, np, nphi);
-    deleteA3DMatrix(dNd2pTdphidy_tot, np, nphi);
+    deleteA4DMatrix(dNd2pTdphidy_eq, nm, np, nphi);
+    // deleteA3DMatrix(dNd2pTdphidy_vis, np, nphi);
+    // deleteA3DMatrix(dNd2pTdphidy_vis_deltaf_restricted, np, nphi);
+    // deleteA3DMatrix(dNd2pTdphidy_bulkvis, np, nphi);
+    // deleteA3DMatrix(dNd2pTdphidy_bulkvis_deltaf_restricted, np, nphi);
+    // deleteA3DMatrix(dNd2pTdphidy_tot, np, nphi);
 
     // deleteA2DMatrix(vnpT_cos_eq, norder);
     // deleteA2DMatrix(vnpT_sin_eq, norder);
@@ -389,24 +399,25 @@ void ThermalPhoton::readEmissionrate(string emissionProcess) {
 }
 
 
-void ThermalPhoton::analyticRates(double T, vector<double> &Eq,
-                                  std::vector<double> &eqrate_ptr) {
-    for (unsigned int i = 0; i < Eq.size(); i++) {
+void ThermalPhoton::analyticRates(double T, vector<double> &Eq, 
+    double *M_ll, std::vector<double> &eqrate_ptr, int nm,
+    int np, int nphi, int nrapidity) {
+    for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
         eqrate_ptr[i] = 1e-16;
     }
 }
 
 
-void ThermalPhoton::analyticRatesShearVis(
-        double T, vector<double> &Eq, std::vector<double> &visrate_ptr) {
+void ThermalPhoton::analyticRatesShearVis(double T, vector<double> &Eq, 
+    double *M_ll, std::vector<double> &visrate_ptr) {
     for (unsigned int i = 0; i < visrate_ptr.size(); i++) {
         visrate_ptr[i] = 0.;
     }
 }
 
 
-void ThermalPhoton::analyticRatesBulkVis(
-        double T, vector<double> &Eq, std::vector<double> &bulkvis_ptr) {
+void ThermalPhoton::analyticRatesBulkVis(double T, vector<double> &Eq, 
+    double *M_ll, std::vector<double> &bulkvis_ptr) {
     for (unsigned int i = 0; i < bulkvis_ptr.size(); i++) {
         bulkvis_ptr[i] = 0.;
     }
@@ -415,63 +426,75 @@ void ThermalPhoton::analyticRatesBulkVis(
 
 // get emission rate for a fluid cell either by interpolating discretized tables 
 // or from anlytical expressions
-void ThermalPhoton::getPhotonemissionRate(
-    vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
-    const double T, const double muB,
-    vector<double> &eqrate_ptr, vector<double> &visrate_ptr,
-    vector<double> &bulkvis_ptr) {
+void ThermalPhoton::getPhotonemissionRate(vector<double> &Eq, double *M_ll,
+    vector<double> &pi_zz, vector<double> &bulkPi, const double T, const double muB,
+    vector<double> &eqrate_ptr, vector<double> &visrate_ptr, vector<double> &bulkvis_ptr) 
+{
 
     if (bRateTable_) {
         // interpolate equilibrium rate
         interpolation2D_bilinear(T, Eq, Emission_eqrateTb_ptr,
                                  eqrate_ptr);
-        for (unsigned int i = 0; i < eqrate_ptr.size(); i++)
-            eqrate_ptr[i]  = exp(eqrate_ptr[i]); // since eqrate_ptr was log(rate)
-    } else {
-        analyticRates(T, Eq, eqrate_ptr);
-    }
+        int idx = 0;
+        for (int k = 0; k < nrapidity; k++) {
+            for (int m = 0; m < nphi; m++) {
+                for (int l = 0; l < np; l++) {
+                    for (int j = 0; j < nm; j++) {
 
-    // mu dependence
-    NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
-
-    if (bShearVisCorr_) {
-        if (bRateTable_) {
-            // interpolate viscous rate
-            interpolation2D_bilinear(T, Eq, Emission_viscous_rateTb_ptr,
-                                     visrate_ptr);
+                        eqrate_ptr[idx]  = exp(eqrate_ptr[idx]); // since eqrate_ptr was log(rate)
+                        idx++;
+                    }
+                }
+            }
         }
     } else {
-        analyticRatesShearVis(T, Eq, visrate_ptr);
-    }
-    if (bBulkVisCorr_) {
-        if (bRateTable_) {
-            // interpolate bulk viscous rate
-            interpolation2D_bilinear(T, Eq, Emission_bulkvis_rateTb_ptr,
-                                     bulkvis_ptr);
-        }
-    } else {
-        analyticRatesBulkVis(T, Eq, bulkvis_ptr);
+        analyticRates(T, Eq, M_ll, eqrate_ptr, nm, np, nphi, nrapidity);
     }
 
-    for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
-        visrate_ptr[i] = pi_zz[i]*visrate_ptr[i]*eqrate_ptr[i]; // pi_zz ~ q_muq_nu\pi^\mu\nu
-        bulkvis_ptr[i] = bulkPi[i]*bulkvis_ptr[i]*eqrate_ptr[i]; // since visrate_ptr was ratio
-    }
+    // // mu dependence
+    // NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
+
+    // if (bShearVisCorr_) {
+    //     if (bRateTable_) {
+    //         // interpolate viscous rate
+    //         interpolation2D_bilinear(T, Eq, Emission_viscous_rateTb_ptr,
+    //                                  visrate_ptr);
+    //     }
+    // } else {
+    //     analyticRatesShearVis(T, Eq, visrate_ptr);
+    // }
+    // if (bBulkVisCorr_) {
+    //     if (bRateTable_) {
+    //         // interpolate bulk viscous rate
+    //         interpolation2D_bilinear(T, Eq, Emission_bulkvis_rateTb_ptr,
+    //                                  bulkvis_ptr);
+    //     }
+    // } else {
+    //     analyticRatesBulkVis(T, Eq, bulkvis_ptr);
+    // }
+
+    // for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
+    //     visrate_ptr[i] = pi_zz[i]*visrate_ptr[i]*eqrate_ptr[i]; // pi_zz ~ q_muq_nu\pi^\mu\nu
+    //     bulkvis_ptr[i] = bulkPi[i]*bulkvis_ptr[i]*eqrate_ptr[i]; // since visrate_ptr was ratio
+    // }
 }
 
 
-void ThermalPhoton::calThermalPhotonemission_3d(
-        vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
-        double T, double muB, double volume, double fraction) {
+void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll,
+    vector<double> &pi_zz, vector<double> &bulkPi, double T, double muB, 
+    double volume, double fraction) {
 
     const int Tb_length = Eq.size();
-    if (Tb_length != nrapidity*nphi*np) {
+
+    if (Tb_length != nrapidity*nphi*np*nm) {
         std::cout << "The length of Eq array is not right! Please check!"
                   << std::endl;
         exit(1);
     }
 
     const double volfrac = volume*fraction;
+
+    // Given (T, mu), the emission rate depends on momentum and invariant mass of dilepton
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
     // photon emission viscous correction at local rest cell
@@ -479,42 +502,46 @@ void ThermalPhoton::calThermalPhotonemission_3d(
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, muB,
+    getPhotonemissionRate(Eq, M_ll, pi_zz, bulkPi, T, muB,
                           em_eqrate, em_visrate, em_bulkvis);
 
     int idx = 0;
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
             for (int l = 0; l < np; l++) {
-                double local_eq = em_eqrate[idx];
-                double local_vis = em_visrate[idx];
-                double local_bulk = em_bulkvis[idx];
+                for (int j = 0; j < nm; j++) {
 
-                double temp_eq_sum = local_eq*volfrac;
-                double temp_vis_sum = local_vis*volfrac;
-                double temp_bulkvis_sum = local_bulk*volfrac;
+                    double local_eq = em_eqrate[idx];
+                    double local_vis = em_visrate[idx];
+                    double local_bulk = em_bulkvis[idx];
 
-                // regulate viscous corrections
-                double ratio = fabs(local_vis + local_bulk)/(local_eq + 1e-20);
-                if (ratio > 1.0) {
-                    local_vis = local_vis/ratio;
-                    local_bulk = local_bulk/ratio;
+                    double temp_eq_sum = local_eq*volfrac;
+                    double temp_vis_sum = local_vis*volfrac;
+                    double temp_bulkvis_sum = local_bulk*volfrac;
+
+                    // regulate viscous corrections
+                    double ratio = fabs(local_vis + local_bulk)/(local_eq + 1e-20);
+                    if (ratio > 1.0) {
+                        local_vis = local_vis/ratio;
+                        local_bulk = local_bulk/ratio;
+                    }
+                    double temp_vis_deltaf_restricted_sum = local_vis*volfrac;
+                    double temp_bulkvis_deltaf_restricted_sum = local_bulk*volfrac;
+
+                    // spectra
+                    dNd2pTdphidy_eq[j][l][m][k] += temp_eq_sum + temp_vis_sum;
+
+                    // dNd2pTdphidy_vis[j][l][m][k] += temp_eq_sum + temp_vis_sum;
+                    // dNd2pTdphidy_vis_deltaf_restricted[j][l][m][k] += (
+                    //             temp_eq_sum + temp_vis_deltaf_restricted_sum);
+                    // dNd2pTdphidy_bulkvis[j][l][m][k] += (
+                    //             temp_eq_sum + temp_bulkvis_sum);
+                    // dNd2pTdphidy_bulkvis_deltaf_restricted[j][l][m][k] += (
+                    //             temp_eq_sum + temp_bulkvis_deltaf_restricted_sum);
+                    // dNd2pTdphidy_tot[j][l][m][k] += (temp_eq_sum + temp_vis_sum
+                    //                               + temp_bulkvis_sum);
+                    idx++;
                 }
-                double temp_vis_deltaf_restricted_sum = local_vis*volfrac;
-                double temp_bulkvis_deltaf_restricted_sum = local_bulk*volfrac;
-
-                // spectra
-                dNd2pTdphidy_eq[l][m][k] += temp_eq_sum;
-                dNd2pTdphidy_vis[l][m][k] += temp_eq_sum + temp_vis_sum;
-                dNd2pTdphidy_vis_deltaf_restricted[l][m][k] += (
-                            temp_eq_sum + temp_vis_deltaf_restricted_sum);
-                dNd2pTdphidy_bulkvis[l][m][k] += (
-                            temp_eq_sum + temp_bulkvis_sum);
-                dNd2pTdphidy_bulkvis_deltaf_restricted[l][m][k] += (
-                            temp_eq_sum + temp_bulkvis_deltaf_restricted_sum);
-                dNd2pTdphidy_tot[l][m][k] += (temp_eq_sum + temp_vis_sum
-                                              + temp_bulkvis_sum);
-                idx++;
             }
         }
     }

@@ -4,6 +4,7 @@
 namespace TENSORTRANSFORM {
 
 void boost_matrix(double** , double , double , double);
+void lorentz_boost_matrix(double** , double , double , double , double);
 void getTransverseflow_u_mu_low(double* flow_u_mu_low,
                                 double vx, double vy, double vz);
 void boost_vec_trans(double* , double* , double** );
