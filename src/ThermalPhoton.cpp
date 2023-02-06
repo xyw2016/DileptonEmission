@@ -55,22 +55,19 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     double m_i = paraRdr->getVal("dilepton_mass_i");
     double m_f = paraRdr->getVal("dilepton_mass_f");
 
+    p = new double [np];
+    p_weight = new double [np];
+    phi = new double [nphi];
+    phi_weight = new double [nphi];
+
+    gauss_quadrature(np, 1, 0.0, 0.0, p_i, p_f, p, p_weight);
+    gauss_quadrature(nphi, 1, 0.0, 0.0, phi_i, phi_f, phi, phi_weight);
+
     if (nrapidity > 1) {
         dy = (y_f - y_i)/(nrapidity - 1 + 1e-100);
     } else {
         dy = 1.0;
     }
-
-    p = new double [np];
-    p_weight = new double [np];
-    phi = new double [nphi];
-    phi_weight = new double [nphi];
-    M = new double [nm];
-    M_weight = new double [nm];
-
-    gauss_quadrature(np, 1, 0.0, 0.0, p_i, p_f, p, p_weight);
-    gauss_quadrature(nphi, 1, 0.0, 0.0, phi_i, phi_f, phi, phi_weight);
-    gauss_quadrature(nm, 1, 0.0, 0.0, m_i, m_f, M, M_weight);
 
     y.resize(nrapidity, 0);
     theta.resize(nrapidity, 0);
@@ -78,6 +75,13 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
         y[i] = y_i + i*dy;
         theta[i] = acos(tanh(y[i]));  //rapidity's corresponding polar angle
     }
+
+    M.resize(nm, 0);
+    dM = (m_f - m_i)/(nm + 1e-100);
+    for (int i=0;i<nm;i++) {
+        M[i] = m_i + i*dM;
+    }
+
 
     dNd2pTdphidy_eq = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     // dNd2pTdphidy_vis = createA3DMatrix(np, nphi, nrapidity, 0.);
@@ -850,7 +854,7 @@ void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll
 //     }
 // }
 
-
+// for individual channels
 // void ThermalPhoton::calPhoton_SpvnpT_shell() {
 //     calPhoton_SpvnpT(dNd2pTdphidy_eq, vnypT_cos_eq, vnypT_sin_eq,
 //                      vnpT_cos_eq, vnpT_sin_eq,

@@ -54,17 +54,17 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     dNd2pTd2M_eq = createA2DMatrix(nm, np, 0);
     dNd2pTd2M = createA2DMatrix(nm, np, 0);
 
-    // vnpT_cos_eq = createA2DMatrix(norder, np, 0.);
-    // vnpT_sin_eq = createA2DMatrix(norder, np, 0.);
-    // vnpT_cos = createA2DMatrix(norder, np, 0.);
-    // vnpT_sin = createA2DMatrix(norder, np, 0.);
+    vnpT_cos_eq = createA3DMatrix(norder, nm, np, 0.);
+    vnpT_sin_eq = createA3DMatrix(norder, nm, np, 0.);
+    vnpT_cos = createA3DMatrix(norder, nm, np, 0.);
+    vnpT_sin = createA3DMatrix(norder, nm, np, 0.);
 
     dNd2Mdy_eq.resize(nm, 0);
     dNd2Mdy_tot.resize(nm, 0);
-    // vn_cos_eq.resize(norder, 0.);
-    // vn_sin_eq.resize(norder, 0.);
-    // vn_cos_tot.resize(norder, 0.);
-    // vn_sin_tot.resize(norder, 0.);
+    vn_cos_eq = createA2DMatrix(norder, nm, 0.);
+    vn_sin_eq = createA2DMatrix(norder, nm, 0.);
+    vn_cos = createA2DMatrix(norder, nm, 0.);
+    vn_sin = createA2DMatrix(norder, nm, 0.);
 }
 
 
@@ -72,10 +72,16 @@ PhotonEmission::~PhotonEmission() {
     deleteA4DMatrix(dNd2pTdphidy_eq, nm, np, nphi);
     deleteA4DMatrix(dNd2pTdphidy, nm, np, nphi);
 
-    // deleteA2DMatrix(vnpT_cos_eq, norder);
-    // deleteA2DMatrix(vnpT_sin_eq, norder);
-    // deleteA2DMatrix(vnpT_cos, norder);
-    // deleteA2DMatrix(vnpT_sin, norder);
+    deleteA3DMatrix(vnpT_cos_eq, norder, nm);
+    deleteA3DMatrix(vnpT_sin_eq, norder, nm);
+    deleteA3DMatrix(vnpT_cos, norder, nm);
+    deleteA3DMatrix(vnpT_sin, norder, nm);
+
+    deleteA2DMatrix(vn_cos_eq, norder);
+    deleteA2DMatrix(vn_sin_eq, norder);
+    deleteA2DMatrix(vn_cos, norder);
+    deleteA2DMatrix(vn_sin, norder);
+
     deleteA2DMatrix(lambda, 4);
 }
 
@@ -1039,6 +1045,8 @@ void PhotonEmission::calPhoton_total_SpMatrix() {
                 for (int j = 0; j < nm; j++) {
                     dNd2pTdphidy_eq[j][l][m][k] = (
                           dilepton_QGP_LO->getPhotonSpMatrix_eq(j, l, m, k));
+                    dNd2pTdphidy[j][l][m][k] = (
+                          dilepton_QGP_LO->getPhotonSpMatrix_eq(j, l, m, k));
                     //printf("calPhoton_total_SpMatrix BII...%e\n",dNd2pTdphidy_eq[j][l][m][k]);
                 // dNd2pTdphidy_eq[l][m][k] = (
                 //       photon_QGP_2_to_2->getPhotonSpMatrix_eq(l, m, k)
@@ -1100,54 +1108,53 @@ void PhotonEmission::calPhoton_total_SpMatrix() {
 // }
 
 
-void PhotonEmission::outputPhotonSpvn() {
-    // photon_QGP_2_to_2->outputPhoton_SpvnpT_shell(output_path);
-    // photon_QGP_collinear->outputPhoton_SpvnpT_shell(output_path);
-    // photon_HG_meson->outputPhoton_SpvnpT_shell(output_path);
-    // photon_HG_omega->outputPhoton_SpvnpT_shell(output_path);
-    // photon_HG_rho_spectralfun->outputPhoton_SpvnpT_shell(output_path);
-    // photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpT_shell(output_path);
-    // if (differential_flag == 1 || differential_flag > 10) {
-    //     photon_QGP_2_to_2->outputPhoton_SpvnpTdTdtau(output_path);
-    //     photon_QGP_collinear->outputPhoton_SpvnpTdTdtau(output_path);
-    //     photon_QGP_2_to_2->output_photon_spectra_dTdtau(output_path);
-    //     photon_QGP_collinear->output_photon_spectra_dTdtau(output_path);
-    //     photon_HG_meson->outputPhoton_SpvnpTdTdtau(output_path);
-    //     photon_HG_meson->output_photon_spectra_dTdtau(output_path);
-    //     photon_HG_omega->outputPhoton_SpvnpTdTdtau(output_path);
-    //     photon_HG_omega->output_photon_spectra_dTdtau(output_path);
-    //     photon_HG_rho_spectralfun->outputPhoton_SpvnpTdTdtau(output_path);
-    //     photon_HG_rho_spectralfun->output_photon_spectra_dTdtau(output_path);
-    //     photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpTdTdtau(output_path);
-    //     photon_HG_pipiBremsstrahlung->output_photon_spectra_dTdtau(output_path);
-    // }
-    // if (differential_flag == 2 || differential_flag > 10) {
-    //     photon_QGP_2_to_2->outputPhoton_SpvnpTdxperpdtau(output_path);
-    //     photon_QGP_collinear->outputPhoton_SpvnpTdxperpdtau(output_path);
-    //     photon_HG_meson->outputPhoton_SpvnpTdxperpdtau(output_path);
-    //     photon_HG_omega->outputPhoton_SpvnpTdxperpdtau(output_path);
-    //     photon_HG_rho_spectralfun->outputPhoton_SpvnpTdxperpdtau(output_path);
-    //     photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpTdxperpdtau(output_path);
-    // }
-    // if (calHGIdFlag == 1) {
-    //     photon_pirho->outputPhoton_SpvnpT_shell(output_path);
-    //     photon_KstarK->outputPhoton_SpvnpT_shell(output_path);
-    //     photon_piK->outputPhoton_SpvnpT_shell(output_path);
-    //     photon_piKstar->outputPhoton_SpvnpT_shell(output_path);
-    //     photon_pipi->outputPhoton_SpvnpT_shell(output_path);
-    //     photon_rhoK->outputPhoton_SpvnpT_shell(output_path);
-    //     photon_rho->outputPhoton_SpvnpT_shell(output_path);
-    //     photon_pirho_omegat->outputPhoton_SpvnpT_shell(output_path);
-    // }
+// void PhotonEmission::outputPhotonSpvn_individualchannel() {
+//     // photon_QGP_2_to_2->outputPhoton_SpvnpT_shell(output_path);
+//     // photon_QGP_collinear->outputPhoton_SpvnpT_shell(output_path);
+//     // photon_HG_meson->outputPhoton_SpvnpT_shell(output_path);
+//     // photon_HG_omega->outputPhoton_SpvnpT_shell(output_path);
+//     // photon_HG_rho_spectralfun->outputPhoton_SpvnpT_shell(output_path);
+//     // photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpT_shell(output_path);
+//     // if (differential_flag == 1 || differential_flag > 10) {
+//     //     photon_QGP_2_to_2->outputPhoton_SpvnpTdTdtau(output_path);
+//     //     photon_QGP_collinear->outputPhoton_SpvnpTdTdtau(output_path);
+//     //     photon_QGP_2_to_2->output_photon_spectra_dTdtau(output_path);
+//     //     photon_QGP_collinear->output_photon_spectra_dTdtau(output_path);
+//     //     photon_HG_meson->outputPhoton_SpvnpTdTdtau(output_path);
+//     //     photon_HG_meson->output_photon_spectra_dTdtau(output_path);
+//     //     photon_HG_omega->outputPhoton_SpvnpTdTdtau(output_path);
+//     //     photon_HG_omega->output_photon_spectra_dTdtau(output_path);
+//     //     photon_HG_rho_spectralfun->outputPhoton_SpvnpTdTdtau(output_path);
+//     //     photon_HG_rho_spectralfun->output_photon_spectra_dTdtau(output_path);
+//     //     photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpTdTdtau(output_path);
+//     //     photon_HG_pipiBremsstrahlung->output_photon_spectra_dTdtau(output_path);
+//     // }
+//     // if (differential_flag == 2 || differential_flag > 10) {
+//     //     photon_QGP_2_to_2->outputPhoton_SpvnpTdxperpdtau(output_path);
+//     //     photon_QGP_collinear->outputPhoton_SpvnpTdxperpdtau(output_path);
+//     //     photon_HG_meson->outputPhoton_SpvnpTdxperpdtau(output_path);
+//     //     photon_HG_omega->outputPhoton_SpvnpTdxperpdtau(output_path);
+//     //     photon_HG_rho_spectralfun->outputPhoton_SpvnpTdxperpdtau(output_path);
+//     //     photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpTdxperpdtau(output_path);
+//     // }
+//     // if (calHGIdFlag == 1) {
+//     //     photon_pirho->outputPhoton_SpvnpT_shell(output_path);
+//     //     photon_KstarK->outputPhoton_SpvnpT_shell(output_path);
+//     //     photon_piK->outputPhoton_SpvnpT_shell(output_path);
+//     //     photon_piKstar->outputPhoton_SpvnpT_shell(output_path);
+//     //     photon_pipi->outputPhoton_SpvnpT_shell(output_path);
+//     //     photon_rhoK->outputPhoton_SpvnpT_shell(output_path);
+//     //     photon_rho->outputPhoton_SpvnpT_shell(output_path);
+//     //     photon_pirho_omegat->outputPhoton_SpvnpT_shell(output_path);
+//     // }
 
-    outputPhoton_total_SpvnpT("photon_total");
-}
+//     //outputPhoton_total_SpvnpT("photon_total");
+// }
 
 void PhotonEmission::calPhoton_total_Spvn() {
 
     for (int m = 0; m < nm; m++) {
         double Mll = photon_QGP_2_to_2->getDileptonMass(m);
-        double Mll_weight = photon_QGP_2_to_2->getDilepton_Massweight(m);   
         for (int i = 0; i < np; i++) {
             double p = photon_QGP_2_to_2->getPhotonp(i);
             double pweight = photon_QGP_2_to_2->getPhoton_pweight(i);
@@ -1160,69 +1167,74 @@ void PhotonEmission::calPhoton_total_Spvn() {
                     // integrate over rapidity and azimuthal angle of momentum
                     dNd2pTd2M_eq[m][i] += dNd2pTdphidy_eq[m][i][j][k]*weight;
                     dNd2pTd2M[m][i] += dNd2pTdphidy[m][i][j][k]*weight;
-                    // for (int order = 0; order < norder; order++) {
-                    //     vnpT_cos_eq[order][i] += (
-                    //             dNd2pTdphidy_eq[i][j][k]*cos(order*phi)*weight);
-                    //     vnpT_cos[order][i] += (
-                    //             dNd2pTdphidy[i][j][k]*cos(order*phi)*weight);
-                    //     vnpT_sin_eq[order][i] += (
-                    //             dNd2pTdphidy_eq[i][j][k]*sin(order*phi)*weight);
-                    //     vnpT_sin[order][i] += (
-                    //             dNd2pTdphidy[i][j][k]*sin(order*phi)*weight);
-                    // }
+                    for (int order = 0; order < norder; order++) {
+                        vnpT_cos_eq[order][m][i] += (
+                                dNd2pTdphidy_eq[m][i][j][k]*cos(order*phi)*weight);
+                        vnpT_cos[order][m][i] += (
+                                dNd2pTdphidy[m][i][j][k]*cos(order*phi)*weight);
+                        vnpT_sin_eq[order][m][i] += (
+                                dNd2pTdphidy_eq[m][i][j][k]*sin(order*phi)*weight);
+                        vnpT_sin[order][m][i] += (
+                                dNd2pTdphidy[m][i][j][k]*sin(order*phi)*weight);
+                    }
                 }
             }
             dNd2Mdy_eq[m] += dNd2pTd2M_eq[m][i]*p*pweight; // integral over p
             dNd2Mdy_tot[m] += dNd2pTd2M[m][i]*p*pweight;
 
-            // for (int order=0; order < norder; order++) {
-            //     vn_cos_eq[order] += vnpT_cos_eq[order][i]*p*pweight;
-            //     vn_sin_eq[order] += vnpT_sin_eq[order][i]*p*pweight;
-            //     vn_cos_tot[order] += vnpT_cos[order][i]*p*pweight;
-            //     vn_sin_tot[order] += vnpT_sin[order][i]*p*pweight;
+            for (int order=0; order < norder; order++) {
+                // sum over pT
+                vn_cos_eq[order][m] += vnpT_cos_eq[order][m][i]*p*pweight;
+                vn_sin_eq[order][m] += vnpT_sin_eq[order][m][i]*p*pweight;
+                vn_cos[order][m] += vnpT_cos[order][m][i]*p*pweight;
+                vn_sin[order][m] += vnpT_sin[order][m][i]*p*pweight;
 
-            //     vnpT_cos_eq[order][i] = vnpT_cos_eq[order][i]/dNd2pT_eq[i];
-            //     vnpT_cos[order][i] = vnpT_cos[order][i]/dNd2pT[i];
-            //     vnpT_sin_eq[order][i] = vnpT_sin_eq[order][i]/dNd2pT_eq[i];
-            //     vnpT_sin[order][i] = vnpT_sin[order][i]/dNd2pT[i];
-            // }
+                vnpT_cos_eq[order][m][i] = vnpT_cos_eq[order][m][i]/dNd2pTd2M_eq[m][i];
+                vnpT_cos[order][m][i] = vnpT_cos[order][m][i]/dNd2pTd2M[m][i];
+                vnpT_sin_eq[order][m][i] = vnpT_sin_eq[order][m][i]/dNd2pTd2M_eq[m][i];
+                vnpT_sin[order][m][i] = vnpT_sin[order][m][i]/dNd2pTd2M[m][i];
+            }
             dNd2pTd2M_eq[m][i] = dNd2pTd2M_eq[m][i]/(2*M_PI); // dN/(2pi pTdpT)
             dNd2pTd2M[m][i] = dNd2pTd2M[m][i]/(2*M_PI);
         }
     }
     
-    // for (int order = 1; order < norder ; order++) {
-    //     vn_cos_eq[order] = vn_cos_eq[order]/dNdy_eq;
-    //     vn_sin_eq[order] = vn_sin_eq[order]/dNdy_eq;
-    //     vn_cos_tot[order] = vn_cos_tot[order]/dNdy_tot;
-    //     vn_sin_tot[order] = vn_sin_tot[order]/dNdy_tot;
-    // }
+    for (int m = 0; m < nm; m++) {
+        for (int order = 1; order < norder ; order++) {
+            vn_cos_eq[order][m] = vn_cos_eq[order][m]/dNd2Mdy_eq[m];
+            vn_sin_eq[order][m] = vn_sin_eq[order][m]/dNd2Mdy_eq[m];
+            vn_cos[order][m] = vn_cos[order][m]/dNd2Mdy_tot[m];
+            vn_sin[order][m] = vn_sin[order][m]/dNd2Mdy_tot[m];
+        }
+    }
 }
 
 
-void PhotonEmission::outputPhoton_total_SpvnpT(string filename) {
+void PhotonEmission::outputPhoton_total_SpvnpT() {
     ostringstream filename_stream_eq_SpMatrix;
     ostringstream filename_stream_eq_Spvn;
     ostringstream filename_stream_SpMatrix;
     ostringstream filename_stream_Spvn;
-    // ostringstream filename_stream_inte_eq_Spvn;
-    // ostringstream filename_stream_inte_Spvn;
+    ostringstream filename_stream_inte_eq_Spvn;
+    ostringstream filename_stream_inte_Spvn;
+
+    string filename = "photon_total";
 
     filename_stream_eq_SpMatrix << output_path << filename
                                 << "_eq_SpMatrix.dat";
     filename_stream_eq_Spvn << output_path << filename << "_eq_Spvn.dat";
     filename_stream_SpMatrix << output_path << filename << "_SpMatrix.dat";
     filename_stream_Spvn << output_path << filename << "_Spvn.dat";
-    // filename_stream_inte_eq_Spvn << output_path << filename
-    //                              << "_eq_Spvn_inte.dat";
-    // filename_stream_inte_Spvn << output_path << filename << "_Spvn_inte.dat";
+    filename_stream_inte_eq_Spvn << output_path << filename
+                                 << "_eq_Spvn_inte.dat";
+    filename_stream_inte_Spvn << output_path << filename << "_Spvn_inte.dat";
 
     ofstream fphoton_eq_SpMatrix(filename_stream_eq_SpMatrix.str().c_str());
     ofstream fphoton_eq_Spvn(filename_stream_eq_Spvn.str().c_str());
     ofstream fphotonSpMatrix(filename_stream_SpMatrix.str().c_str());
     ofstream fphotonSpvn(filename_stream_Spvn.str().c_str());
-    // ofstream fphotoninte_eq_Spvn(filename_stream_inte_eq_Spvn.str().c_str());
-    // ofstream fphotoninteSpvn(filename_stream_inte_Spvn.str().c_str());
+    ofstream fphotoninte_eq_Spvn(filename_stream_inte_eq_Spvn.str().c_str());
+    ofstream fphotoninteSpvn(filename_stream_inte_Spvn.str().c_str());
 
     // for (int i=0; i < nphi; i++) {
     //     double phi = photon_QGP_2_to_2->getPhotonphi(i);
@@ -1244,52 +1256,55 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename) {
     //     fphoton_eq_SpMatrix << endl;
     //     fphotonSpMatrix << endl;
     // }
-    // for (int i = 0; i < np; i++) {
-    //     double pT = photon_QGP_2_to_2->getPhotonp(i);
-    //     fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
-    //                     << pT << "  " << dNd2pT_eq[i] << "  ";
-    //     fphotonSpvn << scientific << setprecision(6) << setw(16)
-    //                 << pT << "  " << dNd2pT[i] << "  ";
-    //     // for (int order=1; order < norder; order++) {
-    //     //     fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
-    //     //                     << vnpT_cos_eq[order][i] << "  "
-    //     //                     << vnpT_sin_eq[order][i] << "  "
-    //     //                     << sqrt(pow(vnpT_cos_eq[order][i], 2)
-    //     //                             + pow(vnpT_sin_eq[order][i], 2)) << "  ";
-    //     //     fphotonSpvn << scientific << setprecision(6) << setw(16)
-    //     //                 << vnpT_cos[order][i] << "  "
-    //     //                 << vnpT_sin[order][i] << "  "
-    //     //                 << sqrt(pow(vnpT_cos[order][i], 2)
-    //     //                         + pow(vnpT_sin[order][i], 2)) << "  ";
-    //     // }
-    //     fphoton_eq_Spvn << endl;
-    //     fphotonSpvn << endl;
-    // }
-
-
-    for (int i = 0; i < nm; i++) {
-
-        double M_ll = photon_QGP_2_to_2->getDileptonMass(i);
-        fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_eq[i] << "  ";
-        fphotonSpvn << scientific << setprecision(6) << setw(16)
-                    << M_ll << "  " << dNd2Mdy_tot[i] << "  ";
-        fphoton_eq_Spvn << endl;
-        fphotonSpvn << endl;
-
-        //printf("error BII...%d,%f,%f\n",i,M_ll,dNd2Mdy_eq[i]);
+    for (int m = 0; m < nm; m++) {
+        for (int i = 0; i < np; i++) {
+            double M_ll = photon_QGP_2_to_2->getDileptonMass(m);
+            fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
+                            << M_ll << "  ";
+            fphotonSpvn << scientific << setprecision(6) << setw(16)
+                        << M_ll << "  ";
+            double pT = photon_QGP_2_to_2->getPhotonp(i);
+            fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
+                            << pT << "  " << dNd2pTd2M_eq[m][i] << "  ";
+            fphotonSpvn << scientific << setprecision(6) << setw(16)
+                        << pT << "  " << dNd2pTd2M[m][i] << "  ";
+            for (int order=1; order < norder; order++) {
+                fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
+                                << order << "   " << vnpT_cos_eq[order][m][i] << "  "
+                                << vnpT_sin_eq[order][m][i] << "  "
+                                << sqrt(pow(vnpT_cos_eq[order][m][i], 2)
+                                        + pow(vnpT_sin_eq[order][m][i], 2)) << "  ";
+                fphotonSpvn << scientific << setprecision(6) << setw(16)
+                            << order << "   " << vnpT_cos[order][m][i] << "  "
+                            << vnpT_sin[order][m][i] << "  "
+                            << sqrt(pow(vnpT_cos[order][m][i], 2)
+                                    + pow(vnpT_sin[order][m][i], 2)) << "  ";
+            }
+            fphoton_eq_Spvn << endl;
+            fphotonSpvn << endl;
+        }
     }
 
-    // for (int order = 0; order < norder; order++) {
-    //     fphotoninte_eq_Spvn << scientific << setprecision(6) << setw(16)
-    //                         << order << "   " << vn_cos_eq[order] << "   "
-    //                         << vn_sin_eq[order] << "   "
-    //                         << sqrt(pow(vn_cos_eq[order], 2)
-    //                                 + pow(vn_sin_eq[order], 2)) << endl;
-    //     fphotoninteSpvn << scientific << setprecision(6) << setw(16)
-    //                     << order << "   " << vn_cos_tot[order] << "   "
-    //                     << vn_sin_tot[order] << "   "
-    //                     << sqrt(pow(vn_cos_tot[order], 2)
-    //                             + pow(vn_sin_tot[order], 2)) << endl;
-    // }
+    for (int m = 0; m < nm; m++) {
+        double M_ll = photon_QGP_2_to_2->getDileptonMass(m);
+        fphotoninte_eq_Spvn << scientific << setprecision(6) << setw(16)
+                        << M_ll << "  " << dNd2Mdy_eq[m]*M_ll << "  ";
+        fphotoninteSpvn << scientific << setprecision(6) << setw(16)
+                    << M_ll << "  " << dNd2Mdy_tot[m]*M_ll << "  ";
+
+        for (int order = 0; order < norder; order++) {
+            fphotoninte_eq_Spvn << scientific << setprecision(6) << setw(16)
+                                << order << "   " << vn_cos_eq[order][m] << "   "
+                                << vn_sin_eq[order][m] << "   "
+                                << sqrt(pow(vn_cos_eq[order][m], 2)
+                                        + pow(vn_sin_eq[order][m], 2)) << "  ";
+            fphotoninteSpvn << scientific << setprecision(6) << setw(16)
+                            << order << "   " << vn_cos[order][m] << "   "
+                            << vn_sin[order][m] << "   "
+                            << sqrt(pow(vn_cos[order][m], 2)
+                                    + pow(vn_sin[order][m], 2)) << "  ";
+        }
+        fphotoninte_eq_Spvn << endl;
+        fphotoninteSpvn << endl;
+    }
 }

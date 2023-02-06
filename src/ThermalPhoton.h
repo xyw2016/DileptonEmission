@@ -21,6 +21,7 @@ class ThermalPhoton {
     std::string rate_path_;
 
     double dy;
+    double dM;
 
     bool bRateTable_;
     bool bShearVisCorr_;
@@ -46,7 +47,7 @@ class ThermalPhoton {
     std::string emissionProcess_name;
     double *p, *p_weight;
     double *phi, *phi_weight;
-    double *M, *M_weight;
+    std::vector<double> M;
     std::vector<double> y;
     std::vector<double> theta;
 
@@ -134,7 +135,6 @@ class ThermalPhoton {
     double getPhotonphi(int i) {return(phi[i]);}
     double getPhoton_phiweight(int i) {return(phi_weight[i]);}
     double getDileptonMass(int i) {return(M[i]);}
-    double getDilepton_Massweight(int i) {return(M_weight[i]);}
     double getPhotontheta(int i) {return(theta[i]);}
     double getPhotonrapidity(int i) {return(y[i]);}
     double getPhotonSpMatrix_eq(int i, int j, int k, int l) {

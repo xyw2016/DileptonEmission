@@ -48,15 +48,15 @@ class PhotonEmission {
     double **dNd2pTd2M_eq;
     double **dNd2pTd2M;
     double ****dNd2pTdphidy_eq;
-    double **vnpT_cos_eq, **vnpT_sin_eq;
+    double ***vnpT_cos_eq, ***vnpT_sin_eq;
     double ****dNd2pTdphidy;
-    double **vnpT_cos, **vnpT_sin;
+    double ***vnpT_cos, ***vnpT_sin;
 
     std::vector<double> dNd2Mdy_eq, dNd2Mdy_tot;
-    std::vector<double> vn_sin_eq;
-    std::vector<double> vn_cos_eq;
-    std::vector<double> vn_cos_tot;
-    std::vector<double> vn_sin_tot;
+    double **vn_sin_eq;
+    double **vn_cos_eq;
+    double **vn_cos;
+    double **vn_sin;
 
     //photon production processes
     std::unique_ptr<ThermalPhoton> dilepton_QGP_LO;
@@ -90,8 +90,8 @@ class PhotonEmission {
     void calPhoton_total_SpMatrix();
     void calPhoton_SpvnpT_individualchannel();
     void calPhoton_total_Spvn();
-    void outputPhoton_total_SpvnpT(std::string );
-    void outputPhotonSpvn();
+    void outputPhoton_total_SpvnpT();
+    void outputPhotonSpvn_individualchannel();
 };
 
 #endif   // SRC_PHOTONEMISSION_H_

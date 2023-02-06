@@ -102,7 +102,8 @@ int main(int argc, char** argv) {
     thermalPhotons.calPhoton_total_Spvn();
 
     // output results
-    thermalPhotons.outputPhotonSpvn();
+    // thermalPhotons.outputPhotonSpvn_individualchannel();
+    thermalPhotons.outputPhoton_total_SpvnpT();
 
     sw.toc();
     cout << "totally takes : " << sw.takeTime() << " seconds." << endl;

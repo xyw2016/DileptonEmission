@@ -36,7 +36,7 @@ photon_y_f = 0.0              # the largest photon rapidity
 dilepton_mass_i = 0.2         # the smallest dilepton invariant mass
 dilepton_mass_f = 3.0         # the largest dilepton invariant mass
 
-norder = 10                   # calculate photon vn to norder
+norder = 3                   # calculate photon vn to norder
 turn_on_muB = 1               # flag to include muB dependence in photon rates
 
 T_dec = 0.105                 # freeze out temperature (GeV)
