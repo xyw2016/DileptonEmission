@@ -145,7 +145,7 @@ class ThermalPhoton {
         return(dNd2pTdphidy_tot[i][j][k][l]);
     }
 
-    virtual void analyticRates(double T, std::vector<double> &Eq,
+    virtual void analyticRates(double T, double muB, std::vector<double> &Eq,
         double *M_ll, std::vector<double> &eqrate_ptr, int nm,
         int np, int nphi, int nrapidity);
     virtual void NetBaryonCorrection(double T, double muB,
@@ -159,25 +159,28 @@ class ThermalPhoton {
     virtual void analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp,
         std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
         int nm, int np, int nphi, int nrapidity);
+    virtual void FinateBaryonRates(double T, double muB, double rhoB_over_eplusp, 
+        std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
+        std::vector<double> &diffrate_ptr, int nm, int np, int nphi, int nrapidity);
 
     void getPhotonemissionRate(std::vector<double> &Eq,
                                double *M_ll,
                                std::vector<double> &pi_zz,
                                std::vector<double> &bulkPi,
-                               std::vector<double> &diffusion,
+                               std::vector<double> &diff_factor,
                                const double T, const double muB,
                                const double rhoB_over_eplusp,
                                std::vector<double> &eqrate_ptr,
                                std::vector<double> &visrate_ptr,
                                std::vector<double> &bulkvis_ptr,
-                               std::vector<double> &diffusion_ptr);
+                               std::vector<double> &diffrate_ptr);
     void calThermalPhotonemission(
         std::vector<double> &Eq, std::vector<double> &pi_zz,
         std::vector<double> &bulkPi, int Tb_length, double T,
         std::vector<double> &volume, double fraction);
     void calThermalPhotonemission_3d(
         std::vector<double> &Eq, double *M_ll, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, std::vector<double> &diffusion, double T, double muB, 
+        std::vector<double> &bulkPi, std::vector<double> &diff_factor, double T, double muB, 
         double rhoB_over_eplusp, double volume, double fraction);
     void calThermalPhotonemissiondTdtau(
         std::vector<double> &Eq, std::vector<double> &pi_zz,

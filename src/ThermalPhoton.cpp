@@ -43,6 +43,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     bRateTable_    = false;
     bShearVisCorr_ = false;
     bBulkVisCorr_  = false;
+    bDiffusionCorr_  = false;
 
     //initial variables for photon spectra 
     double p_i = paraRdr->getVal("photon_q_i"); 
@@ -406,7 +407,7 @@ void ThermalPhoton::readEmissionrate(string emissionProcess) {
 }
 
 
-void ThermalPhoton::analyticRates(double T, vector<double> &Eq, 
+void ThermalPhoton::analyticRates(double T, double muB, vector<double> &Eq, 
     double *M_ll, std::vector<double> &eqrate_ptr, int nm,
     int np, int nphi, int nrapidity) {
     for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
@@ -431,11 +432,21 @@ void ThermalPhoton::analyticRatesBulkVis(double T, vector<double> &Eq,
 }
 
 
-void ThermalPhoton::analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp, vector<double> &Eq, 
-    double *M_ll, std::vector<double> &diffusion_ptr, 
+void ThermalPhoton::analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp, 
+    vector<double> &Eq, double *M_ll, std::vector<double> &diffrate_ptr, 
         int nm, int np, int nphi, int nrapidity) {
-    for (unsigned int i = 0; i < diffusion_ptr.size(); i++) {
-        diffusion_ptr[i] = 0.;
+    for (unsigned int i = 0; i < diffrate_ptr.size(); i++) {
+        diffrate_ptr[i] = 0.;
+    }
+}
+
+
+void ThermalPhoton::FinateBaryonRates(double T, double muB, double rhoB_over_eplusp, 
+    vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, std::vector<double> &diffrate_ptr, 
+        int nm, int np, int nphi, int nrapidity) {
+    for (unsigned int i = 0; i < diffrate_ptr.size(); i++) {
+        eqrate_ptr[i] = 1.e-16;
+        diffrate_ptr[i] = 0.;
     }
 }
 
@@ -443,42 +454,43 @@ void ThermalPhoton::analyticRatesDiffusion(double T, double muB, double rhoB_ove
 // get emission rate for a fluid cell either by interpolating discretized tables 
 // or from anlytical expressions
 void ThermalPhoton::getPhotonemissionRate(vector<double> &Eq, double *M_ll,
-    vector<double> &pi_zz, vector<double> &bulkPi, vector<double> &diffusion, 
+    vector<double> &pi_zz, vector<double> &bulkPi, vector<double> &diff_factor, 
     const double T, const double muB, const double rhoB_over_eplusp,
     vector<double> &eqrate_ptr, vector<double> &visrate_ptr, vector<double> &bulkvis_ptr, 
-    vector<double> &diffusion_ptr) 
+    vector<double> &diffrate_ptr) 
 {
 
-    if (bRateTable_) {
-        // interpolate equilibrium rate
-        interpolation2D_bilinear(T, Eq, Emission_eqrateTb_ptr,
-                                 eqrate_ptr);
-        int idx = 0;
-        for (int k = 0; k < nrapidity; k++) {
-            for (int m = 0; m < nphi; m++) {
-                for (int l = 0; l < np; l++) {
-                    for (int j = 0; j < nm; j++) {
-
-                        eqrate_ptr[idx]  = exp(eqrate_ptr[idx]); // since eqrate_ptr was log(rate)
-                        idx++;
-                    }
-                }
-            }
-        }
-    } else {
-        analyticRates(T, Eq, M_ll, eqrate_ptr, nm, np, nphi, nrapidity);
-    }
-
-    analyticRatesDiffusion(T, muB, rhoB_over_eplusp, Eq, M_ll, diffusion_ptr, nm, np, nphi, nrapidity);
+    // analyticRates(T, muB, Eq, M_ll, eqrate_ptr, nm, np, nphi, nrapidity);
+    // analyticRatesDiffusion(T, muB, rhoB_over_eplusp, Eq, M_ll, diffrate_ptr, nm, np, nphi, nrapidity);
+    FinateBaryonRates(T, muB, rhoB_over_eplusp, Eq, M_ll, eqrate_ptr, diffrate_ptr, nm, np, nphi, nrapidity);
 
     for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
-        diffusion_ptr[i] = diffusion[i]*diffusion_ptr[i]; // pi_zz ~ q_muq_nu\pi^\mu\nu
+        diffrate_ptr[i] = diff_factor[i]*diffrate_ptr[i]; 
     }
 
 
     // // mu dependence
     // NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
 
+    // if (bRateTable_) {
+    //     // interpolate equilibrium rate
+    //     interpolation2D_bilinear(T, Eq, Emission_eqrateTb_ptr,
+    //                              eqrate_ptr);
+    //     int idx = 0;
+    //     for (int k = 0; k < nrapidity; k++) {
+    //         for (int m = 0; m < nphi; m++) {
+    //             for (int l = 0; l < np; l++) {
+    //                 for (int j = 0; j < nm; j++) {
+
+    //                     eqrate_ptr[idx]  = exp(eqrate_ptr[idx]); // since eqrate_ptr was log(rate)
+    //                     idx++;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // } else {
+    //     analyticRates(T, Eq, M_ll, eqrate_ptr, nm, np, nphi, nrapidity);
+    // }
     // if (bShearVisCorr_) {
     //     if (bRateTable_) {
     //         // interpolate viscous rate
@@ -506,7 +518,7 @@ void ThermalPhoton::getPhotonemissionRate(vector<double> &Eq, double *M_ll,
 
 
 void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll,
-    vector<double> &pi_zz, vector<double> &bulkPi, vector<double> &diffusion, double T, double muB, 
+    vector<double> &pi_zz, vector<double> &bulkPi, vector<double> &diff_factor, double T, double muB, 
     double rhoB_over_eplusp, double volume, double fraction) {
 
     const int Tb_length = Eq.size();
@@ -527,10 +539,10 @@ void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
     // dilepton emission diffusion correction at local rest cell
-    vector<double> em_diffusion(Tb_length, 0);
+    vector<double> em_diffrate(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, M_ll, pi_zz, bulkPi, diffusion, T, muB, rhoB_over_eplusp,
-                          em_eqrate, em_visrate, em_bulkvis, em_diffusion);
+    getPhotonemissionRate(Eq, M_ll, pi_zz, bulkPi, diff_factor, T, muB, rhoB_over_eplusp,
+                          em_eqrate, em_visrate, em_bulkvis, em_diffrate);
 
     int idx = 0;
     for (int k = 0; k < nrapidity; k++) {
@@ -541,7 +553,7 @@ void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll
                     double local_eq = em_eqrate[idx];
                     double local_vis = em_visrate[idx];
                     double local_bulk = em_bulkvis[idx];
-                    double local_diff = em_diffusion[idx];
+                    double local_diff = em_diffrate[idx];
 
                     double temp_eq_sum = local_eq*volfrac;
                     double temp_vis_sum = local_vis*volfrac;

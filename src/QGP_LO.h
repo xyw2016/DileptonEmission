@@ -12,11 +12,15 @@ class QGP_LO : public ThermalPhoton {
     QGP_LO(std::shared_ptr<ParameterReader> paraRdr_in,
                         std::string emissionProcess);
     ~QGP_LO() {}
-    void analyticRates(double T, std::vector<double> &Eq, double *M,
+    void analyticRates(double T, double muB, std::vector<double> &Eq, double *M,
                         std::vector<double> &eqrate_ptr, int nm,
                         int np, int nphi, int nrapidity);
     void analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp,
-        std::vector<double> &Eq, double *M_ll, std::vector<double> &diffusion_ptr, 
+        std::vector<double> &Eq, double *M_ll, std::vector<double> &diffrate_ptr, 
+        int nm, int np, int nphi, int nrapidity);
+    void FinateBaryonRates(double T, double muB, double rhoB_over_eplusp, 
+        std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
+        std::vector<double> &diffrate_ptr, 
         int nm, int np, int nphi, int nrapidity);
     // void NetBaryonCorrection(double T, double muB, std::vector<double> &Eq,
     //                          std::vector<double> &eqrate_ptr);
@@ -31,9 +35,9 @@ class QGP_LO : public ThermalPhoton {
 
     double heaviside(double x) ;
 
-    double cross_sec(double omega, double q, double m_ell2);
+    double cross_sec(double omega, double q, double qsq, double m_ell2);
 
-    double a1(double omega,double q,double T,double muB,double m_ell2,double nB_o_epp);
+    double a1(double omega,double q, double qsq,double T,double muB,double m_ell2,double nB_o_epp);
 
 
 
@@ -43,9 +47,9 @@ class QGP_LO : public ThermalPhoton {
 
 
     // for finite muB rate
-    double rhoV(double omega,double k,double T,double muB);
+    double rhoV(double omega,double k, double ksq,double T,double muB);
 
-    double fmuB_rate(double omega,double q,double T,double muB,double m_ell2);
+    double fmuB_rate(double omega,double q, double qsq,double T,double muB,double m_ell2);
 };
 
 #endif

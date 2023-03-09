@@ -31,6 +31,10 @@ using ARSENAL::deleteA5DMatrix;
 using TENSORTRANSFORM::getTransverseflow_u_mu_low;
 using TENSORTRANSFORM::lorentz_boost_matrix;
 
+using PhysConsts::hbarC;
+
+#define CODE_TEST 1
+
 PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     paraRdr = paraRdr_in;
     output_path = "results/";
@@ -671,6 +675,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
     cout << "******************************************" << endl;
 
+    int ncells = 0;
+
     for (long int cell_id = 0; cell_id < number_of_cells; cell_id++) {
         hydroinfo_MUSIC_ptr->get_hydro_cell_info_3d(cell_id, fluidCellptr);
 
@@ -688,11 +694,11 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
         const double ed_local = fluidCellptr.ed;
         const double pd_local = fluidCellptr.pressure;
-        const double temp_local = fluidCellptr.temperature;
-        const double muB_local = turn_on_muB_*fluidCellptr.muB;
+        double temp_local = fluidCellptr.temperature;
+        double muB_local = turn_on_muB_*fluidCellptr.muB;
         const double rhoB_local = turn_on_muB_*fluidCellptr.rhoB;
-        const double temp_inv = 1/temp_local;
-        const double rhoB_over_eplusp = rhoB_local/(ed_local+pd_local);
+        double temp_inv = 1/temp_local;
+        double rhoB_over_eplusp = rhoB_local/(ed_local+pd_local);
 
         if (temp_local < T_dec ||
             temp_local > T_cuthigh || temp_local < T_cutlow) {
@@ -709,6 +715,21 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             uy = fluidCellptr.uy;
             ueta = fluidCellptr.ueta;
         }
+
+
+        // validation setup
+        if(CODE_TEST){
+            temp_local = 0.25;
+            temp_inv = 1/temp_local;
+            muB_local = 0.9;
+            rhoB_over_eplusp = 8.0;
+            volume = 1.0;
+            eta_local = 0.0;
+            ux = 0.0;
+            uy = 0.0;
+            ueta = 0.0;
+        }
+        
         double utau = sqrt(1. + ux*ux + uy*uy + ueta*ueta);
 
         flow_u_mu_low[0] = utau;
@@ -753,7 +774,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         double qtau = (ux*qx + uy*qy + ueta*qeta)/utau;
 
         double prefactor_pimunu = 1./2.;
-        double prefactor_diff = 1./(4.*pow(2*M_PI, 5)) * temp_inv;
+        double prefactor_diff = 1./(4.*pow(2*M_PI, 5)) * temp_inv/pow(hbarC, 4);
 
         int idx_Tb = 0;
 
@@ -817,7 +838,11 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                         // note that 1/kappa_hat included
                         double diff_dot_p = qtau*p_lab_local[0] - qx*p_lab_local[1] 
                                             - qy*p_lab_local[2] - qeta*p_lab_local[3];
-
+                        // validation setup
+                        if(CODE_TEST){
+                            diff_dot_p = 1.0;
+                        }
+                        
                         Eq_localrest_Tb[idx_Tb] = Eq_localrest_temp;
                         pi_photon_Tb[idx_Tb] = pi_photon*prefactor_pimunu;
                         bulkPi_Tb[idx_Tb] = bulkPi_local;
@@ -842,6 +867,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             dilepton_QGP_LO->calThermalPhotonemission_3d(
                 Eq_localrest_Tb, M_ll, pi_photon_Tb, bulkPi_Tb, diff_Tb,
                 temp_local, muB_local, rhoB_over_eplusp, volume, QGP_fraction);
+            ncells++;
 
             // if (differential_flag == 1 || differential_flag > 10) {
             //     photon_QGP_2_to_2->calThermalPhotonemissiondTdtau_3d(
@@ -1042,6 +1068,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         //     }
         // }
     }
+
+    printf("Cells above T_sw_high=%d...\n", ncells);
 
     //printf("error H...\n");
 

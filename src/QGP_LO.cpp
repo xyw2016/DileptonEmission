@@ -22,17 +22,15 @@ double QGP_LO::Bfun(double x){
     }
 }
 
-double QGP_LO::cross_sec(double omega, double q, double m_ell2){
+double QGP_LO::cross_sec(double omega, double q, double qsq, double m_ell2){
     double alphaEM = 1./137.035999;
     double C_EM = 2./3.;
     double Nc = 3.;
-    double qsq = pow(omega,2) - pow(q,2); //4-vector squared
     double eps = 1e-12;
     if(abs(qsq)<eps){
         qsq += eps;
     }
     return Nc*C_EM*(4.* M_PI/3.)*(pow(alphaEM,2)/qsq)*Bfun(m_ell2/qsq);
-
 }
 
 // for a_1 part of diff rate
@@ -73,23 +71,25 @@ double QGP_LO::intJn(int n, double a, double b, double z) { // computing J_n(a,b
     return result;
 }
 
-double QGP_LO::a1(double omega,double q,double T,double muB,double m_ell2,double nB_o_epp){
+double QGP_LO::a1(double omega,double q,double qsq,double T,double muB,double m_ell2,double nB_o_epp){
     // omega = q^0, q = magnitude of 3-vec q, T = temperature, muB = Baryon chemical potential, m_ell2 = the lepton mass squared
     // nB_o_epp = n_B/(e+p) must be import from hydro
     // final rate for a1 is d4R/d4q = a1*q.V/(T^2*kappa-hat) where V is the diffusion current
+    // note that the factor T*qsq/(4.*pow((2.*M_PI),5)*pow(q,3)) is not included in a1 here.
     
-    double qsq = pow(omega,2) - pow(q,2); //4-vector squared
     double eps = 1e-12;
     double muq = muB/3.;
     if(fabs(qsq)<eps){
         qsq += eps;
     }
-    double sigma = cross_sec(omega,q,m_ell2);
-    double ps1 = T*qsq*sigma/(4.*pow((2.*M_PI),5)*pow(q,3));
-    double ps2 = 2*omega*nB_o_epp*pow(T,3)*intJn(1,omega/T,q/T,muq/T) - pow(T,2)*(qsq*nB_o_epp + 2.*omega/3.)*intJn(0,omega/T,q/T,muq/T) + qsq*T*intJn(-1,omega/T,q/T,muq/T)/3.;
-    double ps3 = 2*omega*nB_o_epp*pow(T,3)*intJn(1,omega/T,q/T,-muq/T) - pow(T,2)*(qsq*nB_o_epp - 2.*omega/3.)*intJn(0,omega/T,q/T,-muq/T) - qsq*T*intJn(-1,omega/T,q/T,-muq/T)/3.;
+    double sigma = cross_sec(omega,q,qsq,m_ell2);
+    //double ps1 = T*qsq*sigma/(4.*pow((2.*M_PI),5)*pow(q,3));
+    double ps2 = 2*omega*nB_o_epp*pow(T,3)*intJn(1,omega/T,q/T,muq/T) - pow(T,2)*(qsq*nB_o_epp + 2.*omega/3.)*intJn(0,omega/T,q/T,muq/T) 
+                    + qsq*T*intJn(-1,omega/T,q/T,muq/T)/3.;
+    double ps3 = 2*omega*nB_o_epp*pow(T,3)*intJn(1,omega/T,q/T,-muq/T) - pow(T,2)*(qsq*nB_o_epp - 2.*omega/3.)*intJn(0,omega/T,q/T,-muq/T) 
+                    - qsq*T*intJn(-1,omega/T,q/T,-muq/T)/3.;
 
-    return ps1*(ps2 + ps3);
+    return sigma*(ps2 + ps3);
 }
 
 double QGP_LO::heaviside(double x) {
@@ -112,9 +112,8 @@ double QGP_LO::nB(double x){
 
 
 // for finite muB rate
-double QGP_LO::rhoV(double omega,double k,double T,double muB){
+double QGP_LO::rhoV(double omega,double k,double ksq, double T,double muB){
     // k is the magnitude of 3-vec k
-    double ksq = pow(omega,2) - pow(k,2); //4-vector squared
     double eps = 1e-12;
     if(abs(ksq)<eps){
         ksq += eps;
@@ -129,31 +128,25 @@ double QGP_LO::rhoV(double omega,double k,double T,double muB){
     return ps1*(T*ps2 + ps3);
 }
 
-double QGP_LO::fmuB_rate(double omega,double q,double T,double muB,double m_ell2){
+double QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,double m_ell2){
     // omega = q^0, q = magnitude of 3-vec q, T = temperature, muB = Baryon chemical potential, m_ell2 = the lepton mass squared
     double alphaEM = 1./137.;
     double C_EM = 2./3.;
-    double qsq = pow(omega,2) - pow(q,2); //4-vector squared
     double eps = 1e-12;
     if(abs(qsq)<eps){
         qsq += eps;
     }
-    return C_EM*pow(alphaEM,2)*nB(omega/T)*Bfun(m_ell2/qsq)*rhoV(omega,q,T,muB)/(3.*pow(M_PI,3)*qsq);
+    return C_EM*pow(alphaEM,2)*nB(omega/T)*Bfun(m_ell2/qsq)*rhoV(omega,q,qsq,T,muB)/(3.*pow(M_PI,3)*qsq);
 }
 
 
 // PRC. 93, 044902, 2016
-void QGP_LO::analyticRates(
-            double T, std::vector<double> &Eq, double *M_ll,
-            std::vector<double> &eqrate_ptr, int nm,
-            int np, int nphi, int nrapidity) {
+void QGP_LO::analyticRates(double T, double muB, std::vector<double> &Eq, double *M_ll,
+            std::vector<double> &eqrate_ptr, int nm, int np, int nphi, int nrapidity) {
 
-    const double aem = 1./137.;
-    const double Qu  = 2./3.;
-    const double Qd  = -1./3.;
-    const double Qs  = -1./3.;
-
-    double prefac = (Qu*Qu+Qd*Qd+Qs*Qs)*aem*aem/(2.*pow(M_PI, 4))/pow(hbarC, 4);
+    double prefac = 1./pow(hbarC, 4);
+    double me = 0.0051;
+    double m_ell2 = me * me;
 
     int idx = 0;
     for (int k = 0; k < nrapidity; k++) {
@@ -162,14 +155,12 @@ void QGP_LO::analyticRates(
                 for (int j = 0; j < nm; j++) {
 
                     double M = M_ll[j];
+                    double M2 = M*M;
                     double E = Eq[idx];
-                    double p = sqrt(E*E - M*M);
-                    double x = E/T;
-                    double y = p/T;
-                    double fq = 1./(exp(x) - 1.);
-                    double log_r = log(cosh(0.25*(x+y))/cosh(0.25*(x-y)));
+                    double p = sqrt(E*E - M2);
 
-                    eqrate_ptr[idx] = prefac/y*fq*log_r;
+                    eqrate_ptr[idx] = prefac*fmuB_rate(E,p,M2,T,muB,m_ell2);
+
                     idx++;
                 }
             }
@@ -178,7 +169,7 @@ void QGP_LO::analyticRates(
 }
 
 void QGP_LO::analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp,
-        std::vector<double> &Eq, double *M_ll, std::vector<double> &diffusion_ptr, 
+        std::vector<double> &Eq, double *M_ll, std::vector<double> &diffrate_ptr, 
         int nm, int np, int nphi, int nrapidity){
 
     double me = 0.0051;
@@ -191,10 +182,12 @@ void QGP_LO::analyticRatesDiffusion(double T, double muB, double rhoB_over_eplus
                 for (int j = 0; j < nm; j++) {
 
                     double M = M_ll[j];
+                    double M2 = M*M;
                     double E = Eq[idx];
-                    double p = sqrt(E*E - M*M);
+                    double p = sqrt(E*E - M2);// magnitude of 3-vec p in LRF
 
-                    diffusion_ptr[idx] = a1(E, p, T, muB, m_ell2, rhoB_over_eplusp);
+                    diffrate_ptr[idx] = a1(E, p, M2, T, muB, m_ell2, rhoB_over_eplusp);
+
                     idx++;
                 }
             }
@@ -202,3 +195,32 @@ void QGP_LO::analyticRatesDiffusion(double T, double muB, double rhoB_over_eplus
     }
 }
 
+
+void QGP_LO::FinateBaryonRates(double T, double muB, double rhoB_over_eplusp, 
+    std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, std::vector<double> &diffrate_ptr, 
+        int nm, int np, int nphi, int nrapidity){
+
+    double me = 0.0051;
+    double m_ell2 = me * me;
+    double prefac = 1./pow(hbarC, 4);
+
+    int idx = 0;
+    for (int k = 0; k < nrapidity; k++) {
+        for (int m = 0; m < nphi; m++) {
+            for (int l = 0; l < np; l++) {
+                for (int j = 0; j < nm; j++) {
+
+                    double M = M_ll[j];
+                    double M2 = M*M;
+                    double E = Eq[idx];
+                    double p = sqrt(E*E - M2);// magnitude of 3-vec p in LRF
+
+                    eqrate_ptr[idx] = prefac*fmuB_rate(E,p,M2,T,muB,m_ell2);
+                    diffrate_ptr[idx] = a1(E, p, M2, T, muB, m_ell2, rhoB_over_eplusp);
+
+                    idx++;
+                }
+            }
+        }
+    }
+}
