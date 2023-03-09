@@ -26,6 +26,7 @@ class ThermalPhoton {
     bool bRateTable_;
     bool bShearVisCorr_;
     bool bBulkVisCorr_;
+    bool bDiffusionCorr_;
 
     // photon emission rate
     std::unique_ptr<Table2D> Photonemission_eqrateTable_ptr;
@@ -51,8 +52,8 @@ class ThermalPhoton {
     std::vector<double> y;
     std::vector<double> theta;
 
-    double ****dNd2pTdphidy_eq, ***dNd2pTdphidy_vis, ***dNd2pTdphidy_tot;
-    double ***dNd2pTdphidy_bulkvis;
+    double ****dNd2pTdphidy_eq, ***dNd2pTdphidy_vis, ****dNd2pTdphidy_tot;
+    double ***dNd2pTdphidy_bulkvis, ****dNd2pTdphidy_diff;
     double ***dNd2pTdphidy_vis_deltaf_restricted;
     double ***dNd2pTdphidy_bulkvis_deltaf_restricted;
 
@@ -121,7 +122,7 @@ class ThermalPhoton {
 
     void setupEmissionrateFromFile(
             double Xmin, double dX, double Ymin, double dY,
-            bool bShearVisCorr, bool bBulkVisCorr);
+            bool bShearVisCorr, bool bBulkVisCorr, bool bDiffusionCorr);
     void readEmissionrate(std::string);
 
     void setupEmissionrateFromParametrization(
@@ -140,8 +141,8 @@ class ThermalPhoton {
     double getPhotonSpMatrix_eq(int i, int j, int k, int l) {
         return(dNd2pTdphidy_eq[i][j][k][l]);
     }
-    double getPhotonSpMatrix_tot(int i, int j, int k) {
-        return(dNd2pTdphidy_tot[i][j][k]);
+    double getPhotonSpMatrix_tot(int i, int j, int k, int l) {
+        return(dNd2pTdphidy_tot[i][j][k][l]);
     }
 
     virtual void analyticRates(double T, std::vector<double> &Eq,
@@ -155,23 +156,29 @@ class ThermalPhoton {
         double *M_ll, std::vector<double> &eqrate_ptr);
     virtual void analyticRatesBulkVis(double T, std::vector<double> &Eq,
         double *M_ll, std::vector<double> &eqrate_ptr);
+    virtual void analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp,
+        std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
+        int nm, int np, int nphi, int nrapidity);
 
     void getPhotonemissionRate(std::vector<double> &Eq,
                                double *M_ll,
                                std::vector<double> &pi_zz,
                                std::vector<double> &bulkPi,
+                               std::vector<double> &diffusion,
                                const double T, const double muB,
+                               const double rhoB_over_eplusp,
                                std::vector<double> &eqrate_ptr,
                                std::vector<double> &visrate_ptr,
-                               std::vector<double> &bulkvis_ptr);
+                               std::vector<double> &bulkvis_ptr,
+                               std::vector<double> &diffusion_ptr);
     void calThermalPhotonemission(
         std::vector<double> &Eq, std::vector<double> &pi_zz,
         std::vector<double> &bulkPi, int Tb_length, double T,
         std::vector<double> &volume, double fraction);
     void calThermalPhotonemission_3d(
         std::vector<double> &Eq, double *M_ll, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, double T, double muB, double volume,
-        double fraction);
+        std::vector<double> &bulkPi, std::vector<double> &diffusion, double T, double muB, 
+        double rhoB_over_eplusp, double volume, double fraction);
     void calThermalPhotonemissiondTdtau(
         std::vector<double> &Eq, std::vector<double> &pi_zz,
         std::vector<double> &bulkPi, int Tb_length, double T, double tau,

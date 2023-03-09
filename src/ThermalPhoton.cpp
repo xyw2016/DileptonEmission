@@ -88,7 +88,8 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     // dNd2pTdphidy_vis_deltaf_restricted = createA3DMatrix(np, nphi, nrapidity, 0.);
     // dNd2pTdphidy_bulkvis = createA3DMatrix(np, nphi, nrapidity, 0.);
     // dNd2pTdphidy_bulkvis_deltaf_restricted = createA3DMatrix(np, nphi, nrapidity, 0.);
-    // dNd2pTdphidy_tot = createA3DMatrix(np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_diff = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_tot = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
 
     // vnypT_cos_eq = createA3DMatrix(norder, np, nrapidity, 0.);
     // vnypT_sin_eq = createA3DMatrix(norder, np, nrapidity, 0.);
@@ -221,7 +222,8 @@ ThermalPhoton::~ThermalPhoton() {
     // deleteA3DMatrix(dNd2pTdphidy_vis_deltaf_restricted, np, nphi);
     // deleteA3DMatrix(dNd2pTdphidy_bulkvis, np, nphi);
     // deleteA3DMatrix(dNd2pTdphidy_bulkvis_deltaf_restricted, np, nphi);
-    // deleteA3DMatrix(dNd2pTdphidy_tot, np, nphi);
+    deleteA4DMatrix(dNd2pTdphidy_diff, nm, np, nphi);
+    deleteA4DMatrix(dNd2pTdphidy_tot, nm, np, nphi);
 
     // deleteA2DMatrix(vnpT_cos_eq, norder);
     // deleteA2DMatrix(vnpT_sin_eq, norder);
@@ -300,10 +302,11 @@ ThermalPhoton::~ThermalPhoton() {
 
 void ThermalPhoton::setupEmissionrateFromFile(
         double Xmin, double dX, double Ymin, double dY,
-        bool bShearVisCorr, bool bBulkVisCorr) {
+        bool bShearVisCorr, bool bBulkVisCorr, bool bDiffusionCorr) {
     bRateTable_    = true;
     bShearVisCorr_ = bShearVisCorr;
     bBulkVisCorr_  = bBulkVisCorr;
+    bDiffusionCorr_  = bDiffusionCorr;
     EmissionrateTb_Xmin = Xmin;
     EmissionrateTb_Ymin = Ymin;
     EmissionrateTb_dX = dX;
@@ -428,11 +431,22 @@ void ThermalPhoton::analyticRatesBulkVis(double T, vector<double> &Eq,
 }
 
 
+void ThermalPhoton::analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp, vector<double> &Eq, 
+    double *M_ll, std::vector<double> &diffusion_ptr, 
+        int nm, int np, int nphi, int nrapidity) {
+    for (unsigned int i = 0; i < diffusion_ptr.size(); i++) {
+        diffusion_ptr[i] = 0.;
+    }
+}
+
+
 // get emission rate for a fluid cell either by interpolating discretized tables 
 // or from anlytical expressions
 void ThermalPhoton::getPhotonemissionRate(vector<double> &Eq, double *M_ll,
-    vector<double> &pi_zz, vector<double> &bulkPi, const double T, const double muB,
-    vector<double> &eqrate_ptr, vector<double> &visrate_ptr, vector<double> &bulkvis_ptr) 
+    vector<double> &pi_zz, vector<double> &bulkPi, vector<double> &diffusion, 
+    const double T, const double muB, const double rhoB_over_eplusp,
+    vector<double> &eqrate_ptr, vector<double> &visrate_ptr, vector<double> &bulkvis_ptr, 
+    vector<double> &diffusion_ptr) 
 {
 
     if (bRateTable_) {
@@ -454,6 +468,13 @@ void ThermalPhoton::getPhotonemissionRate(vector<double> &Eq, double *M_ll,
     } else {
         analyticRates(T, Eq, M_ll, eqrate_ptr, nm, np, nphi, nrapidity);
     }
+
+    analyticRatesDiffusion(T, muB, rhoB_over_eplusp, Eq, M_ll, diffusion_ptr, nm, np, nphi, nrapidity);
+
+    for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
+        diffusion_ptr[i] = diffusion[i]*diffusion_ptr[i]; // pi_zz ~ q_muq_nu\pi^\mu\nu
+    }
+
 
     // // mu dependence
     // NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
@@ -485,8 +506,8 @@ void ThermalPhoton::getPhotonemissionRate(vector<double> &Eq, double *M_ll,
 
 
 void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll,
-    vector<double> &pi_zz, vector<double> &bulkPi, double T, double muB, 
-    double volume, double fraction) {
+    vector<double> &pi_zz, vector<double> &bulkPi, vector<double> &diffusion, double T, double muB, 
+    double rhoB_over_eplusp, double volume, double fraction) {
 
     const int Tb_length = Eq.size();
 
@@ -505,9 +526,11 @@ void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll
     vector<double> em_visrate(Tb_length, 0);
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
+    // dilepton emission diffusion correction at local rest cell
+    vector<double> em_diffusion(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, M_ll, pi_zz, bulkPi, T, muB,
-                          em_eqrate, em_visrate, em_bulkvis);
+    getPhotonemissionRate(Eq, M_ll, pi_zz, bulkPi, diffusion, T, muB, rhoB_over_eplusp,
+                          em_eqrate, em_visrate, em_bulkvis, em_diffusion);
 
     int idx = 0;
     for (int k = 0; k < nrapidity; k++) {
@@ -518,10 +541,12 @@ void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll
                     double local_eq = em_eqrate[idx];
                     double local_vis = em_visrate[idx];
                     double local_bulk = em_bulkvis[idx];
+                    double local_diff = em_diffusion[idx];
 
                     double temp_eq_sum = local_eq*volfrac;
                     double temp_vis_sum = local_vis*volfrac;
                     double temp_bulkvis_sum = local_bulk*volfrac;
+                    double temp_diff_sum = local_diff*volfrac;
 
                     // regulate viscous corrections
                     double ratio = fabs(local_vis + local_bulk)/(local_eq + 1e-20);
@@ -533,7 +558,8 @@ void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll
                     double temp_bulkvis_deltaf_restricted_sum = local_bulk*volfrac;
 
                     // spectra
-                    dNd2pTdphidy_eq[j][l][m][k] += temp_eq_sum + temp_vis_sum;
+                    dNd2pTdphidy_eq[j][l][m][k] += temp_eq_sum;
+                    dNd2pTdphidy_diff[j][l][m][k] += temp_eq_sum + temp_diff_sum;
 
                     // dNd2pTdphidy_vis[j][l][m][k] += temp_eq_sum + temp_vis_sum;
                     // dNd2pTdphidy_vis_deltaf_restricted[j][l][m][k] += (
@@ -542,8 +568,7 @@ void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll
                     //             temp_eq_sum + temp_bulkvis_sum);
                     // dNd2pTdphidy_bulkvis_deltaf_restricted[j][l][m][k] += (
                     //             temp_eq_sum + temp_bulkvis_deltaf_restricted_sum);
-                    // dNd2pTdphidy_tot[j][l][m][k] += (temp_eq_sum + temp_vis_sum
-                    //                               + temp_bulkvis_sum);
+                    dNd2pTdphidy_tot[j][l][m][k] += (temp_diff_sum);
                     idx++;
                 }
             }

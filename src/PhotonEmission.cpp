@@ -655,6 +655,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     Eq_localrest_Tb.resize(Eqtb_length, 0);
     pi_photon_Tb.resize(Eqtb_length, 0);
     bulkPi_Tb.resize(Eqtb_length, 0);
+    diff_Tb.resize(Eqtb_length, 0);
 
     double tau_now = 0.0;
     double flow_u_mu_low[4];
@@ -685,8 +686,13 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         // volume element: tau*dtau*dx*dy*deta,
         double volume = tau_local*volume_base;
 
+        const double ed_local = fluidCellptr.ed;
+        const double pd_local = fluidCellptr.pressure;
         const double temp_local = fluidCellptr.temperature;
         const double muB_local = turn_on_muB_*fluidCellptr.muB;
+        const double rhoB_local = turn_on_muB_*fluidCellptr.rhoB;
+        const double temp_inv = 1/temp_local;
+        const double rhoB_over_eplusp = rhoB_local/(ed_local+pd_local);
 
         if (temp_local < T_dec ||
             temp_local > T_cuthigh || temp_local < T_cutlow) {
@@ -740,7 +746,14 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
         double bulkPi_local = fluidCellptr.bulkPi;
 
+        // qeta = tau*qeta, qi is qi/kappa_hat
+        double qx = fluidCellptr.qx;
+        double qy = fluidCellptr.qy;
+        double qeta = fluidCellptr.qz;
+        double qtau = (ux*qx + uy*qy + ueta*qeta)/utau;
+
         double prefactor_pimunu = 1./2.;
+        double prefactor_diff = 1./(4.*pow(2*M_PI, 5)) * temp_inv;
 
         int idx_Tb = 0;
 
@@ -763,39 +776,30 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                         p_lab_Min[2] = p_q[l]*sin_phiq[m];
                         p_lab_Min[3] = M_T * sinh_y;
 
-                        // from Minkowski to Milne
+                        // from Minkowski to Milne in lab frame
                         p_lab_local[0] = M_T * cosh_y_minus_eta;
                         p_lab_local[1] = p_q[l]*cos_phiq[m];
                         p_lab_local[2] = p_q[l]*sin_phiq[m];
                         p_lab_local[3] = M_T * sinh_y_minus_eta;
 
-                        // double Mm_lab;
-                        // Mm_lab = sqrt(p_lab_local[0]*p_lab_local[0] - p_lab_local[1]*p_lab_local[1] - p_lab_local[2]*p_lab_local[2]  -p_lab_local[3]*p_lab_local[3]);
-                        // printf("Mm_lab=%f\n", Mm_lab);
-
                         // from Lab frame to LRF frame
+                        double p_Min_lrf[4];
+                        for (int j = 0; j < 4; j++) {
+                            p_Min_lrf[j] = 0.;
+                            for (int i = 0; i < 4; i++) {
+                                p_Min_lrf[j] += lambda_munu[j][i]*p_lab_Min[i];
+                            }                            
+                        }
 
-                        // double p_Min_lrf[4];
-                        // double M_lrf;
-                        // for (int j = 0; j < 4; j++) {
-                        //     p_Min_lrf[j] = 0.;
-                        //     for (int i = 0; i < 4; i++) {
-                        //         //printf("lambda_munu%d%d=%f\n", j, i, lambda_munu[j][i]);
-                        //         p_Min_lrf[j] += lambda_munu[j][i]*p_lab_Min[i];
-                        //     }
-
-                        //     printf("p_Min_lrf%d=%f\n", j, p_Min_lrf[j]);
-                            
-                        // }
-
+                        double pvec_lrf, pvec3; // spatial magnitude, |vec p| and |vec p|^5
+                        pvec_lrf = sqrt(p_Min_lrf[1]*p_Min_lrf[1] + p_Min_lrf[2]*p_Min_lrf[2] + p_Min_lrf[3]*p_Min_lrf[3]);
+                        pvec3 = pow(pvec_lrf, 3);
 
                         double Eq_localrest_temp = 0.0e0;
                         for (int local_i = 0; local_i < 4; local_i++) {
                             Eq_localrest_temp += (flow_u_mu_low[local_i]
                                                   *p_lab_local[local_i]);
                         }
-
-                        // printf("Eq_localrest_temp=%f, M_ll=%f\n", Eq_localrest_temp,M_ll[j]);
 
                         double pi_photon = (
                               p_lab_local[0]*p_lab_local[0]*pi00
@@ -809,10 +813,17 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             + 2.*p_lab_local[2]*p_lab_local[3]*pi23
                             + p_lab_local[3]*p_lab_local[3]*pi33);
 
+                        // dot product of diffusion and dilepton momentum, calculated in lab frame
+                        // note that 1/kappa_hat included
+                        double diff_dot_p = qtau*p_lab_local[0] - qx*p_lab_local[1] 
+                                            - qy*p_lab_local[2] - qeta*p_lab_local[3];
+
                         Eq_localrest_Tb[idx_Tb] = Eq_localrest_temp;
                         pi_photon_Tb[idx_Tb] = pi_photon*prefactor_pimunu;
                         bulkPi_Tb[idx_Tb] = bulkPi_local;
+                        diff_Tb[idx_Tb] = prefactor_diff * diff_dot_p * M_ll[j] * M_ll[j] / pvec3;
                         idx_Tb++; // Tb_length = nrapidity*nphi*np
+
                     }
                 }
             }
@@ -829,8 +840,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             //     Eq_localrest_Tb, M_ll, pi_photon_Tb, bulkPi_Tb,
             //     temp_local, muB_local, volume, QGP_fraction);
             dilepton_QGP_LO->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, M_ll, pi_photon_Tb, bulkPi_Tb,
-                temp_local, muB_local, volume, QGP_fraction);
+                Eq_localrest_Tb, M_ll, pi_photon_Tb, bulkPi_Tb, diff_Tb,
+                temp_local, muB_local, rhoB_over_eplusp, volume, QGP_fraction);
 
             // if (differential_flag == 1 || differential_flag > 10) {
             //     photon_QGP_2_to_2->calThermalPhotonemissiondTdtau_3d(
@@ -1046,7 +1057,7 @@ void PhotonEmission::calPhoton_total_SpMatrix() {
                     dNd2pTdphidy_eq[j][l][m][k] = (
                           dilepton_QGP_LO->getPhotonSpMatrix_eq(j, l, m, k));
                     dNd2pTdphidy[j][l][m][k] = (
-                          dilepton_QGP_LO->getPhotonSpMatrix_eq(j, l, m, k));
+                          dilepton_QGP_LO->getPhotonSpMatrix_tot(j, l, m, k));
                     //printf("calPhoton_total_SpMatrix BII...%e\n",dNd2pTdphidy_eq[j][l][m][k]);
                 // dNd2pTdphidy_eq[l][m][k] = (
                 //       photon_QGP_2_to_2->getPhotonSpMatrix_eq(l, m, k)
@@ -1154,7 +1165,7 @@ void PhotonEmission::calPhoton_total_SpMatrix() {
 void PhotonEmission::calPhoton_total_Spvn() {
 
     for (int m = 0; m < nm; m++) {
-        double Mll = photon_QGP_2_to_2->getDileptonMass(m);
+        //double Mll = photon_QGP_2_to_2->getDileptonMass(m);
         for (int i = 0; i < np; i++) {
             double p = photon_QGP_2_to_2->getPhotonp(i);
             double pweight = photon_QGP_2_to_2->getPhoton_pweight(i);

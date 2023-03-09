@@ -760,9 +760,12 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         zeroCell.ix = 0;
         zeroCell.iy = 0;
         zeroCell.ieta = 0;
+        zeroCell.ed = 0.;
+        zeroCell.pressure = 0.;
         zeroCell.temperature = 0.;
         zeroCell.cs2 = 0.;
         zeroCell.muB = 0.;
+        zeroCell.rhoB = 0.;
         zeroCell.ux = 0.;
         zeroCell.uy = 0.;
         zeroCell.ueta = 0.;
@@ -772,6 +775,9 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         zeroCell.pi22 = 0.;
         zeroCell.pi23 = 0.;
         zeroCell.bulkPi = 0.;
+        zeroCell.qx = 0.;
+        zeroCell.qy = 0.;
+        zeroCell.qz = 0.;
         lattice_new_.push_back(zeroCell);
         int ik = 0;
         while (true) {
@@ -791,14 +797,18 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             newCell.ix   = static_cast<int>(cell_info[1]);
             newCell.iy   = static_cast<int>(cell_info[2]);
             newCell.ieta = static_cast<int>(cell_info[3]);
+            newCell.ed = cell_info[4];
+            newCell.pressure = cell_info[5];
             newCell.temperature = cell_info[6];
             newCell.cs2 = cell_info[7];
             newCell.ux = cell_info[8];
             newCell.uy = cell_info[9];
             newCell.ueta = cell_info[10];
             if (turn_on_rhob == 1) {
+                newCell.rhoB = cell_info[11];
                 newCell.muB = cell_info[12];
             } else {
+                newCell.rhoB = 0.;
                 newCell.muB = 0.;
             }
             if (turn_on_shear == 1) {
@@ -819,6 +829,18 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
                     cell_info[11 + turn_on_rhob*2 + turn_on_shear*5]);
             } else {
                 newCell.bulkPi = 0.;
+            }
+            if (turn_on_diff == 1) {
+                newCell.qx = (
+                    cell_info[11 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+                newCell.qy = (
+                    cell_info[12 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+                newCell.qz = (
+                    cell_info[13 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+            } else {
+                newCell.qx = 0.;
+                newCell.qy = 0.;
+                newCell.qz = 0.;
             }
             lattice_new_.push_back(newCell);
             ik++;

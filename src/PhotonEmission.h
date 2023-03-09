@@ -44,6 +44,7 @@ class PhotonEmission {
     std::vector<double> Eq_localrest_Tb;
     std::vector<double> pi_photon_Tb;
     std::vector<double> bulkPi_Tb;
+    std::vector<double> diff_Tb;
 
     double **dNd2pTd2M_eq;
     double **dNd2pTd2M;
