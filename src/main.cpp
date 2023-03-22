@@ -97,13 +97,13 @@ int main(int argc, char** argv) {
     }
 
     // sum up all channels and compute thermal photon spectra and vn
-    // thermalPhotons.calPhoton_SpvnpT_individualchannel();
+    thermalPhotons.calPhoton_SpvnpT_individualchannel();
     thermalPhotons.calPhoton_total_SpMatrix();
     thermalPhotons.calPhoton_total_Spvn();
 
     // output results
-    // thermalPhotons.outputPhotonSpvn_individualchannel();
-    thermalPhotons.outputPhoton_total_SpvnpT();
+    thermalPhotons.outputPhotonSpvn_individualchannel();
+    thermalPhotons.outputPhoton_total_SpMatrix_and_SpvnpT();
 
     sw.toc();
     cout << "totally takes : " << sw.takeTime() << " seconds." << endl;

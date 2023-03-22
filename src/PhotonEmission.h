@@ -89,9 +89,9 @@ class PhotonEmission {
                            double* etaweight_ptr);
     void calPhotonemission_3d(void *hydroinfo_ptr_in);
     void calPhoton_total_SpMatrix();
-    void calPhoton_SpvnpT_individualchannel();
     void calPhoton_total_Spvn();
-    void outputPhoton_total_SpvnpT();
+    void calPhoton_SpvnpT_individualchannel();
+    void outputPhoton_total_SpMatrix_and_SpvnpT();
     void outputPhotonSpvn_individualchannel();
 };
 

@@ -18,7 +18,7 @@ class QGP_LO : public ThermalPhoton {
     void analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp,
         std::vector<double> &Eq, double *M_ll, std::vector<double> &diffrate_ptr, 
         int nm, int np, int nphi, int nrapidity);
-    void FinateBaryonRates(double T, double muB, double rhoB_over_eplusp, 
+    void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, 
         std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
         std::vector<double> &diffrate_ptr, 
         int nm, int np, int nphi, int nrapidity);

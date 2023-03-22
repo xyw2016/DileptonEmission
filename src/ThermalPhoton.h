@@ -91,14 +91,17 @@ class ThermalPhoton {
     int nTcut, nTaucut;
     double Tcut_high, Tcut_low;
     double Taucut_high, Taucut_low;
-    double *****dNd2pTdphidydTdtau_eq, *****dNd2pTdphidydTdtau_tot;
-    double *****dNd2pTdphidydTdtau_vis, *****dNd2pTdphidydTdtau_bulkvis;
-    double **dNdydTdtau_eq, **dNdydTdtau_tot;
-    double **dNdydTdtau_vis, **dNdydTdtau_bulkvis;
-    double ***vndTdtau_cos_eq, ***vndTdtau_sin_eq;
-    double ***vndTdtau_cos_vis, ***vndTdtau_sin_vis;
-    double ***vndTdtau_cos_bulkvis, ***vndTdtau_sin_bulkvis;
-    double ***vndTdtau_cos_tot, ***vndTdtau_sin_tot;
+    double ******dNd2pTdphidydTdtau_eq, ******dNd2pTdphidydTdtau_tot;
+    // double *****dNd2pTdphidydTdtau_vis, *****dNd2pTdphidydTdtau_bulkvis;
+    double ******dNd2pTdphidydTdtau_diff;
+    double ***dNdydTdtau_eq, ***dNdydTdtau_tot;
+    // double **dNdydTdtau_vis, **dNdydTdtau_bulkvis;
+    double ***dNdydTdtau_diff;
+    double ****vndTdtau_cos_eq, ****vndTdtau_sin_eq;
+    // double ***vndTdtau_cos_vis, ***vndTdtau_sin_vis;
+    // double ***vndTdtau_cos_bulkvis, ***vndTdtau_sin_bulkvis;
+    double ****vndTdtau_cos_diff, ****vndTdtau_sin_diff;
+    double ****vndTdtau_cos_tot, ****vndTdtau_sin_tot;
 
     // matrix for cuts on x and proper time
     int n_xperp_cut, n_tau_cut_xtau;
@@ -159,7 +162,7 @@ class ThermalPhoton {
     virtual void analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp,
         std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
         int nm, int np, int nphi, int nrapidity);
-    virtual void FinateBaryonRates(double T, double muB, double rhoB_over_eplusp, 
+    virtual void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, 
         std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
         std::vector<double> &diffrate_ptr, int nm, int np, int nphi, int nrapidity);
 
@@ -187,9 +190,9 @@ class ThermalPhoton {
         std::vector<double> &bulkPi, int Tb_length, double T, double tau,
         std::vector<double> &volume, double fraction);
     void calThermalPhotonemissiondTdtau_3d(
-        std::vector<double> &Eq, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi,
-        double T, double muB, double tau, double volume, double fraction);
+        std::vector<double> &Eq, double *M_ll, std::vector<double> &pi_zz,
+        std::vector<double> &bulkPi, std::vector<double> &diff_factor, double T, double muB, 
+        double rhoB_over_eplusp, double tau, double volume, double fraction);
     void calThermalPhotonemissiondxperpdtau(
         std::vector<double> &Eq, std::vector<double> &pi_zz,
         std::vector<double> &bulkPi, int Tb_length,
@@ -215,9 +218,9 @@ class ThermalPhoton {
                              std::vector<double> &vn_cos,
                              std::vector<double> &vn_sin);
     void outputPhoton_SpvnpT_shell(std::string path);
-    void outputPhoton_SpvnpTdTdtau(std::string path);
-    void outputPhoton_SpvnpTdxperpdtau(std::string path);
-    void output_photon_spectra_dTdtau(std::string path);
+    void outputPhoton_SpvnpT_dTdtau(std::string path);
+    void outputPhoton_SpvnpT_dxperpdtau(std::string path);
+    void outputPhoton_spectra_dTdtau(std::string path);
     void interpolation2D_bilinear(double varX, std::vector<double> &varY,
                                   double** Table2D_ptr,
                                   std::vector<double> &results);

@@ -49,6 +49,10 @@ double***** createA5DMatrix(const int n1, const int n2, const int n3, const int 
 
 void deleteA5DMatrix(double *****mat, const int n1, const int n2, const int n3, const int n4);
 
+double****** createA6DMatrix(const int n1, const int n2, const int n3, const int n4, const int n5, const int n6, const double init);
+
+void deleteA6DMatrix(double ******mat, const int n1, const int n2, const int n3, const int n4, const int n5);
+
 };
 
 #endif
