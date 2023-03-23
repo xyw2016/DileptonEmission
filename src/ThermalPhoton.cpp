@@ -953,16 +953,16 @@ void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
     // ostringstream filename_SpdTdtau_bulkvis;
     ostringstream filename_SpdTdtau_diff;
     ostringstream filename_SpdTdtau_tot;
-    filename_SpdTdtau_eq << path << emissionProcess_name
-                         << "_SpdTdtau_eq.dat";
+    filename_SpdTdtau_eq 	<< path << emissionProcess_name
+                         	<< "_SpdTdtau_eq.dat";
     // filename_SpdTdtau_vis << path << emissionProcess_name
     //                       << "_SpdTdtau_vis.dat";
     // filename_SpdTdtau_bulkvis << path << emissionProcess_name
     //                           << "_SpdTdtau_bulkvis.dat";
-    filename_SpdTdtau_diff << path << emissionProcess_name
-                          << "_SpdTdtau_diff.dat";
-    filename_SpdTdtau_tot << path << emissionProcess_name
-                          << "_SpdTdtau_tot.dat";
+    filename_SpdTdtau_diff 	<< path << emissionProcess_name
+                          	<< "_SpdTdtau_diff.dat";
+    filename_SpdTdtau_tot 	<< path << emissionProcess_name
+                          	<< "_SpdTdtau_tot.dat";
 
     ofstream ofeq(filename_SpdTdtau_eq.str().c_str());
     // ofstream ofvis(filename_SpdTdtau_vis.str().c_str());
@@ -977,18 +977,17 @@ void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
         double T_local = Tcut_low + i*dT;
         for (int j = 0; j < nTaucut; j++) {
             double tau_local = Taucut_low + j*dtau;
-
-            ofeq << scientific << setw(18) << setprecision(8) 
-                 << T_local << "   "  << tau_local << "   ";
-            // ofvis << scientific << setw(18) << setprecision(8) 
-            //       << T_local << "   "  << tau_local << "   ";
-            // ofbulkvis << scientific << setw(18) << setprecision(8) 
-            //           << T_local << "   "  << tau_local << "   ";
-            ofdiff << scientific << setw(18) << setprecision(8) 
-                   << T_local << "   "  << tau_local << "   ";
-            oftot << scientific << setw(18) << setprecision(8) 
-                  << T_local << "   "  << tau_local << "   ";
             for (int m = 0; m < nm; m++) {
+            	ofeq 	<< scientific << setw(18) << setprecision(8) 
+                 		<< T_local << "   "  << tau_local << "   ";
+	            // ofvis << scientific << setw(18) << setprecision(8) 
+	            //       << T_local << "   "  << tau_local << "   ";
+	            // ofbulkvis << scientific << setw(18) << setprecision(8) 
+	            //           << T_local << "   "  << tau_local << "   ";
+	            ofdiff 	<< scientific << setw(18) << setprecision(8) 
+	                   	<< T_local << "   "  << tau_local << "   ";
+	            oftot 	<< scientific << setw(18) << setprecision(8) 
+	                  	<< T_local << "   "  << tau_local << "   ";
                 for (int k = 0; k < np; k++) {
                     double temp_dNdypTdpT_eq = 0.0;
                     // double temp_dNdypTdpT_vis = 0.0;
@@ -1020,12 +1019,12 @@ void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
                     oftot << temp_dNdypTdpT_diff << "   ";
                     oftot << temp_dNdypTdpT_tot << "   ";
                 }
+                ofeq << endl;
+                // ofvis << endl;
+                // ofbulkvis << endl;
+                ofdiff << endl;
+                oftot << endl;
             }
-            ofeq << endl;
-            // ofvis << endl;
-            // ofbulkvis << endl;
-            ofdiff << endl;
-            oftot << endl;
         }
     }
     ofeq.close();
@@ -1044,7 +1043,7 @@ void ThermalPhoton::calPhoton_SpvnpT_dTdtau() {
             for (int m = 0; m < nm; m++) {
                 for (int k = 0; k < np; k++) {
                     for (int l = 0; l < nphi; l++) {
-                        double weight = p[k]*p_weight[k]*phi_weight[l]*dy;
+                        double weight = p[k]*p_weight[k]*phi_weight[l]*dy; // pT and phi_p integrated out
                         for (int irap = 0; irap < nrapidity; irap++) {
                             dNdydTdtau_eq[i][j][m] += (
                                     dNd2pTdphidydTdtau_eq[i][j][m][k][l][irap]
@@ -1317,20 +1316,28 @@ void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
 
     for(int i = 0; i < nTcut; i++)
     {
+       double T_local = Tcut_low + i*dT;
        for(int j = 0; j < nTaucut; j++)
        {
-          for (int m = 0; m < nm; m++) {
-              fphotondNdy_eq << dNdydTdtau_eq[i][j][m] << "    ";
-              // fphotondNdy_vis << dNdydTdtau_vis[i][j] << "    ";
-              fphotondNdy_diff << dNdydTdtau_diff[i][j][m] << "    ";
-              fphotondNdy_tot << dNdydTdtau_tot[i][j][m] << "    ";
-          }
-       }
-       fphotondNdy_eq << endl;
-       // fphotondNdy_vis << endl;
-       fphotondNdy_diff << endl;
-       fphotondNdy_tot << endl;
-    }
+          	double tau_local = Taucut_low + j*dtau;
+          	fphotondNdy_eq << scientific << setw(18) << setprecision(8) 
+                   	<< T_local << "   "  << tau_local << "   ";
+          	fphotondNdy_diff << scientific << setw(18) << setprecision(8) 
+                   	<< T_local << "   "  << tau_local << "   ";
+          	fphotondNdy_tot << scientific << setw(18) << setprecision(8) 
+                   	<< T_local << "   "  << tau_local << "   ";
+          	for (int m = 0; m < nm; m++) {
+              	fphotondNdy_eq << dNdydTdtau_eq[i][j][m] << "    ";
+              	// fphotondNdy_vis << dNdydTdtau_vis[i][j] << "    ";
+              	fphotondNdy_diff << dNdydTdtau_diff[i][j][m] << "    ";
+              	fphotondNdy_tot << dNdydTdtau_tot[i][j][m] << "    ";
+          	}
+          	fphotondNdy_eq << endl;
+           	// fphotondNdy_vis << endl;
+           	fphotondNdy_diff << endl;
+           	fphotondNdy_tot << endl;
+       	}
+	}
     fphotondNdy_eq.close();
     // fphotondNdy_vis.close();
     fphotondNdy_diff.close();
@@ -1338,79 +1345,93 @@ void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
 
     for(int order = 1; order < norder; order++)
     {
-       ostringstream filename_stream_vncosdTdtau_eq;
-       // ostringstream filename_stream_vncosdTdtau_vis;
-       ostringstream filename_stream_vncosdTdtau_diff;
-       ostringstream filename_stream_vncosdTdtau_tot;
-       ostringstream filename_stream_vnsindTdtau_eq;
-       // ostringstream filename_stream_vnsindTdtau_vis;
-       ostringstream filename_stream_vnsindTdtau_diff;
-       ostringstream filename_stream_vnsindTdtau_tot;
-       filename_stream_vncosdTdtau_eq << path << emissionProcess_name
-                                      << "_v_" << order
-                                      << "_cos_dTdtau_eq.dat";
-       // filename_stream_vncosdTdtau_vis << path << emissionProcess_name
-       //                                 << "_v_" << order
-       //                                 << "_cos_dTdtau_vis.dat";
-       filename_stream_vncosdTdtau_diff << path << emissionProcess_name
-                                           << "_v_" << order
-                                           << "_cos_dTdtau_diff.dat";
-       filename_stream_vncosdTdtau_tot << path << emissionProcess_name
-                                       << "_v_" << order
-                                       << "_cos_dTdtau_tot.dat";
-       filename_stream_vnsindTdtau_eq << path << emissionProcess_name
-                                      << "_v_" << order
-                                      << "_sin_dTdtau_eq.dat";
-       // filename_stream_vnsindTdtau_vis << path << emissionProcess_name
-       //                                 << "_v_" << order
-       //                                 << "_sin_dTdtau_vis.dat";
-       filename_stream_vnsindTdtau_diff << path << emissionProcess_name
-                                           << "_v_" << order
-                                           << "_sin_dTdtau_diff.dat";
-       filename_stream_vnsindTdtau_tot << path << emissionProcess_name
-                                       << "_v_" << order
-                                       << "_sin_dTdtau_tot.dat";
+       	ostringstream filename_stream_vncosdTdtau_eq;
+       	// ostringstream filename_stream_vncosdTdtau_vis;
+       	ostringstream filename_stream_vncosdTdtau_diff;
+       	ostringstream filename_stream_vncosdTdtau_tot;
+       	ostringstream filename_stream_vnsindTdtau_eq;
+       	// ostringstream filename_stream_vnsindTdtau_vis;
+       	ostringstream filename_stream_vnsindTdtau_diff;
+       	ostringstream filename_stream_vnsindTdtau_tot;
+       	filename_stream_vncosdTdtau_eq 	<< path << emissionProcess_name
+                                      	<< "_v_" << order
+                                      	<< "_cos_dTdtau_eq.dat";
+       	// filename_stream_vncosdTdtau_vis << path << emissionProcess_name
+       	//                                 << "_v_" << order
+       	//                                 << "_cos_dTdtau_vis.dat";
+       	filename_stream_vncosdTdtau_diff 	<< path << emissionProcess_name
+                                           	<< "_v_" << order
+                                           	<< "_cos_dTdtau_diff.dat";
+       	filename_stream_vncosdTdtau_tot << path << emissionProcess_name
+                                       	<< "_v_" << order
+                                       	<< "_cos_dTdtau_tot.dat";
+       	filename_stream_vnsindTdtau_eq 	<< path << emissionProcess_name
+                                      	<< "_v_" << order
+                                      	<< "_sin_dTdtau_eq.dat";
+       	// filename_stream_vnsindTdtau_vis << path << emissionProcess_name
+       	//                                 << "_v_" << order
+       	//                                 << "_sin_dTdtau_vis.dat";
+       	filename_stream_vnsindTdtau_diff << path << emissionProcess_name
+                                      	<< "_v_" << order
+                                        << "_sin_dTdtau_diff.dat";
+       	filename_stream_vnsindTdtau_tot 	<< path << emissionProcess_name
+                                       	<< "_v_" << order
+                                       	<< "_sin_dTdtau_tot.dat";
 
-       ofstream fphotonvncos_eq(filename_stream_vncosdTdtau_eq.str().c_str());
-       // ofstream fphotonvncos_vis(filename_stream_vncosdTdtau_vis.str().c_str());
-       ofstream fphotonvncos_diff(filename_stream_vncosdTdtau_diff.str().c_str());
-       ofstream fphotonvncos_tot(filename_stream_vncosdTdtau_tot.str().c_str());
-       ofstream fphotonvnsin_eq(filename_stream_vnsindTdtau_eq.str().c_str());
-       // ofstream fphotonvnsin_vis(filename_stream_vnsindTdtau_vis.str().c_str());
-       ofstream fphotonvnsin_diff(filename_stream_vnsindTdtau_diff.str().c_str());
-       ofstream fphotonvnsin_tot(filename_stream_vnsindTdtau_tot.str().c_str());
-       for(int i = 0; i < nTcut; i++)
-       {
-          for(int j = 0; j < nTaucut; j++)
-          {
-             for (int m = 0; m < nm; m++) {
-                 fphotonvncos_eq << vndTdtau_cos_eq[i][j][m][order] << "    ";
-                 // fphotonvncos_vis << vndTdtau_cos_vis[i][j][order] << "    ";
-                 fphotonvncos_diff << vndTdtau_cos_diff[i][j][m][order] << "    ";
-                 fphotonvncos_tot << vndTdtau_cos_tot[i][j][m][order] << "    ";
-                 fphotonvnsin_eq << vndTdtau_sin_eq[i][j][m][order] << "    ";
-                 // fphotonvnsin_vis << vndTdtau_sin_vis[i][j][order] << "    ";
-                 fphotonvnsin_diff << vndTdtau_sin_diff[i][j][m][order] << "    ";
-                 fphotonvnsin_tot << vndTdtau_sin_tot[i][j][m][order] << "    ";
-             }
-          }
-          fphotonvncos_eq << endl;
-          // fphotonvncos_vis << endl;
-          fphotonvncos_diff << endl;
-          fphotonvncos_tot << endl;
-          fphotonvnsin_eq << endl;
-          // fphotonvnsin_vis << endl;
-          fphotonvnsin_diff << endl;
-          fphotonvnsin_tot << endl;
-       }
-       fphotonvncos_eq.close();
-       fphotonvnsin_eq.close();
-       // fphotonvncos_vis.close();
-       // fphotonvnsin_vis.close();
-       fphotonvncos_diff.close();
-       fphotonvnsin_diff.close();
-       fphotonvncos_tot.close();
-       fphotonvnsin_tot.close();
+       	ofstream fphotonvncos_eq(filename_stream_vncosdTdtau_eq.str().c_str());
+       	// ofstream fphotonvncos_vis(filename_stream_vncosdTdtau_vis.str().c_str());
+       	ofstream fphotonvncos_diff(filename_stream_vncosdTdtau_diff.str().c_str());
+       	ofstream fphotonvncos_tot(filename_stream_vncosdTdtau_tot.str().c_str());
+       	ofstream fphotonvnsin_eq(filename_stream_vnsindTdtau_eq.str().c_str());
+       	// ofstream fphotonvnsin_vis(filename_stream_vnsindTdtau_vis.str().c_str());
+       	ofstream fphotonvnsin_diff(filename_stream_vnsindTdtau_diff.str().c_str());
+       	ofstream fphotonvnsin_tot(filename_stream_vnsindTdtau_tot.str().c_str());
+       	for(int i = 0; i < nTcut; i++)
+       	{
+          	double T_local = Tcut_low + i*dT;
+          	for(int j = 0; j < nTaucut; j++)
+      		{
+             	double tau_local = Taucut_low + j*dtau;
+             	fphotonvncos_eq << scientific << setw(18) << setprecision(8) 
+                   	<< T_local << "   "  << tau_local << "   ";
+             	fphotonvncos_diff << scientific << setw(18) << setprecision(8) 
+                   	<< T_local << "   "  << tau_local << "   ";
+             	fphotonvncos_tot << scientific << setw(18) << setprecision(8) 
+                   	<< T_local << "   "  << tau_local << "   ";
+             	fphotonvnsin_eq << scientific << setw(18) << setprecision(8) 
+                   	<< T_local << "   "  << tau_local << "   ";
+             	fphotonvnsin_diff << scientific << setw(18) << setprecision(8) 
+                   	<< T_local << "   "  << tau_local << "   ";
+             	fphotonvnsin_tot << scientific << setw(18) << setprecision(8) 
+                   	<< T_local << "   "  << tau_local << "   ";
+             	for (int m = 0; m < nm; m++) {
+                 	fphotonvncos_eq << vndTdtau_cos_eq[i][j][m][order] << "    ";
+                 	// fphotonvncos_vis << vndTdtau_cos_vis[i][j][order] << "    ";
+                 	fphotonvncos_diff << vndTdtau_cos_diff[i][j][m][order] << "    ";
+                 	fphotonvncos_tot << vndTdtau_cos_tot[i][j][m][order] << "    ";
+                 	fphotonvnsin_eq << vndTdtau_sin_eq[i][j][m][order] << "    ";
+                 	// fphotonvnsin_vis << vndTdtau_sin_vis[i][j][order] << "    ";
+                 	fphotonvnsin_diff << vndTdtau_sin_diff[i][j][m][order] << "    ";
+                 	fphotonvnsin_tot << vndTdtau_sin_tot[i][j][m][order] << "    ";
+             	}
+             	fphotonvncos_eq << endl;
+             	// fphotonvncos_vis << endl;
+             	fphotonvncos_diff << endl;
+             	fphotonvncos_tot << endl;
+             	fphotonvnsin_eq << endl;
+             	// fphotonvnsin_vis << endl;
+             	fphotonvnsin_diff << endl;
+             	fphotonvnsin_tot << endl;
+          	}
+       	}
+       	fphotonvncos_eq.close();
+       	fphotonvnsin_eq.close();
+       	// fphotonvncos_vis.close();
+       	// fphotonvnsin_vis.close();
+       	fphotonvncos_diff.close();
+       	fphotonvnsin_diff.close();
+       	fphotonvncos_tot.close();
+       	fphotonvnsin_tot.close();
     }
 }
 

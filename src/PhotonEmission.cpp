@@ -165,7 +165,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
     double photonrate_tb_dT = paraRdr->getVal("PhotonemRatetableInfo_dT");
 
     dilepton_QGP_LO = std::unique_ptr<ThermalPhoton>(
-            new QGP_LO(paraRdr, "QGP_2to2_total"));
+            new QGP_LO(paraRdr, "QGP_LO_total"));
     // dilepton_QGP_LO->setupEmissionrateFromFile(
     //         photonrate_tb_Tmin, photonrate_tb_dT,
     //         photonrate_tb_Emin, photonrate_tb_dE, true, true);// true for vis corrections
@@ -1122,6 +1122,7 @@ void PhotonEmission::outputPhotonSpvn_individualchannel() {
 //     // photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpT_shell(output_path);
     if (differential_flag == 1 || differential_flag > 10) {
         dilepton_QGP_LO->outputPhoton_SpvnpT_dTdtau(output_path);
+        dilepton_QGP_LO->outputPhoton_spectra_dTdtau(output_path);
 //     //     photon_QGP_collinear->outputPhoton_SpvnpTdTdtau(output_path);
 //     //     photon_QGP_2_to_2->output_photon_spectra_dTdtau(output_path);
 //     //     photon_QGP_collinear->output_photon_spectra_dTdtau(output_path);
@@ -1304,7 +1305,8 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
             fphotonSpMatrix << endl;
         }
     }
-    
+
+    // pT differential
     for (int m = 0; m < nm; m++) {
         for (int i = 0; i < np; i++) {
             double M_ll = photon_QGP_2_to_2->getDileptonMass(m);
@@ -1336,6 +1338,7 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
         }
     }
 
+    // pT integrated
     for (int m = 0; m < nm; m++) {
         double M_ll = photon_QGP_2_to_2->getDileptonMass(m);
         fphotoninte_eq_Spvn << scientific << setprecision(6) << setw(16)
