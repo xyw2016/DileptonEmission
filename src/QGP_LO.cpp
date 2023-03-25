@@ -198,7 +198,7 @@ void QGP_LO::analyticRatesDiffusion(double T, double muB, double rhoB_over_eplus
 
 void QGP_LO::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, 
     std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, std::vector<double> &diffrate_ptr, 
-        int nm, int np, int nphi, int nrapidity){
+        int nm, int np, int nphi, int nrapidity, int include_diff_deltaf){
 
     double me = 0.0051;
     double m_ell2 = me * me;
@@ -216,12 +216,16 @@ void QGP_LO::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp,
                     double p = sqrt(E*E - M2);// magnitude of 3-vec p in LRF
 
                     eqrate_ptr[idx] = prefac*fmuB_rate(E,p,M2,T,muB,m_ell2);
-                    diffrate_ptr[idx] = a1(E, p, M2, T, muB, m_ell2, rhoB_over_eplusp);
+                    
+                    if(include_diff_deltaf==1)
+                        diffrate_ptr[idx] = a1(E, p, M2, T, muB, m_ell2, rhoB_over_eplusp);
+                    else
+                        diffrate_ptr[idx] = 0.0;
 
-                    if(eqrate_ptr[idx]<0.0)
-                        printf("WARNING, negative emission rate... E=%f\t p=%f\t T=%f\t mu=%f\t\n", E, p, T, muB);
-                    if(diffrate_ptr[idx]<0.0)
-                        printf("WARNING, negative vis emission rate... E=%f\t p=%f\t T=%f\t mu=%f\t\n", E, p, T, muB);
+                    // if(eqrate_ptr[idx]<0.0)
+                    //     printf("WARNING, negative emission rate... E=%f\t p=%f\t T=%f\t mu=%f\t\n", E, p, T, muB);
+                    // if(diffrate_ptr[idx]<0.0)
+                    //     printf("WARNING, negative vis emission rate... E=%f\t p=%f\t T=%f\t mu=%f\t\n", E, p, T, muB);
 
                     idx++;
                 }

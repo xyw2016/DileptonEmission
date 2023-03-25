@@ -47,6 +47,8 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     bBulkVisCorr_  = false;
     bDiffusionCorr_  = false;
 
+    include_diff_deltaf = paraRdr->getVal("include_baryondiff_deltaf"); 
+
     //initial variables for photon spectra 
     double p_i = paraRdr->getVal("photon_q_i"); 
     double p_f = paraRdr->getVal("photon_q_f");
@@ -445,7 +447,7 @@ void ThermalPhoton::analyticRatesDiffusion(double T, double muB, double rhoB_ove
 
 void ThermalPhoton::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, 
     vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, std::vector<double> &diffrate_ptr, 
-        int nm, int np, int nphi, int nrapidity) {
+        int nm, int np, int nphi, int nrapidity, int include_diff_deltaf) {
     for (unsigned int i = 0; i < diffrate_ptr.size(); i++) {
         eqrate_ptr[i] = 1.e-16;
         diffrate_ptr[i] = 0.;
@@ -464,7 +466,7 @@ void ThermalPhoton::getPhotonemissionRate(vector<double> &Eq, double *M_ll,
 
     // analyticRates(T, muB, Eq, M_ll, eqrate_ptr, nm, np, nphi, nrapidity);
     // analyticRatesDiffusion(T, muB, rhoB_over_eplusp, Eq, M_ll, diffrate_ptr, nm, np, nphi, nrapidity);
-    FiniteBaryonRates(T, muB, rhoB_over_eplusp, Eq, M_ll, eqrate_ptr, diffrate_ptr, nm, np, nphi, nrapidity);
+    FiniteBaryonRates(T, muB, rhoB_over_eplusp, Eq, M_ll, eqrate_ptr, diffrate_ptr, nm, np, nphi, nrapidity, include_diff_deltaf);
 
     for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
         diffrate_ptr[i] = diff_factor[i]*diffrate_ptr[i]; 
@@ -580,10 +582,10 @@ void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll
                     // if(temp_diff_sum<0.0)
                     //     printf("WARNING, negative temp_diff_sum... Eq=%f\t M=%f\t T=%f\t mu=%f\t\n", Eq[idx], M_ll[j], T, muB);
 
-                    if(dNd2pTdphidy_diff[j][l][m][k]<0.0)
-                        printf("WARNING, negative dNd2pTdphidy_diff[j][l][m][k]... Eq=%f\t M=%f\t T=%f\t mu=%f\t\n", Eq[idx], M_ll[j], T, muB);
-                    if(dNd2pTdphidy_eq[j][l][m][k]<0.0)
-                        printf("WARNING, negative dNd2pTdphidy_eq[j][l][m][k]... Eq=%f\t M=%f\t T=%f\t mu=%f\t\n", Eq[idx], M_ll[j], T, muB);
+                    // if(dNd2pTdphidy_diff[j][l][m][k]<0.0)
+                    //     printf("WARNING, negative dNd2pTdphidy_diff[j][l][m][k]... Eq=%f\t M=%f\t T=%f\t mu=%f\t\n", Eq[idx], M_ll[j], T, muB);
+                    // if(dNd2pTdphidy_eq[j][l][m][k]<0.0)
+                    //     printf("WARNING, negative dNd2pTdphidy_eq[j][l][m][k]... Eq=%f\t M=%f\t T=%f\t mu=%f\t\n", Eq[idx], M_ll[j], T, muB);
 
                     // dNd2pTdphidy_vis[j][l][m][k] += temp_eq_sum + temp_vis_sum;
                     // dNd2pTdphidy_vis_deltaf_restricted[j][l][m][k] += (
@@ -742,6 +744,8 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(vector<double> &Eq, double
     int idx_T = (int)((T - Tcut_low)/dT + eps);
     int idx_tau = (int)((tau - Taucut_low)/dtau + eps);
 
+    //printf("tau=%lf\t dtau=%lf\t idx_tau=%d\n", tau, dtau, idx_tau);
+
     int idx = 0;
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
@@ -761,7 +765,7 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(vector<double> &Eq, double
                     // dNd2pTdphidydTdtau_bulkvis[idx_T][idx_tau][j][l][m][k] += (
                     //                             temp_eq_sum + temp_bulkvis_sum);
                     dNd2pTdphidydTdtau_tot[idx_T][idx_tau][j][l][m][k] += (
-                                temp_eq_sum + temp_diff_sum);
+                                				temp_eq_sum + temp_diff_sum);
                     idx++;
                 }
             }
@@ -1327,10 +1331,11 @@ void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
           	fphotondNdy_tot << scientific << setw(18) << setprecision(8) 
                    	<< T_local << "   "  << tau_local << "   ";
           	for (int m = 0; m < nm; m++) {
-              	fphotondNdy_eq << dNdydTdtau_eq[i][j][m] << "    ";
-              	// fphotondNdy_vis << dNdydTdtau_vis[i][j] << "    ";
-              	fphotondNdy_diff << dNdydTdtau_diff[i][j][m] << "    ";
-              	fphotondNdy_tot << dNdydTdtau_tot[i][j][m] << "    ";
+          		double M_ll = M[m];
+              	fphotondNdy_eq << dNdydTdtau_eq[i][j][m]*M_ll << "    ";
+              	// fphotondNdy_vis << dNdydTdtau_vis[i][j]*M_ll << "    ";
+              	fphotondNdy_diff << dNdydTdtau_diff[i][j][m]*M_ll << "    ";
+              	fphotondNdy_tot << dNdydTdtau_tot[i][j][m]*M_ll << "    ";
           	}
           	fphotondNdy_eq << endl;
            	// fphotondNdy_vis << endl;

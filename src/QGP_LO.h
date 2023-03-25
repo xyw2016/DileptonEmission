@@ -21,7 +21,7 @@ class QGP_LO : public ThermalPhoton {
     void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, 
         std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
         std::vector<double> &diffrate_ptr, 
-        int nm, int np, int nphi, int nrapidity);
+        int nm, int np, int nphi, int nrapidity, int include_diff_deltaf);
     // void NetBaryonCorrection(double T, double muB, std::vector<double> &Eq,
     //                          std::vector<double> &eqrate_ptr);
     double integrand_J(double x,int n,double a,double z);

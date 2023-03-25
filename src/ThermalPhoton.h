@@ -28,6 +28,8 @@ class ThermalPhoton {
     bool bBulkVisCorr_;
     bool bDiffusionCorr_;
 
+    int include_diff_deltaf;
+
     // photon emission rate
     std::unique_ptr<Table2D> Photonemission_eqrateTable_ptr;
     std::unique_ptr<Table2D> Photonemission_viscous_rateTable_ptr;
@@ -164,7 +166,8 @@ class ThermalPhoton {
         int nm, int np, int nphi, int nrapidity);
     virtual void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, 
         std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
-        std::vector<double> &diffrate_ptr, int nm, int np, int nphi, int nrapidity);
+        std::vector<double> &diffrate_ptr, int nm, int np, int nphi, int nrapidity,
+        int include_diff_deltaf);
 
     void getPhotonemissionRate(std::vector<double> &Eq,
                                double *M_ll,

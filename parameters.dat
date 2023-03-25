@@ -11,8 +11,8 @@ Xmin = -15.0                  # minimum points along x direction
 dx = 0.3                      # lattice spacing along x direction
 Ymin = -15.0                  # minimum points along y direction
 dy = 0.3                      # lattice spacing along y direction
-tau_start = 0.4               # emission start time (fm)
-tau_end = 30.0                # emission end time (fm)
+tau_start = 1.5               # emission start time (fm)
+tau_end = 10.0                # emission end time (fm)
 dTau = 0.1                    # lattice spacing along tau direction
 
 neta = 10                     # number of points in eta direction
@@ -26,7 +26,7 @@ nrapidity = 1                 # number of points for photon rapidity
 
 nm = 15                       # number of points for dilepton invariant mass
 
-photon_q_i = 0.2              # the smallest photon momentum to be calculated
+photon_q_i = 0.02              # the smallest photon momentum to be calculated
 photon_q_f = 4.0              # the largest photon momentum to be calculated
 photon_phi_q_i = 0.0          # the smallest angle of photon momentum
 photon_phi_q_f = 6.2831853    # the largest angle of photon momentum
@@ -42,7 +42,7 @@ turn_on_muB = 1               # flag to include muB dependence in photon rates
 T_dec = 0.105                 # freeze out temperature (GeV)
 T_sw_high = 0.180             # high end of the switching temperature
 T_sw_low = 0.1795             # low end of the switching temperature
-T_cuthigh = 0.80              # maximum allowed emission T (GeV)
+T_cuthigh = 0.20              # maximum allowed emission T (GeV)
 T_cutlow = 0.10               # minimum allowed emission T (GeV)
 
 calHGIdFlag = 0               # Flag to decide whether to calculate individual HG channels
@@ -55,14 +55,15 @@ PhotonemRatetableInfo_dT = 0.002    # lattice space of temperature in the photon
 HydroinfoVisflag = 1         # determine whether to read in the viscous evolution information
 HydroinfoBuffersize = 500    # set the buffer size for hydro evolution profile
 
+include_baryondiff_deltaf = 0   # switch to include baryon diffusion corrections
 turn_off_transverse_flow = 0  # flag to turn off transverse flow in the photon calculation
 enable_polyakov_suppression = 0   # apply the polyakov suppression to QGP photon rates
 
-differential_flag = 0        # determine whether to output differential photon yield and vn
+differential_flag = 1        # determine whether to output differential photon yield and vn
                              # 1: differential in T and tau
                              # 2: differential in x and tau
                              # 10: differeitial in all options above
-nTaucut = 50                 # number of points in tau (range of tau is specified by tau_start and tau_end)
+nTaucut = 100                 # number of points in tau (range of tau is specified by tau_start and tau_end)
 nTcut = 50                   # number of points in T (range of T is specified by T_cuthigh and T_cutlow)
 n_xperp_cut = 101            # number of points in x
 xperp_cuthigh = 10.0         # maximum value in x (fm)

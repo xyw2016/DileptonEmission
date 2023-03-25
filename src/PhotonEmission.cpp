@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iomanip>
 #include <string>
+#include <omp.h>
 
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
@@ -673,11 +674,19 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                 hydroinfo_MUSIC_ptr->get_number_of_fluid_cells_3d());
     cout << "number of cells:" << number_of_cells << endl;
 
-    cout << "******************************************" << endl;
+    cout << "----------------------------------------" << endl;
 
     int ncells = 0;
 
     for (long int cell_id = 0; cell_id < number_of_cells; cell_id++) {
+
+// #ifdef _OPENMP
+//         int thread_id = omp_get_thread_num();
+//         int num_threads = omp_get_num_threads();
+
+//         std::cout << "Hello from thread " << thread_id << " of " << num_threads << " threads" << std::endl;
+// #endif
+
         hydroinfo_MUSIC_ptr->get_hydro_cell_info_3d(cell_id, fluidCellptr);
 
         double tau_local = tau0 + fluidCellptr.itau*dtau;
@@ -784,6 +793,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double sinh_y = sinh(y_q[k]);
             double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
             double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
+            //#pragma omp parallel for collapse(3)
             for (int m = 0; m < nphi; m++) {
                 for (int l = 0; l < np; l++) {
                     for (int j = 0; j < nm; j++) {
@@ -887,7 +897,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             //         temp_local, muB_local, x_local, tau_local, volume,
             //         QGP_fraction);
             // }
-        } 
+        }
         
         // else if (temp_local > T_sw_low) {     // QGP and HG emission
         //     double QGP_fraction = (
@@ -1069,7 +1079,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         // }
     }
 
-    printf("Cells above T_sw_high=%d...\n", ncells);
+    if(CODE_TEST){
+        printf("Cells above T_sw_high=%d...\n", ncells);
+    }
 
     //printf("error H...\n");
 
@@ -1167,10 +1179,10 @@ void PhotonEmission::calPhoton_total_SpMatrix() {
                     dNd2pTdphidy[j][l][m][k] = (
                           dilepton_QGP_LO->getPhotonSpMatrix_tot(j, l, m, k));
 
-                    if(dNd2pTdphidy[j][l][m][k]<0.0)
-                        printf("WARNING, negative dNd2pTdphidy[j][l][m][k]...\n");
-                    if(dNd2pTdphidy_eq[j][l][m][k]<0.0)
-                        printf("WARNING, negative dNd2pTdphidy_eq[j][l][m][k]...\n");
+                    // if(dNd2pTdphidy[j][l][m][k]<0.0)
+                    //     printf("WARNING, negative dNd2pTdphidy[j][l][m][k]...\n");
+                    // if(dNd2pTdphidy_eq[j][l][m][k]<0.0)
+                    //     printf("WARNING, negative dNd2pTdphidy_eq[j][l][m][k]...\n");
                     //printf("calPhoton_total_SpMatrix BII...%e\n",dNd2pTdphidy_eq[j][l][m][k]);
                 // dNd2pTdphidy_eq[l][m][k] = (
                 //       photon_QGP_2_to_2->getPhotonSpMatrix_eq(l, m, k)
@@ -1241,8 +1253,8 @@ void PhotonEmission::calPhoton_total_Spvn() {
             }
             dNd2pTd2M_eq[m][i] = dNd2pTd2M_eq[m][i]/(2*M_PI); // dN/(2pi pTdpT)
             dNd2pTd2M[m][i] = dNd2pTd2M[m][i]/(2*M_PI);
-            if(dNd2pTd2M_eq[m][i]<0.0)
-                        printf("WARNING, negative dNd2pTd2M_eq[m][i]...\n");
+            // if(dNd2pTd2M_eq[m][i]<0.0)
+            //             printf("WARNING, negative dNd2pTd2M_eq[m][i]...\n");
         }
     }
     
@@ -1333,8 +1345,8 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
             }
             fphoton_eq_Spvn << endl;
             fphotonSpvn << endl;
-            if(dNd2pTd2M_eq[m][i]<0.0)
-                        printf("WARNING, write negative dNd2pTd2M_eq[m][i]...\n");
+            // if(dNd2pTd2M_eq[m][i]<0.0)
+            //             printf("WARNING, write negative dNd2pTd2M_eq[m][i]...\n");
         }
     }
 
