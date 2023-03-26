@@ -744,7 +744,7 @@ void imtqlx ( int n, double d[], double e[], double z[] )
   int j;
   int k;
   int l;
-  int m;
+  int m = 0;
   int mml;
   double p;
   double prec;

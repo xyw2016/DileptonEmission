@@ -410,7 +410,8 @@ void ThermalPhoton::getPhotonemissionRate(vector<double> &Eq, double *M_ll,
     // analyticRatesDiffusion(T, muB, rhoB_over_eplusp, Eq, M_ll, diffrate_ptr, nm, np, nphi, nrapidity);
     FiniteBaryonRates(T, muB, rhoB_over_eplusp, Eq, M_ll, eqrate_ptr, diffrate_ptr, nm, np, nphi, nrapidity, include_diff_deltaf);
 
-    for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
+    #pragma omp parallel for
+    for (unsigned int i = 0; i < diffrate_ptr.size(); i++) {
         diffrate_ptr[i] = diff_factor[i]*diffrate_ptr[i]; 
     }
 
@@ -491,6 +492,8 @@ void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll
                           em_eqrate, em_visrate, em_bulkvis, em_diffrate);
 
     int idx = 0;
+
+    //#pragma omp parallel for collapse(4)
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
             for (int l = 0; l < np; l++) {
@@ -518,16 +521,6 @@ void ThermalPhoton::calThermalPhotonemission_3d(vector<double> &Eq, double *M_ll
                     // spectra
                     dNd2pTdphidy_eq[j][l][m][k] += temp_eq_sum;
                     dNd2pTdphidy_diff[j][l][m][k] += temp_eq_sum + temp_diff_sum;
-
-                    // if(temp_eq_sum<0.0)
-                    //     printf("WARNING, negative temp_eq_sum... Eq=%f\t M=%f\t T=%f\t mu=%f\t\n", Eq[idx], M_ll[j], T, muB);
-                    // if(temp_diff_sum<0.0)
-                    //     printf("WARNING, negative temp_diff_sum... Eq=%f\t M=%f\t T=%f\t mu=%f\t\n", Eq[idx], M_ll[j], T, muB);
-
-                    // if(dNd2pTdphidy_diff[j][l][m][k]<0.0)
-                    //     printf("WARNING, negative dNd2pTdphidy_diff[j][l][m][k]... Eq=%f\t M=%f\t T=%f\t mu=%f\t\n", Eq[idx], M_ll[j], T, muB);
-                    // if(dNd2pTdphidy_eq[j][l][m][k]<0.0)
-                    //     printf("WARNING, negative dNd2pTdphidy_eq[j][l][m][k]... Eq=%f\t M=%f\t T=%f\t mu=%f\t\n", Eq[idx], M_ll[j], T, muB);
 
                     // dNd2pTdphidy_vis[j][l][m][k] += temp_eq_sum + temp_vis_sum;
                     // dNd2pTdphidy_vis_deltaf_restricted[j][l][m][k] += (
@@ -686,9 +679,9 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(vector<double> &Eq, double
     int idx_T = (int)((T - Tcut_low)/dT + eps);
     int idx_tau = (int)((tau - Taucut_low)/dtau + eps);
 
-    //printf("tau=%lf\t dtau=%lf\t idx_tau=%d\n", tau, dtau, idx_tau);
-
     int idx = 0;
+
+    //#pragma omp parallel for collapse(4)
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
             for (int l = 0; l < np; l++) {
@@ -829,6 +822,7 @@ void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
         double T_local = Tcut_low + i*dT;
         for (int j = 0; j < nTaucut; j++) {
             double tau_local = Taucut_low + j*dtau;
+
             for (int m = 0; m < nm; m++) {
             	ofeq 	<< scientific << setw(18) << setprecision(8) 
                  		<< T_local << "   "  << tau_local << "   ";
@@ -892,6 +886,7 @@ void ThermalPhoton::calPhoton_SpvnpT_dTdtau() {
     double eps = 1e-15;
     for (int i = 0; i < nTcut; i++) {
         for (int j = 0; j < nTaucut; j++) {
+
             for (int m = 0; m < nm; m++) {
                 for (int k = 0; k < np; k++) {
                     for (int l = 0; l < nphi; l++) {
@@ -939,6 +934,7 @@ void ThermalPhoton::calPhoton_SpvnpT_dTdtau() {
                     }
                 }
             }
+
             for (int m = 0; m < nm; m++) {
                 for (int order = 1; order < norder ; order++) {
                     vndTdtau_cos_eq[i][j][m][order] = (vndTdtau_cos_eq[i][j][m][order]

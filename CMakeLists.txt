@@ -1,8 +1,8 @@
 cmake_minimum_required (VERSION 3.4)
 project (PhotonEmission LANGUAGES CXX C)
 
-set(libname "hydro_photonEmission")
-set(exename "hydro_photonEmission.e")
+set(libname "dilepton_emission")
+set(exename "dilepton_emission.e")
 
 # require C++11
 set(CMAKE_CXX_STANDARD 11)
@@ -18,6 +18,16 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     endif()
 endif()
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+    message("Using Clang compiler without OpenMP parallelization... ")
+else ()
+    find_package(OpenMP)
+    if (OpenMP_FOUND)
+        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${OpenMP_CXX_FLAGS})
+        set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${OpenMP_EXE_LINKER_FLAGS})
+    endif ()
+endif()
+
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_HOME_DIRECTORY}")
 set (CMAKE_INSTALL_PREFIX "${CMAKE_HOME_DIRECTORY}")
 set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
@@ -27,7 +37,12 @@ message("rpath = " ${CMAKE_INSTALL_RPATH})
 option (link_with_lib "Link executable with library" ON)
 option (unittest "Build Unit tests" OFF)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -Wall -std=c++11")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -Wall -std=c++11")
+else ()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -Wall -std=c++11")
+endif()
 
 if (unittest)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDOCTEST_CONFIG_IMPLEMENT_WITH_MAIN")

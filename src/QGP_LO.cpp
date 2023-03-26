@@ -1,9 +1,6 @@
-
 #include "QGP_LO.h"
 #include "data_struct.h"
 #include <cmath>
-//#include <gsl/gsl_sf_fermi_dirac.h>
-// see https://www.gnu.org/software/gsl/doc/html/specfunc.html#fermi-dirac-function
 
 using PhysConsts::hbarC;
 
@@ -125,6 +122,13 @@ double QGP_LO::rhoV(double omega,double k,double ksq, double T,double muB){
     double ps1 = Nc*ksq/(4.*M_PI*k);
     double ps2 = l1f((kplus - muq)/T) - l1f((abs(kminus) - muq)/T) + l1f((kplus + muq)/T) - l1f((abs(kminus) + muq)/T);
     double ps3 = k*heaviside(kminus);
+
+
+    // if(ps2<0.0)
+    //     printf("WARNING, negative ps2...\n");
+    // if(ps3<0.0)
+    //     printf("WARNING, negative ps3...\n");
+
     return ps1*(T*ps2 + ps3);
 }
 
@@ -136,7 +140,10 @@ double QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,do
     if(abs(qsq)<eps){
         qsq += eps;
     }
-    return C_EM*pow(alphaEM,2)*nB(omega/T)*Bfun(m_ell2/qsq)*rhoV(omega,q,qsq,T,muB)/(3.*pow(M_PI,3)*qsq);
+
+    double rate = C_EM*pow(alphaEM,2)*nB(omega/T)*Bfun(m_ell2/qsq)*rhoV(omega,q,qsq,T,muB)/(3.*pow(M_PI,3)*qsq);
+
+    return rate;
 }
 
 
@@ -149,6 +156,8 @@ void QGP_LO::analyticRates(double T, double muB, std::vector<double> &Eq, double
     double m_ell2 = me * me;
 
     int idx = 0;
+
+    #pragma omp parallel for collapse(4)
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
             for (int l = 0; l < np; l++) {
@@ -176,6 +185,8 @@ void QGP_LO::analyticRatesDiffusion(double T, double muB, double rhoB_over_eplus
     double m_ell2 = me * me;
 
     int idx = 0;
+
+    #pragma omp parallel for collapse(4)
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
             for (int l = 0; l < np; l++) {
@@ -205,6 +216,8 @@ void QGP_LO::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp,
     double prefac = 1./pow(hbarC, 4);
 
     int idx = 0;
+
+    #pragma omp parallel for collapse(4)
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
             for (int l = 0; l < np; l++) {
@@ -216,16 +229,11 @@ void QGP_LO::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp,
                     double p = sqrt(E*E - M2);// magnitude of 3-vec p in LRF
 
                     eqrate_ptr[idx] = prefac*fmuB_rate(E,p,M2,T,muB,m_ell2);
-                    
+
                     if(include_diff_deltaf==1)
                         diffrate_ptr[idx] = a1(E, p, M2, T, muB, m_ell2, rhoB_over_eplusp);
                     else
                         diffrate_ptr[idx] = 0.0;
-
-                    // if(eqrate_ptr[idx]<0.0)
-                    //     printf("WARNING, negative emission rate... E=%f\t p=%f\t T=%f\t mu=%f\t\n", E, p, T, muB);
-                    // if(diffrate_ptr[idx]<0.0)
-                    //     printf("WARNING, negative vis emission rate... E=%f\t p=%f\t T=%f\t mu=%f\t\n", E, p, T, muB);
 
                     idx++;
                 }
