@@ -12,43 +12,24 @@ class QGP_LO : public ThermalPhoton {
     QGP_LO(std::shared_ptr<ParameterReader> paraRdr_in,
                         std::string emissionProcess);
     ~QGP_LO() {}
-    void analyticRates(double T, double muB, std::vector<double> &Eq, double *M,
-                        std::vector<double> &eqrate_ptr, int nm,
-                        int np, int nphi, int nrapidity);
-    void analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp,
-        std::vector<double> &Eq, double *M_ll, std::vector<double> &diffrate_ptr, 
-        int nm, int np, int nphi, int nrapidity);
-    void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, 
-        std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
-        std::vector<double> &diffrate_ptr, 
-        int nm, int np, int nphi, int nrapidity, int include_diff_deltaf);
-    // void NetBaryonCorrection(double T, double muB, std::vector<double> &Eq,
-    //                          std::vector<double> &eqrate_ptr);
+
+    void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, double Eq, 
+        double M_ll, double &eqrate_ptr, double &diffrate_ptr, int include_diff_deltaf);
+
     double integrand_J(double x,int n,double a,double z);
-
     double gaussLegendre(double* xs, double* ws, int m, int n, double a, double b, double z);
-
     double intJn(int n, double a, double b, double z) ;
 
     // for diffusion rate
     double Bfun(double x);
-
     double heaviside(double x) ;
-
     double cross_sec(double omega, double q, double qsq, double m_ell2);
-
     double a1(double omega,double q, double qsq,double T,double muB,double m_ell2,double nB_o_epp);
-
-
-
     double l1f(double x);
-
     double nB(double x);
-
 
     // for finite muB rate
     double rhoV(double omega,double k, double ksq,double T,double muB);
-
     double fmuB_rate(double omega,double q, double qsq,double T,double muB,double m_ell2);
 };
 

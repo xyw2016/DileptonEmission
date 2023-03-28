@@ -3,6 +3,7 @@
 
 namespace PhysConsts {
     const double hbarC = 0.19733;
+    const double eps = 1.e-15;
 }
 
 

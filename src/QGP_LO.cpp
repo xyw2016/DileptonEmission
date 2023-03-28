@@ -3,6 +3,7 @@
 #include <cmath>
 
 using PhysConsts::hbarC;
+using PhysConsts::eps;
 
 QGP_LO::QGP_LO(
         std::shared_ptr<ParameterReader> paraRdr_in,
@@ -23,10 +24,10 @@ double QGP_LO::cross_sec(double omega, double q, double qsq, double m_ell2){
     double alphaEM = 1./137.035999;
     double C_EM = 2./3.;
     double Nc = 3.;
-    double eps = 1e-12;
-    if(abs(qsq)<eps){
-        qsq += eps;
-    }
+
+    // if(abs(qsq)<eps){
+    //     qsq = eps;
+    // }
     return Nc*C_EM*(4.* M_PI/3.)*(pow(alphaEM,2)/qsq)*Bfun(m_ell2/qsq);
 }
 
@@ -74,11 +75,10 @@ double QGP_LO::a1(double omega,double q,double qsq,double T,double muB,double m_
     // final rate for a1 is d4R/d4q = a1*q.V/(T^2*kappa-hat) where V is the diffusion current
     // note that the factor T*qsq/(4.*pow((2.*M_PI),5)*pow(q,3)) is not included in a1 here.
     
-    double eps = 1e-12;
     double muq = muB/3.;
-    if(fabs(qsq)<eps){
-        qsq += eps;
-    }
+    // if(fabs(qsq)<eps){
+    //     qsq = eps;
+    // }
     double sigma = cross_sec(omega,q,qsq,m_ell2);
     //double ps1 = T*qsq*sigma/(4.*pow((2.*M_PI),5)*pow(q,3));
     double ps2 = 2*omega*nB_o_epp*pow(T,3)*intJn(1,omega/T,q/T,muq/T) - pow(T,2)*(qsq*nB_o_epp + 2.*omega/3.)*intJn(0,omega/T,q/T,muq/T) 
@@ -111,10 +111,10 @@ double QGP_LO::nB(double x){
 // for finite muB rate
 double QGP_LO::rhoV(double omega,double k,double ksq, double T,double muB){
     // k is the magnitude of 3-vec k
-    double eps = 1e-12;
-    if(abs(ksq)<eps){
-        ksq += eps;
-    }
+
+    // if(abs(ksq)<eps){
+    //     ksq = eps;
+    // }
     double kplus = (omega + k)*0.5;
     double kminus = (omega - k)*0.5;
     double muq = muB/3.;
@@ -123,12 +123,6 @@ double QGP_LO::rhoV(double omega,double k,double ksq, double T,double muB){
     double ps2 = l1f((kplus - muq)/T) - l1f((abs(kminus) - muq)/T) + l1f((kplus + muq)/T) - l1f((abs(kminus) + muq)/T);
     double ps3 = k*heaviside(kminus);
 
-
-    // if(ps2<0.0)
-    //     printf("WARNING, negative ps2...\n");
-    // if(ps3<0.0)
-    //     printf("WARNING, negative ps3...\n");
-
     return ps1*(T*ps2 + ps3);
 }
 
@@ -136,10 +130,10 @@ double QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,do
     // omega = q^0, q = magnitude of 3-vec q, T = temperature, muB = Baryon chemical potential, m_ell2 = the lepton mass squared
     double alphaEM = 1./137.;
     double C_EM = 2./3.;
-    double eps = 1e-12;
-    if(abs(qsq)<eps){
-        qsq += eps;
-    }
+
+    // if(abs(qsq)<eps){
+    //     qsq = eps;
+    // }
 
     double rate = C_EM*pow(alphaEM,2)*nB(omega/T)*Bfun(m_ell2/qsq)*rhoV(omega,q,qsq,T,muB)/(3.*pow(M_PI,3)*qsq);
 
@@ -147,97 +141,23 @@ double QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,do
 }
 
 
-// PRC. 93, 044902, 2016
-void QGP_LO::analyticRates(double T, double muB, std::vector<double> &Eq, double *M_ll,
-            std::vector<double> &eqrate_ptr, int nm, int np, int nphi, int nrapidity) {
-
-    double prefac = 1./pow(hbarC, 4);
-    double me = 0.0051;
-    double m_ell2 = me * me;
-
-    int idx = 0;
-
-    #pragma omp parallel for collapse(4)
-    for (int k = 0; k < nrapidity; k++) {
-        for (int m = 0; m < nphi; m++) {
-            for (int l = 0; l < np; l++) {
-                for (int j = 0; j < nm; j++) {
-
-                    double M = M_ll[j];
-                    double M2 = M*M;
-                    double E = Eq[idx];
-                    double p = sqrt(E*E - M2);
-
-                    eqrate_ptr[idx] = prefac*fmuB_rate(E,p,M2,T,muB,m_ell2);
-
-                    idx++;
-                }
-            }
-        }
-    }
-}
-
-void QGP_LO::analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp,
-        std::vector<double> &Eq, double *M_ll, std::vector<double> &diffrate_ptr, 
-        int nm, int np, int nphi, int nrapidity){
-
-    double me = 0.0051;
-    double m_ell2 = me * me;
-
-    int idx = 0;
-
-    #pragma omp parallel for collapse(4)
-    for (int k = 0; k < nrapidity; k++) {
-        for (int m = 0; m < nphi; m++) {
-            for (int l = 0; l < np; l++) {
-                for (int j = 0; j < nm; j++) {
-
-                    double M = M_ll[j];
-                    double M2 = M*M;
-                    double E = Eq[idx];
-                    double p = sqrt(E*E - M2);// magnitude of 3-vec p in LRF
-
-                    diffrate_ptr[idx] = a1(E, p, M2, T, muB, m_ell2, rhoB_over_eplusp);
-
-                    idx++;
-                }
-            }
-        }
-    }
-}
-
-
-void QGP_LO::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, 
-    std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, std::vector<double> &diffrate_ptr, 
-        int nm, int np, int nphi, int nrapidity, int include_diff_deltaf){
+void QGP_LO::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, double Eq, 
+    double M_ll, double &eqrate_ptr, double &diffrate_ptr, int include_diff_deltaf){
 
     double me = 0.0051;
     double m_ell2 = me * me;
     double prefac = 1./pow(hbarC, 4);
 
-    int idx = 0;
+    double M2 = M_ll*M_ll;
+    double p = sqrt(Eq*Eq - M2);// magnitude of 3-vec p in LRF
 
-    #pragma omp parallel for collapse(4)
-    for (int k = 0; k < nrapidity; k++) {
-        for (int m = 0; m < nphi; m++) {
-            for (int l = 0; l < np; l++) {
-                for (int j = 0; j < nm; j++) {
+    // equilibrium rate
+    eqrate_ptr= prefac*fmuB_rate(Eq,p,M2,T,muB,m_ell2);
 
-                    double M = M_ll[j];
-                    double M2 = M*M;
-                    double E = Eq[idx];
-                    double p = sqrt(E*E - M2);// magnitude of 3-vec p in LRF
+    // diffusion correction
+    if(include_diff_deltaf==1)
+        diffrate_ptr = a1(Eq, p, M2, T, muB, m_ell2, rhoB_over_eplusp);
+    else
+        diffrate_ptr = 0.0;
 
-                    eqrate_ptr[idx] = prefac*fmuB_rate(E,p,M2,T,muB,m_ell2);
-
-                    if(include_diff_deltaf==1)
-                        diffrate_ptr[idx] = a1(E, p, M2, T, muB, m_ell2, rhoB_over_eplusp);
-                    else
-                        diffrate_ptr[idx] = 0.0;
-
-                    idx++;
-                }
-            }
-        }
-    }
 }

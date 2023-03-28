@@ -56,23 +56,16 @@ class ThermalPhoton {
 
     double ****dNd2pTdphidy_eq, ***dNd2pTdphidy_vis, ****dNd2pTdphidy_tot;
     double ***dNd2pTdphidy_bulkvis, ****dNd2pTdphidy_diff;
-    double ***dNd2pTdphidy_vis_deltaf_restricted;
-    double ***dNd2pTdphidy_bulkvis_deltaf_restricted;
 
     double **vnpT_cos_eq, **vnpT_sin_eq;
     double ***vnypT_cos_eq, ***vnypT_sin_eq;
+
     double **vnpT_cos_vis, **vnpT_sin_vis;
     double ***vnypT_cos_vis, ***vnypT_sin_vis;
-    double **vnpT_cos_vis_deltaf_restricted;
-    double **vnpT_sin_vis_deltaf_restricted;
-    double ***vnypT_cos_vis_deltaf_restricted;
-    double ***vnypT_sin_vis_deltaf_restricted;
+
     double **vnpT_cos_bulkvis, **vnpT_sin_bulkvis;
     double ***vnypT_cos_bulkvis, ***vnypT_sin_bulkvis;
-    double **vnpT_cos_bulkvis_deltaf_restricted;
-    double **vnpT_sin_bulkvis_deltaf_restricted;
-    double ***vnypT_cos_bulkvis_deltaf_restricted;
-    double ***vnypT_sin_bulkvis_deltaf_restricted;
+
     double **vnpT_cos_tot, **vnpT_sin_tot;
     double ***vnypT_cos_tot, ***vnypT_sin_tot;
 
@@ -80,19 +73,15 @@ class ThermalPhoton {
     std::vector<double> vn_sin_eq;
     std::vector<double> vn_cos_vis;
     std::vector<double> vn_sin_vis;
-    std::vector<double> vn_cos_vis_deltaf_restricted;
-    std::vector<double> vn_sin_vis_deltaf_restricted;
     std::vector<double> vn_cos_bulkvis;
     std::vector<double> vn_sin_bulkvis;
-    std::vector<double> vn_cos_bulkvis_deltaf_restricted;
-    std::vector<double> vn_sin_bulkvis_deltaf_restricted;
     std::vector<double> vn_cos_tot;
     std::vector<double> vn_sin_tot;
 
     // matrix for cuts on temperature and proper time
-    int nTcut, nTaucut;
+    int nTcut, n_tau_cut;
     double Tcut_high, Tcut_low;
-    double Taucut_high, Taucut_low;
+    double tau_cut_high, tau_cut_low;
     double ******dNd2pTdphidydTdtau_eq, ******dNd2pTdphidydTdtau_tot;
     // double *****dNd2pTdphidydTdtau_vis, *****dNd2pTdphidydTdtau_bulkvis;
     double ******dNd2pTdphidydTdtau_diff;
@@ -104,20 +93,6 @@ class ThermalPhoton {
     // double ***vndTdtau_cos_bulkvis, ***vndTdtau_sin_bulkvis;
     double ****vndTdtau_cos_diff, ****vndTdtau_sin_diff;
     double ****vndTdtau_cos_tot, ****vndTdtau_sin_tot;
-
-    // matrix for cuts on x and proper time
-    int n_xperp_cut, n_tau_cut_xtau;
-    double xperp_high, xperp_low;
-    double tau_cut_high, tau_cut_low;
-    double *****dNd2pTdphidydxperpdtau_eq, *****dNd2pTdphidydxperpdtau_tot;
-    double *****dNd2pTdphidydxperpdtau_vis;
-    double *****dNd2pTdphidydxperpdtau_bulkvis;
-    double **dNdydxperpdtau_eq, **dNdydxperpdtau_tot;
-    double **dNdydxperpdtau_vis, **dNdydxperpdtau_bulkvis;
-    double ***vndxperpdtau_cos_eq, ***vndxperpdtau_sin_eq;
-    double ***vndxperpdtau_cos_vis, ***vndxperpdtau_sin_vis;
-    double ***vndxperpdtau_cos_bulkvis, ***vndxperpdtau_sin_bulkvis;
-    double ***vndxperpdtau_cos_tot, ***vndxperpdtau_sin_tot;
 
  public:
     ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
@@ -143,68 +118,23 @@ class ThermalPhoton {
     double getDileptonMass(int i) {return(M[i]);}
     double getPhotontheta(int i) {return(theta[i]);}
     double getPhotonrapidity(int i) {return(y[i]);}
-    double getPhotonSpMatrix_eq(int i, int j, int k, int l) {
-        return(dNd2pTdphidy_eq[i][j][k][l]);
-    }
-    double getPhotonSpMatrix_tot(int i, int j, int k, int l) {
-        return(dNd2pTdphidy_tot[i][j][k][l]);
-    }
 
     virtual void analyticRates(double T, double muB, std::vector<double> &Eq,
         double *M_ll, std::vector<double> &eqrate_ptr, int nm,
         int np, int nphi, int nrapidity);
-    virtual void NetBaryonCorrection(double T, double muB,
-                                     std::vector<double> &Eq,
-                                     std::vector<double> &eqrate_ptr) {}
-
     virtual void analyticRatesShearVis(double T, std::vector<double> &Eq,
         double *M_ll, std::vector<double> &eqrate_ptr);
     virtual void analyticRatesBulkVis(double T, std::vector<double> &Eq,
         double *M_ll, std::vector<double> &eqrate_ptr);
-    virtual void analyticRatesDiffusion(double T, double muB, double rhoB_over_eplusp,
-        std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
-        int nm, int np, int nphi, int nrapidity);
-    virtual void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, 
-        std::vector<double> &Eq, double *M_ll, std::vector<double> &eqrate_ptr, 
-        std::vector<double> &diffrate_ptr, int nm, int np, int nphi, int nrapidity,
-        int include_diff_deltaf);
+    virtual void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, double Eq, 
+    double M_ll, double &eqrate_ptr, double &diffrate_ptr, int include_diff_deltaf);
 
-    void getPhotonemissionRate(std::vector<double> &Eq,
-                               double *M_ll,
-                               std::vector<double> &pi_zz,
-                               std::vector<double> &bulkPi,
-                               std::vector<double> &diff_factor,
-                               const double T, const double muB,
-                               const double rhoB_over_eplusp,
-                               std::vector<double> &eqrate_ptr,
-                               std::vector<double> &visrate_ptr,
-                               std::vector<double> &bulkvis_ptr,
-                               std::vector<double> &diffrate_ptr);
-    void calThermalPhotonemission(
-        std::vector<double> &Eq, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, int Tb_length, double T,
-        std::vector<double> &volume, double fraction);
-    void calThermalPhotonemission_3d(
-        std::vector<double> &Eq, double *M_ll, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, std::vector<double> &diff_factor, double T, double muB, 
-        double rhoB_over_eplusp, double volume, double fraction);
-    void calThermalPhotonemissiondTdtau(
-        std::vector<double> &Eq, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, int Tb_length, double T, double tau,
-        std::vector<double> &volume, double fraction);
-    void calThermalPhotonemissiondTdtau_3d(
-        std::vector<double> &Eq, double *M_ll, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, std::vector<double> &diff_factor, double T, double muB, 
-        double rhoB_over_eplusp, double tau, double volume, double fraction);
-    void calThermalPhotonemissiondxperpdtau(
-        std::vector<double> &Eq, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, int Tb_length,
-        double T, double x_local, double tau,
-        std::vector<double> &volume, double fraction);
-    void calThermalPhotonemissiondxperpdtau_3d(
-        std::vector<double> &Eq, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, double T, double muB,
-        double x_local, double tau, double volume, double fraction);
+    void getPhotonemissionRate(double Eq, double M_ll, double pi_zz, double bulkPi,
+        double diff_factor, double T, double muB, double rhoB_over_eplusp, double &eqrate_ptr, 
+        double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr);
+    void calThermalPhotonemission_3d(double Eq, double M_ll, double pi_zz, double bulkPi, 
+        double diff_factor, double T, double muB, double rhoB_over_eplusp, double volume, double fraction,
+        double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot);
 
     void calPhoton_SpvnpT(double ***dNd2pTdphipy,
                           double ***vnypT_cos, double *** vnypT_sin,
@@ -213,7 +143,8 @@ class ThermalPhoton {
                           std::vector<double> &vn_sin);
     void calPhoton_SpvnpT_shell();
     void calPhoton_SpvnpT_dTdtau();
-    void calPhoton_SpvnpT_dxperpdtau();
+    void calPhoton_SpMatrix_dTdtau(double ******dNd2pTdphidydTdtau_eq, 
+            double ******dNd2pTdphidydTdtau_tot, double ******dNd2pTdphidydTdtau_diff);
     void outputPhoton_SpvnpT(std::string path, std::string type_str,
                              double ***dNd2pTdphidy,
                              double ***vnypT_cos, double ***vnypT_sin,
@@ -222,13 +153,9 @@ class ThermalPhoton {
                              std::vector<double> &vn_sin);
     void outputPhoton_SpvnpT_shell(std::string path);
     void outputPhoton_SpvnpT_dTdtau(std::string path);
-    void outputPhoton_SpvnpT_dxperpdtau(std::string path);
     void outputPhoton_spectra_dTdtau(std::string path);
     void interpolation2D_bilinear(double varX, std::vector<double> &varY,
                                   double** Table2D_ptr,
                                   std::vector<double> &results);
-
-    void update_rates_with_polyakov_suppression();
-    double get_polyakov_suppression_factor(double T_in_GeV);
 };
 #endif  // SRC_THERMALPHOTON_H_

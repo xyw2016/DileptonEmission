@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <memory>
+#include <omp.h>
 
 #include "./PhotonEmission.h"
 #include "./Hydroinfo_h5.h"
@@ -33,6 +34,12 @@ int main(int argc, char** argv) {
     Stopwatch sw;
 
     sw.tic();
+    cout << "----------------------------------------" << endl;
+#ifdef _OPENMP   
+    double start_time, end_time;
+    start_time = omp_get_wtime();
+    printf("OpenMP acceleration is on...\n");
+#endif
     std::shared_ptr<ParameterReader> paraRdr(new ParameterReader());
     paraRdr->readFromFile("parameters.dat");
     paraRdr->readFromArguments(argc, argv);
@@ -49,47 +56,14 @@ int main(int argc, char** argv) {
 
     // initialize hydro medium
     int hydro_flag = paraRdr->getVal("hydro_flag");
-    // if (hydro_flag == 0) {
-    //     int bufferSize = paraRdr->getVal("HydroinfoBuffersize");
-    //     int hydroInfoVisflag = paraRdr->getVal("HydroinfoVisflag");
-    //     // hydro data file pointer
-    //     HydroinfoH5* hydroinfo_ptr = new HydroinfoH5(
-    //                     "results/JetData.h5", bufferSize, hydroInfoVisflag);
-    //     // calculate thermal photons from the hydro medium
-    //     thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
-    //                                      etaweight_ptr);
-    //     delete hydroinfo_ptr;
-    // } else if (hydro_flag == 1) {
-    //     Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
-    //     int hydro_mode = 8;
-    //     int nskip_tau = paraRdr->getVal("hydro_nskip_tau");
-    //     hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
-    //     // calculate thermal photons from the hydro medium
-    //     thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
-    //                                      etaweight_ptr);
-    //     delete hydroinfo_ptr;
-    // } else if (hydro_flag == 3) {
-    //     Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
-    //     int hydro_mode = 9;
-    //     int nskip_tau = paraRdr->getVal("hydro_nskip_tau");
-    //     hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
-    //     // calculate thermal photons from the hydro medium
-    //     thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
-    //                                      etaweight_ptr);
-    //     delete hydroinfo_ptr;
-    // } else 
+
     if (hydro_flag == 2) {
         Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
         int hydro_mode = 12;
         int nskip_tau = 1;
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
-        // if (hydroinfo_ptr->isBoostInvariant()) {
-        //     thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
-        //                                      etaweight_ptr);
-        // } else {
-            thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
-        // }
+        thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
         delete hydroinfo_ptr;
     } else {
         cout << "main: unrecognized hydro_flag = " << hydro_flag << endl;
@@ -98,7 +72,6 @@ int main(int argc, char** argv) {
 
     // sum up all channels and compute thermal photon spectra and vn
     thermalPhotons.calPhoton_SpvnpT_individualchannel();
-    thermalPhotons.calPhoton_total_SpMatrix();
     thermalPhotons.calPhoton_total_Spvn();
 
     // output results
@@ -107,6 +80,11 @@ int main(int argc, char** argv) {
 
     sw.toc();
     cout << "totally takes : " << sw.takeTime() << " seconds." << endl;
+#ifdef _OPENMP
+    end_time = omp_get_wtime();
+    double total_time = end_time - start_time;
+    printf("Total CPU time: %f seconds. Bye!\n", total_time);
+#endif
 
     // clean up
     delete [] eta_ptr;
