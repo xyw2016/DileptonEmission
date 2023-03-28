@@ -312,6 +312,21 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double temp_inv = 1/temp_local;
             double rhoB_over_eplusp = rhoB_local/(ed_local+pd_local);
 
+            // if muB is off, muB is set to a tiny value
+            if(turn_on_muB_==0)
+                muB_local = eps;
+
+            // validation setup
+            if(CODE_TEST==1){
+                temp_local = 0.25;
+                temp_inv = 1/temp_local;
+                muB_local = 0.9;
+                rhoB_over_eplusp = 8.0;
+                volume = 1.0;
+                eta_local = 0.0;
+                turn_off_transverse_flow = 1;
+            }
+
             // fluid cell is out of interest
             if (temp_local < T_dec || temp_local > T_cuthigh || temp_local < T_cutlow)
                 continue;
@@ -329,20 +344,6 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                 ux = fluidCellptr.ux;
                 uy = fluidCellptr.uy;
                 ueta = fluidCellptr.ueta;
-            }
-
-
-            // validation setup
-            if(CODE_TEST){
-                temp_local = 0.25;
-                temp_inv = 1/temp_local;
-                muB_local = 0.9;
-                rhoB_over_eplusp = 8.0;
-                volume = 1.0;
-                eta_local = 0.0;
-                ux = 0.0;
-                uy = 0.0;
-                ueta = 0.0;
             }
 
             double utau = sqrt(1. + ux*ux + uy*uy + ueta*ueta);
@@ -456,7 +457,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             double diff_dot_p = qtau*p_lab_local[0] - qx*p_lab_local[1] 
                                                 - qy*p_lab_local[2] - qeta*p_lab_local[3];
                             // validation setup
-                            if(CODE_TEST){
+                            if(CODE_TEST==1){
                                 diff_dot_p = 1.0;
                             }
                             

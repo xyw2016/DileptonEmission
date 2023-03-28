@@ -48,7 +48,12 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     bBulkVisCorr_  = false;
     bDiffusionCorr_  = false;
 
-    include_diff_deltaf = paraRdr->getVal("include_baryondiff_deltaf"); 
+    turn_on_muB_ = static_cast<int>(paraRdr->getVal("turn_on_muB", 1));
+    include_diff_deltaf = paraRdr->getVal("include_baryondiff_deltaf");
+
+    // if muB is off, no need to include diffusion correction
+    if(turn_on_muB_==0)
+    	include_diff_deltaf = 0;
 
     //initial variables for photon spectra 
     double p_i = paraRdr->getVal("photon_q_i"); 

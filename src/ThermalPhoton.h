@@ -29,6 +29,7 @@ class ThermalPhoton {
     bool bDiffusionCorr_;
 
     int include_diff_deltaf;
+    int turn_on_muB_;
 
     // photon emission rate
     std::unique_ptr<Table2D> Photonemission_eqrateTable_ptr;

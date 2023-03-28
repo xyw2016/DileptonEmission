@@ -25,9 +25,6 @@ double QGP_LO::cross_sec(double omega, double q, double qsq, double m_ell2){
     double C_EM = 2./3.;
     double Nc = 3.;
 
-    // if(abs(qsq)<eps){
-    //     qsq = eps;
-    // }
     return Nc*C_EM*(4.* M_PI/3.)*(pow(alphaEM,2)/qsq)*Bfun(m_ell2/qsq);
 }
 
@@ -76,9 +73,6 @@ double QGP_LO::a1(double omega,double q,double qsq,double T,double muB,double m_
     // note that the factor T*qsq/(4.*pow((2.*M_PI),5)*pow(q,3)) is not included in a1 here.
     
     double muq = muB/3.;
-    // if(fabs(qsq)<eps){
-    //     qsq = eps;
-    // }
     double sigma = cross_sec(omega,q,qsq,m_ell2);
     //double ps1 = T*qsq*sigma/(4.*pow((2.*M_PI),5)*pow(q,3));
     double ps2 = 2*omega*nB_o_epp*pow(T,3)*intJn(1,omega/T,q/T,muq/T) - pow(T,2)*(qsq*nB_o_epp + 2.*omega/3.)*intJn(0,omega/T,q/T,muq/T) 
@@ -112,9 +106,6 @@ double QGP_LO::nB(double x){
 double QGP_LO::rhoV(double omega,double k,double ksq, double T,double muB){
     // k is the magnitude of 3-vec k
 
-    // if(abs(ksq)<eps){
-    //     ksq = eps;
-    // }
     double kplus = (omega + k)*0.5;
     double kminus = (omega - k)*0.5;
     double muq = muB/3.;
@@ -130,10 +121,6 @@ double QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,do
     // omega = q^0, q = magnitude of 3-vec q, T = temperature, muB = Baryon chemical potential, m_ell2 = the lepton mass squared
     double alphaEM = 1./137.;
     double C_EM = 2./3.;
-
-    // if(abs(qsq)<eps){
-    //     qsq = eps;
-    // }
 
     double rate = C_EM*pow(alphaEM,2)*nB(omega/T)*Bfun(m_ell2/qsq)*rhoV(omega,q,qsq,T,muB)/(3.*pow(M_PI,3)*qsq);
 
