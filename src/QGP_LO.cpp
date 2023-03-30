@@ -3,6 +3,7 @@
 #include <cmath>
 
 using PhysConsts::hbarC;
+using PhysConsts::alphaEM;
 using PhysConsts::eps;
 
 QGP_LO::QGP_LO(
@@ -21,7 +22,6 @@ double QGP_LO::Bfun(double x){
 }
 
 double QGP_LO::cross_sec(double omega, double q, double qsq, double m_ell2){
-    double alphaEM = 1./137.035999;
     double C_EM = 2./3.;
     double Nc = 3.;
 
@@ -119,7 +119,6 @@ double QGP_LO::rhoV(double omega,double k,double ksq, double T,double muB){
 
 double QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,double m_ell2){
     // omega = q^0, q = magnitude of 3-vec q, T = temperature, muB = Baryon chemical potential, m_ell2 = the lepton mass squared
-    double alphaEM = 1./137.;
     double C_EM = 2./3.;
 
     double rate = C_EM*pow(alphaEM,2)*nB(omega/T)*Bfun(m_ell2/qsq)*rhoV(omega,q,qsq,T,muB)/(3.*pow(M_PI,3)*qsq);

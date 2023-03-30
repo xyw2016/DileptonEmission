@@ -381,6 +381,8 @@ void ThermalPhoton::calThermalPhotonemission_3d(double Eq, double M_ll, double p
 }
 
 
+// functions to get distributions in T and tau; contributions from all channels are included
+
 void ThermalPhoton::calPhoton_SpMatrix_dTdtau(double ******dNd2pTdphidydTdtau_eq_temp, 
             double ******dNd2pTdphidydTdtau_tot_temp, double ******dNd2pTdphidydTdtau_diff_temp) {
     //#pragma omp parallel for collapse(4)
@@ -401,27 +403,20 @@ void ThermalPhoton::calPhoton_SpMatrix_dTdtau(double ******dNd2pTdphidydTdtau_eq
 	}
 }
 
+
 void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
     // calculate the inverse slope of the photon spectra at T-tau interval
     ostringstream filename_SpdTdtau_eq;
-    // ostringstream filename_SpdTdtau_vis;
-    // ostringstream filename_SpdTdtau_bulkvis;
     ostringstream filename_SpdTdtau_diff;
     ostringstream filename_SpdTdtau_tot;
     filename_SpdTdtau_eq 	<< path << emissionProcess_name
                          	<< "_SpdTdtau_eq.dat";
-    // filename_SpdTdtau_vis << path << emissionProcess_name
-    //                       << "_SpdTdtau_vis.dat";
-    // filename_SpdTdtau_bulkvis << path << emissionProcess_name
-    //                           << "_SpdTdtau_bulkvis.dat";
     filename_SpdTdtau_diff 	<< path << emissionProcess_name
                           	<< "_SpdTdtau_diff.dat";
     filename_SpdTdtau_tot 	<< path << emissionProcess_name
                           	<< "_SpdTdtau_tot.dat";
 
     ofstream ofeq(filename_SpdTdtau_eq.str().c_str());
-    // ofstream ofvis(filename_SpdTdtau_vis.str().c_str());
-    // ofstream ofbulkvis(filename_SpdTdtau_bulkvis.str().c_str());
     ofstream ofdiff(filename_SpdTdtau_diff.str().c_str());
     ofstream oftot(filename_SpdTdtau_tot.str().c_str());
 
@@ -436,18 +431,12 @@ void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
             for (int m = 0; m < nm; m++) {
             	ofeq 	<< scientific << setw(18) << setprecision(8) 
                  		<< T_local << "   "  << tau_local << "   ";
-	            // ofvis << scientific << setw(18) << setprecision(8) 
-	            //       << T_local << "   "  << tau_local << "   ";
-	            // ofbulkvis << scientific << setw(18) << setprecision(8) 
-	            //           << T_local << "   "  << tau_local << "   ";
 	            ofdiff 	<< scientific << setw(18) << setprecision(8) 
 	                   	<< T_local << "   "  << tau_local << "   ";
 	            oftot 	<< scientific << setw(18) << setprecision(8) 
 	                  	<< T_local << "   "  << tau_local << "   ";
                 for (int k = 0; k < np; k++) {
                     double temp_dNdypTdpT_eq = 0.0;
-                    // double temp_dNdypTdpT_vis = 0.0;
-                    // double temp_dNdypTdpT_bulkvis = 0.0;
                     double temp_dNdypTdpT_diff = 0.0;
                     double temp_dNdypTdpT_tot = 0.0;
                     for (int l = 0; l < nphi; l++) {
@@ -455,12 +444,6 @@ void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
                             temp_dNdypTdpT_eq += (
                                     dNd2pTdphidydTdtau_eq[i][j][m][k][l][irap]
                                     *phi_weight[l]*dy);
-                            // temp_dNdypTdpT_vis += (
-                            //         dNd2pTdphidydTdtau_vis[i][j][m][k][l][irap]
-                            //         *phi_weight[l]*dy);
-                            // temp_dNdypTdpT_bulkvis += (
-                            //         dNd2pTdphidydTdtau_bulkvis[i][j][m][k][l][irap]
-                            //         *phi_weight[l]*dy);
                             temp_dNdypTdpT_diff += (
                                     dNd2pTdphidydTdtau_diff[i][j][m][k][l][irap]
                                     *phi_weight[l]*dy);
@@ -470,22 +453,17 @@ void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
                         }
                     }
                     ofeq << temp_dNdypTdpT_eq << "   ";
-                    // ofvis << temp_dNdypTdpT_vis << "   ";
-                    // ofbulkvis << temp_dNdypTdpT_bulkvis << "   ";
                     ofdiff << temp_dNdypTdpT_diff << "   ";
                     oftot << temp_dNdypTdpT_tot << "   ";
                 }
                 ofeq << endl;
-                // ofvis << endl;
-                // ofbulkvis << endl;
                 ofdiff << endl;
                 oftot << endl;
             }
         }
     }
+
     ofeq.close();
-    // ofvis.close();
-    // ofbulkvis.close();
     ofdiff.close();
     oftot.close();
 }
@@ -721,6 +699,8 @@ void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
 }
 
 
+// pT-integrated and pT-differential spectra and flows for individual channels
+
 // void ThermalPhoton::calPhoton_SpvnpT(
 //         double ***dNd2pTdphidy, double ***vnypT_cos, double ***vnypT_sin,
 //         double **vnpT_cos, double **vnpT_sin,
@@ -768,37 +748,6 @@ void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
 //         vn_cos[order] /= (vn_cos[0] + eps);
 //         vn_sin[order] /= (vn_cos[0] + eps);
 //     }
-// }
-
-// for individual channels
-// void ThermalPhoton::calPhoton_SpvnpT_shell() {
-//     calPhoton_SpvnpT(dNd2pTdphidy_eq, vnypT_cos_eq, vnypT_sin_eq,
-//                      vnpT_cos_eq, vnpT_sin_eq,
-//                      vn_cos_eq, vn_sin_eq);
-//     calPhoton_SpvnpT(dNd2pTdphidy_vis, vnypT_cos_vis, vnypT_sin_vis,
-//                      vnpT_cos_vis, vnpT_sin_vis,
-//                      vn_cos_vis, vn_sin_vis);
-//     calPhoton_SpvnpT(dNd2pTdphidy_vis_deltaf_restricted,
-//                      vnypT_cos_vis_deltaf_restricted,
-//                      vnypT_sin_vis_deltaf_restricted,
-//                      vnpT_cos_vis_deltaf_restricted,
-//                      vnpT_sin_vis_deltaf_restricted,
-//                      vn_cos_vis_deltaf_restricted,
-//                      vn_sin_vis_deltaf_restricted);
-//     calPhoton_SpvnpT(dNd2pTdphidy_bulkvis,
-//                      vnypT_cos_bulkvis, vnypT_sin_bulkvis,
-//                      vnpT_cos_bulkvis, vnpT_sin_bulkvis,
-//                      vn_cos_bulkvis, vn_sin_bulkvis);
-//     calPhoton_SpvnpT(dNd2pTdphidy_bulkvis_deltaf_restricted,
-//                      vnypT_cos_bulkvis_deltaf_restricted,
-//                      vnypT_sin_bulkvis_deltaf_restricted,
-//                      vnpT_cos_bulkvis_deltaf_restricted,
-//                      vnpT_sin_bulkvis_deltaf_restricted,
-//                      vn_cos_bulkvis_deltaf_restricted,
-//                      vn_sin_bulkvis_deltaf_restricted);
-//     calPhoton_SpvnpT(dNd2pTdphidy_tot, vnypT_cos_tot, vnypT_sin_tot,
-//                      vnpT_cos_tot, vnpT_sin_tot,
-//                      vn_cos_tot, vn_sin_tot);
 // }
 
 
@@ -858,6 +807,22 @@ void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
 // }
 
 
+// void ThermalPhoton::calPhoton_SpvnpT_shell() {
+//     calPhoton_SpvnpT(dNd2pTdphidy_eq, vnypT_cos_eq, vnypT_sin_eq,
+//                      vnpT_cos_eq, vnpT_sin_eq,
+//                      vn_cos_eq, vn_sin_eq);
+//     calPhoton_SpvnpT(dNd2pTdphidy_vis, vnypT_cos_vis, vnypT_sin_vis,
+//                      vnpT_cos_vis, vnpT_sin_vis,
+//                      vn_cos_vis, vn_sin_vis);
+//     calPhoton_SpvnpT(dNd2pTdphidy_bulkvis,
+//                      vnypT_cos_bulkvis, vnypT_sin_bulkvis,
+//                      vnpT_cos_bulkvis, vnpT_sin_bulkvis,
+//                      vn_cos_bulkvis, vn_sin_bulkvis);
+//     calPhoton_SpvnpT(dNd2pTdphidy_tot, vnypT_cos_tot, vnypT_sin_tot,
+//                      vnpT_cos_tot, vnpT_sin_tot,
+//                      vn_cos_tot, vn_sin_tot);
+// }
+
 
 // void ThermalPhoton::outputPhoton_SpvnpT_shell(string path) {
 //     outputPhoton_SpvnpT(path, "eq", dNd2pTdphidy_eq,
@@ -872,28 +837,11 @@ void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
 //                         vnypT_cos_bulkvis, vnypT_sin_bulkvis,
 //                         vnpT_cos_bulkvis, vnpT_sin_bulkvis,
 //                         vn_cos_bulkvis, vn_sin_bulkvis);
-//     outputPhoton_SpvnpT(path, "vis_deltaf_restricted",
-//                         dNd2pTdphidy_vis_deltaf_restricted,
-//                         vnypT_cos_vis_deltaf_restricted,
-//                         vnypT_sin_vis_deltaf_restricted,
-//                         vnpT_cos_vis_deltaf_restricted,
-//                         vnpT_sin_vis_deltaf_restricted,
-//                         vn_cos_vis_deltaf_restricted,
-//                         vn_sin_vis_deltaf_restricted);
-//     outputPhoton_SpvnpT(path, "bulkvis_deltaf_restricted",
-//                         dNd2pTdphidy_bulkvis_deltaf_restricted,
-//                         vnypT_cos_bulkvis_deltaf_restricted,
-//                         vnypT_sin_bulkvis_deltaf_restricted,
-//                         vnpT_cos_bulkvis_deltaf_restricted,
-//                         vnpT_sin_bulkvis_deltaf_restricted,
-//                         vn_cos_bulkvis_deltaf_restricted,
-//                         vn_sin_bulkvis_deltaf_restricted);
 //     outputPhoton_SpvnpT(path, "tot", dNd2pTdphidy_tot,
 //                         vnypT_cos_tot, vnypT_sin_tot,
 //                         vnpT_cos_tot, vnpT_sin_tot,
 //                         vn_cos_tot, vn_sin_tot);
 // }
-
 
 
 // //! this function is used the most frequent one,
