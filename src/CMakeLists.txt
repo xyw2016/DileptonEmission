@@ -19,7 +19,7 @@ if (link_with_lib)
     target_link_libraries(${exename} ${libname} ${HDF5_LIBRARIES})
 else (link_with_lib)
     add_executable(${exename} main.cpp ${SOURCES})
-    target_link_libraries(${exename} ${HDF5_LIBRARIES})
+    target_link_libraries(${exename} ${libname} ${HDF5_LIBRARIES})
 endif (link_with_lib)
 
 install(TARGETS ${exename} ${libname}

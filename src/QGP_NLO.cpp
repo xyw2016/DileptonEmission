@@ -5,7 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <math.h>
-//#include <gsl/gsl_sf_fermi_dirac.h>
+#include <gsl/gsl_sf_fermi_dirac.h>
 #include "data_struct.h"
 #include "ThermalPhoton.h"
 #include "QGP_NLO.h"
@@ -36,9 +36,9 @@ double Cf=((Nc)*(Nc)-1)/(2.*Nc);
 
 double nF(double x)  { double e=exp(-x); return e/(1.+e); };
 double nB(double x)  { double e=exp(-x); return e/(1.-e); };
-double l1f(double x) { return 0.0; }//+gsl_sf_fermi_dirac_0(-x); }
-double l2f(double x) { return 0.0; }//-gsl_sf_fermi_dirac_1(-x); }
-double l3f(double x) { return 0.0; }//-gsl_sf_fermi_dirac_2(-x); }
+double l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
+double l2f(double x) { return -gsl_sf_fermi_dirac_1(-x); }
+double l3f(double x) { return -gsl_sf_fermi_dirac_2(-x); }
 
 void rho_LO(double o, double k, double mu, double &rT, double &rL) { 
   // leading order result, see (2.4) of 1910.09567

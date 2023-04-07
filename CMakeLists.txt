@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.4)
-project (PhotonEmission LANGUAGES CXX C)
+project (DileptonEmission LANGUAGES CXX C)
 
 set(libname "dilepton_emission")
 set(exename "dilepton_emission.e")
@@ -11,6 +11,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(HDF5 REQUIRED)
 include_directories(${HDF5_INCLUDE_DIRS})
+
+find_package(GSL REQUIRED)
+include_directories(${GSL_INCLUDE_DIRS})
+link_directories(${GSL_LIBRARY_DIRS})
+#LINK_DIRECTORIES(/usr/local/Cellar/gsl/2.7.1/lib)
+#target_link_libraries(dilepton_emission.e GSL::gsl GSL::cblas)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.0)
