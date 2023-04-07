@@ -4,6 +4,9 @@
 namespace PhysConsts {
     const double hbarC = 0.19733;
     const double alphaEM = 1./137.035999;
+    const double alpha_s = .3;
+    const double me = 0.0005109895; // electron mass / GeV
+    const double m_mu = 0.10565837;   // muon mass / GeV
     const double eps = 1.e-15;
 }
 

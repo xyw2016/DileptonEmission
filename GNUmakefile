@@ -1,6 +1,6 @@
-all	: hydro_photonEmission.e
+all	: dilepton_emission.e
 
-hydro_photonEmission.e	:
+dilepton_emission.e	:
 	(cd src; make; make install)
 distclean	:
 	(cd src; make distclean)

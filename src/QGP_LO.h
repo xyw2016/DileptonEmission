@@ -1,5 +1,5 @@
-#ifndef SRC_QGP2TO2TOTAL
-#define SRC_QGP2TO2TOTAL
+#ifndef SRC_QGPLO
+#define SRC_QGPLO
 
 #include <vector>
 #include <memory>

@@ -39,7 +39,7 @@ photon_phi_q_i = 0.0          # the smallest angle of photon momentum
 photon_phi_q_f = 6.2831853    # the largest angle of photon momentum
 photon_y_i = 0.0              # the smallest photon rapidity
 photon_y_f = 0.0              # the largest photon rapidity
-dilepton_mass_i = 0.1         # the smallest dilepton invariant mass
+dilepton_mass_i = 0.5         # the smallest dilepton invariant mass
 dilepton_mass_f = 3.5         # the largest dilepton invariant mass
 
 norder = 3                    # calculate photon vn to norder
@@ -51,7 +51,7 @@ differential_flag = 1        # determine whether to output differential photon y
 tau_start = 1.0              # emission start time (fm)
 tau_end = 11.0               # emission end time (fm)
 n_tau_cut = 20               # number of points in tau (range of tau is specified by tau_start and tau_end)
-T_cuthigh = 0.25             # maximum allowed emission T (GeV)
+T_cuthigh = 0.35             # maximum allowed emission T (GeV)
 T_cutlow = 0.11              # minimum allowed emission T (GeV)
 nTcut = 50                   # number of points in T (range of T is specified by T_cuthigh and T_cutlow)
 dTau = 0.1                   # lattice spacing along tau direction

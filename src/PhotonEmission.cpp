@@ -10,6 +10,7 @@
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
 #include "QGP_LO.h"
+#include "QGP_NLO.h"
 #include "tensor_trans.h"
 #include "PhotonEmission.h"
 #include "ParameterReader.h"
@@ -32,7 +33,7 @@ using TENSORTRANSFORM::lorentz_boost_matrix;
 using PhysConsts::hbarC;
 using PhysConsts::eps;
 
-#define CODE_TEST 0
+#define CODE_TEST 1
 
 PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     paraRdr = paraRdr_in;
@@ -191,16 +192,15 @@ void PhotonEmission::print_hydroGridinfo() {
 
 
 void PhotonEmission::InitializePhotonEmissionRateTables() {
-    double photonrate_tb_Emin = paraRdr->getVal("PhotonemRatetableInfo_Emin");
-    double photonrate_tb_Tmin = paraRdr->getVal("PhotonemRatetableInfo_Tmin");
-    double photonrate_tb_dE = paraRdr->getVal("PhotonemRatetableInfo_dE");
-    double photonrate_tb_dT = paraRdr->getVal("PhotonemRatetableInfo_dT");
 
+    // To use LO analytical form
+    // dilepton_QGP_LO = std::unique_ptr<ThermalPhoton>(
+    //         new QGP_LO(paraRdr, "QGP_LO_total"));
+
+    // To use NLO table
     dilepton_QGP_LO = std::unique_ptr<ThermalPhoton>(
-            new QGP_LO(paraRdr, "QGP_LO_total"));
-    // dilepton_QGP_LO->setupEmissionrateFromFile(
-    //         photonrate_tb_Tmin, photonrate_tb_dT,
-    //         photonrate_tb_Emin, photonrate_tb_dE, true, true);// true for vis corrections
+            new QGP_NLO(paraRdr, "QGP_NLO_total"));
+    dilepton_QGP_LO->readEmissionrateFromFile(true);// true to read in the NLO emission table
 }
 
 
@@ -236,7 +236,6 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double dx = hydroinfo_MUSIC_ptr->get_hydro_dx();
     double deta = hydroinfo_MUSIC_ptr->get_hydro_deta();
     double eta_max = hydroinfo_MUSIC_ptr->get_hydro_eta_max();
-    double X_max = hydroinfo_MUSIC_ptr->get_hydro_x_max();
     double Nskip_x = hydroinfo_MUSIC_ptr->get_hydro_Nskip_x();
     double Nskip_eta = hydroinfo_MUSIC_ptr->get_hydro_Nskip_eta();
     double Nskip_tau = hydroinfo_MUSIC_ptr->get_hydro_Nskip_tau();
@@ -318,9 +317,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
             // validation setup
             if(CODE_TEST==1){
-                temp_local = 0.25;
+                temp_local = 0.3;//0.25;
                 temp_inv = 1/temp_local;
-                muB_local = 0.9;
+                muB_local = 1.0;//0.9;
                 rhoB_over_eplusp = 8.0;
                 volume = 1.0;
                 eta_local = 0.0;

@@ -17,6 +17,8 @@
 #include "ParameterReader.h"
 #include "gauss_quadrature.h"
 #include "Arsenal.h"
+#include "data_struct.h"
+#include "QGP_NLO.h"
 
 using namespace std;
 using ARSENAL::createA2DMatrix;
@@ -30,8 +32,12 @@ using ARSENAL::deleteA4DMatrix;
 using ARSENAL::deleteA5DMatrix;
 using ARSENAL::deleteA6DMatrix;
 
+using PhysConsts::alpha_s;
+using PhysConsts::me;
+
 ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
-                             std::string emissionProcess) {
+                             std::string emissionProcess): grid_T(), grid_L(){
+
     paraRdr = paraRdr_in;
     emissionProcess_name = emissionProcess;
 
@@ -226,82 +232,52 @@ ThermalPhoton::~ThermalPhoton() {
         deleteA6DMatrix(dNd2pTdphidydTdtau_diff, nTcut, n_tau_cut, nm, np, nphi);
         deleteA6DMatrix(dNd2pTdphidydTdtau_tot, nTcut, n_tau_cut, nm, np, nphi);
     }
+
+    deleteA4DMatrix(grid_T.F, grid_T.nx, grid_T.ny, grid_T.nz);
+    deleteA4DMatrix(grid_L.F, grid_L.nx, grid_L.ny, grid_L.nz);
 }
 
 
-void ThermalPhoton::setupEmissionrateFromFile(
-        double Xmin, double dX, double Ymin, double dY,
-        bool bShearVisCorr, bool bBulkVisCorr, bool bDiffusionCorr) {
-    bRateTable_    = true;
-    bShearVisCorr_ = bShearVisCorr;
-    bBulkVisCorr_  = bBulkVisCorr;
-    bDiffusionCorr_  = bDiffusionCorr;
-    EmissionrateTb_Xmin = Xmin;
-    EmissionrateTb_Ymin = Ymin;
-    EmissionrateTb_dX = dX;
-    EmissionrateTb_dY = dY;
-    readEmissionrate(emissionProcess_name);
-}
+void ThermalPhoton::readEmissionrateFromFile(bool bRateTable) {
 
 
-void ThermalPhoton::readEmissionrate(string emissionProcess) {
+	cout << "----------------------------------------" << endl;
+    cout << "-- Read in emission rate table:" << endl;
+    cout << "----------------------------------------" << endl;
 
-    //equilibrium rate
+	bRateTable_ = bRateTable;
+
+    //read in equilibrium rate
     ostringstream eqrate_filename_stream;
     eqrate_filename_stream << rate_path_ << "rate_"
-                           << emissionProcess << "_eqrate.dat";
-    Photonemission_eqrateTable_ptr = std::unique_ptr<Table2D>(
-                        new Table2D(eqrate_filename_stream.str().c_str()));
-    EmissionrateTb_sizeX = Photonemission_eqrateTable_ptr->getTbsizeX();
-    EmissionrateTb_sizeY = Photonemission_eqrateTable_ptr->getTbsizeY();
-    Emission_eqrateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
-                                            EmissionrateTb_sizeY, 0);
+                           << emissionProcess_name << "_eqrate.dat";
 
-    // shear correction
-    if (bShearVisCorr_) {
-        ostringstream visrate_filename_stream;
-        visrate_filename_stream << rate_path_ << "rate_"
-                                << emissionProcess << "_viscous.dat";
-        Photonemission_viscous_rateTable_ptr = std::unique_ptr<Table2D>(
-                    new Table2D(visrate_filename_stream.str().c_str()));
-        Emission_viscous_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
-                                                      EmissionrateTb_sizeY, 0);
-    }
+    string fname = eqrate_filename_stream.str();
 
-    // bulk correction
-    if (bBulkVisCorr_) {
-        ostringstream bulkvisrate_filename_stream;
-        bulkvisrate_filename_stream << rate_path_ << "rate_"
-                                    << emissionProcess << "_bulkvis.dat";
-        Photonemission_bulkvis_rateTable_ptr = std::unique_ptr<Table2D>(
-                    new Table2D(bulkvisrate_filename_stream.str().c_str()));
-        Emission_bulkvis_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
-                                                      EmissionrateTb_sizeY, 0);
-    }
+    initialize(fname, a_list, B_list, M_list, k_list, rhoT_list, rhoL_list);
 
-    EmissionrateTb_Yidxptr.resize(EmissionrateTb_sizeY, 0);
-    for (int i = 0; i < EmissionrateTb_sizeY; i++)
-        EmissionrateTb_Yidxptr[i] = EmissionrateTb_Ymin + i*EmissionrateTb_dY;
+    if (a_list.empty() ||B_list.empty() || M_list.empty() || k_list.empty() || rhoT_list.empty()) {
+	  // Handle the error here
 
-    // take log for the equilibrium emission rates for better
-    // interpolation precisions;
-    // take ratio of viscous rates w.r.t eq. rates for faster performance
-    for (int i = 0; i < EmissionrateTb_sizeX; i++) {
-        for (int j = 0; j < EmissionrateTb_sizeY; j++) {
-            Emission_eqrateTb_ptr[i][j] =
-                log(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30);
-            if (bShearVisCorr_) {
-                Emission_viscous_rateTb_ptr[i][j] = (
-                    Photonemission_viscous_rateTable_ptr->getTbdata(i,j)
-                    /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
-            }
-            if (bBulkVisCorr_) {
-                Emission_bulkvis_rateTb_ptr[i][j] = (
-                    Photonemission_bulkvis_rateTable_ptr->getTbdata(i,j)
-                    /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
-            }
-        }
-    }
+	    printf("Error: the vectors are still empty. Emission rate table was not read properly.\n");
+	  }
+
+  	// Update the tables
+    grid_T = Table(a_list,B_list,M_list,k_list,rhoT_list);
+    grid_L = Table(a_list,B_list,M_list,k_list,rhoL_list);
+
+	// print some details:
+	cout << "-> boundaries of the table ..."  << endl;
+	cout <<   " min alpha: " << grid_T.x_min
+	     << " , max alpha: " << grid_T.x_max << endl;
+	cout <<   " min muB: "   << grid_T.y_min
+	     << " , max muB: "   << grid_T.y_max << endl;
+	cout <<   " min M: "     << grid_T.z_min
+	     << " , max M: "     << grid_T.z_max << endl;
+	cout <<   " min k: "     << grid_T.w_min
+	     << " , max k: "     << grid_T.w_max << endl;
+	cout << " (muB, M and k are given in units of T!)" << endl << endl;
+
 }
 
 
@@ -342,7 +318,17 @@ void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_zz, 
 	double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr) 
 {
 
-    FiniteBaryonRates(T, muB, rhoB_over_eplusp, Eq, M_ll, eqrate_ptr, diffrate_ptr, include_diff_deltaf);
+	if (bRateTable_) {
+        // interpolate NLO equilibrium rate
+        double k = sqrt(Eq*Eq-M_ll*M_ll);
+
+  		eqrate_ptr = rate(grid_T,grid_L,Eq,k,alpha_s,muB,T,me);
+  		diffrate_ptr = 0.;
+
+    } else {
+    	// use LO analytical form
+    	FiniteBaryonRates(T, muB, rhoB_over_eplusp, Eq, M_ll, eqrate_ptr, diffrate_ptr, include_diff_deltaf);
+    }
 
     diffrate_ptr = diff_factor * diffrate_ptr;
 }
@@ -843,71 +829,4 @@ void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
 //                         vn_cos_tot, vn_sin_tot);
 // }
 
-
-// //! this function is used the most frequent one,
-// //! it needs to be as fast as possible
-// void ThermalPhoton::interpolation2D_bilinear(
-//         double varX, vector<double> &varY,
-//         double** Table2D_ptr, vector<double> &results) {
-//     const int Y_length = varY.size();
-//     double varX_min = EmissionrateTb_Xmin;
-//     double varY_min = EmissionrateTb_Ymin;
-//     double dX = EmissionrateTb_dX;
-//     double dY = EmissionrateTb_dY;
-//     //int tb_sizeX = EmissionrateTb_sizeX;
-//     int tb_sizeY = EmissionrateTb_sizeY;
-
-//     double dXdYinverse = 1/(dX*dY);
-//     double dYinverse = 1/dY;
-
-//     int idx_Y;
-//     double f00, f10, f01, f11;
-//     double ddy;
-//     double dYhigh;
-
-//     int idx_X;
-//     double ddx;
-//     double dXhigh;
-//     idx_X  = static_cast<int>((varX-varX_min)/dX);
-//     ddx    = (varX - (varX_min + idx_X*dX));
-//     dXhigh = (dX - ddx)*dXdYinverse;
-//     ddx    = ddx*dXdYinverse;
-
-//     for (int ii = 0; ii < Y_length; ii++) {
-//         idx_Y = static_cast<int>((varY[ii] - varY_min)*dYinverse);
-
-//         //if it is out the table, doing linear extrapolation
-//         //if (idx_X<0 || idx_X>=tb_sizeX-1) {
-//         //    if (Iwarning == 1) {
-//         //        cout << "interpolation2D_bilinear: varX out of bounds!"
-//         //             << endl;
-//         //        cout << "varX= " << varX << "idx_X= " << idx_X <<endl;
-//         //    }
-//         //    if (idx_X < 0)
-//         //        idx_X = 0;
-//         //    if (idx_X >= tb_sizeX-1)
-//         //        idx_X = tb_sizeX - 1;
-//         //}
-
-//         //if (Iwarning == 1) {
-//         //    cout << "interpolation2D_bilinear: varY out of bounds!" << endl;
-//         //    cout << "varY= " << varY << "idx_Y= "<< idx_Y << endl;
-//         //}
-//         if (idx_Y < 0)
-//             idx_Y = 0;
-//         if (idx_Y >= tb_sizeY-1)
-//             idx_Y = tb_sizeY - 2;
-
-//         ddy = varY[ii] - EmissionrateTb_Yidxptr[idx_Y];
-//         dYhigh = dY - ddy;
-
-//         f00 = Table2D_ptr[idx_X][idx_Y];
-//         f10 = Table2D_ptr[idx_X+1][idx_Y];
-//         f01 = Table2D_ptr[idx_X][idx_Y+1];
-//         f11 = Table2D_ptr[idx_X+1][idx_Y+1];
-
-//         results[ii] = (
-//             ((f00*dYhigh + f01*ddy)*dXhigh + (f10*dYhigh + f11*ddy)*ddx));
-//      }
-// }
 

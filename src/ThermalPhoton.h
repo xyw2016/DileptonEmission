@@ -47,6 +47,12 @@ class ThermalPhoton {
     double EmissionrateTb_dX;
     double EmissionrateTb_dY;
 
+    std::vector<double>  a_list; // alpha_s values
+    std::vector<double>  B_list; // chemical potential (muB/T)
+    std::vector<double>  M_list; // invariant mass (units of T)
+    std::vector<double>  k_list; // 3-momentum (k/T), defined in the local rest frame
+    std::vector<double>  rhoT_list, rhoL_list; // rho list
+
     // photon spectra parameters
     std::string emissionProcess_name;
     double *p, *p_weight;
@@ -101,14 +107,9 @@ class ThermalPhoton {
 
     virtual ~ThermalPhoton();
 
-    void setupEmissionrateFromFile(
-            double Xmin, double dX, double Ymin, double dY,
-            bool bShearVisCorr, bool bBulkVisCorr, bool bDiffusionCorr);
-    void readEmissionrate(std::string);
-
-    void setupEmissionrateFromParametrization(
-        double Xmin, double dX, int nX,
-        double Ymin, double dY, int nY);
+    void readEmissionrateFromFile(bool bRateTable);
+    void initialize(std::string fname, std::vector<double> &a_list, std::vector<double> &B_list, std::vector<double> &M_list, 
+        std::vector<double> &k_list, std::vector<double> &rhoT_list, std::vector<double> &rhoL_list);
 
     double get_dy() {return(dy);}
 
@@ -158,5 +159,23 @@ class ThermalPhoton {
     void interpolation2D_bilinear(double varX, std::vector<double> &varY,
                                   double** Table2D_ptr,
                                   std::vector<double> &results);
+
+    struct Table {
+        int nx, ny, nz, nw;
+        double *x, *y, *z, *w, ****F;
+        double x_min, x_max, y_min, y_max, z_min, z_max, w_min, w_max;
+
+        Table() = default;
+        Table(std::vector<double> &_x, std::vector<double> &_y, std::vector<double> &_z, std::vector<double> &_w, std::vector<double> &_F);
+        double interp(double _x, double _y, double _z, double _w);
+        // ~Table();
+    };
+
+    double rate(struct Table grid_T, struct Table grid_L,
+        double o, double k, double alpha_s, double muB, double T, double m_l);
+
+private:
+    Table grid_T;
+    Table grid_L;
 };
 #endif  // SRC_THERMALPHOTON_H_

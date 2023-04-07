@@ -8,6 +8,7 @@ set (SOURCES
      tensor_trans.cpp
      gauss_quadrature.cpp
      Hydroinfo_MUSIC.cpp
+     QGP_NLO.cpp
      QGP_LO.cpp
     )
 
