@@ -1,5 +1,5 @@
-#ifndef SRC_QGP2TO2TOTAL
-#define SRC_QGP2TO2TOTAL
+#ifndef SRC_QGP_LO_A
+#define SRC_QGP_LO_A
 
 #include <vector>
 #include <memory>
@@ -7,16 +7,13 @@
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 
-class QGP_LO : public ThermalPhoton {
+class QGP_LO_analytic : public ThermalPhoton {
  public:
-    QGP_LO(std::shared_ptr<ParameterReader> paraRdr_in,
+    QGP_LO_analytic(std::shared_ptr<ParameterReader> paraRdr_in,
                         std::string emissionProcess);
-    ~QGP_LO() {}
-    void analyticRates(double T, std::vector<double> &Eq, double *M,
-                        std::vector<double> &eqrate_ptr, int nm,
-                        int np, int nphi, int nrapidity);
-    // void NetBaryonCorrection(double T, double muB, std::vector<double> &Eq,
-    //                          std::vector<double> &eqrate_ptr);
+    ~QGP_LO_analytic() {}
+    void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, double Eq, 
+        double M_ll, double &eqrate_ptr, double &diffrate_ptr, int include_diff_deltaf);
 };
 
 #endif

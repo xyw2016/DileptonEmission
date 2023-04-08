@@ -1,5 +1,6 @@
 #include "QGP_LO.h"
 #include "data_struct.h"
+#include <gsl/gsl_sf_fermi_dirac.h>
 #include <cmath>
 
 using PhysConsts::hbarC;
@@ -93,9 +94,11 @@ double QGP_LO::heaviside(double x) {
     }
 }
 
-double QGP_LO::l1f(double x){
-    return log(1. + exp(-x));
-}
+// double QGP_LO::l1f(double x){
+//     return log(1. + exp(-x));
+// }
+
+double QGP_LO::l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
 
 double QGP_LO::nB(double x){
     return 1./(exp(x) - 1.);

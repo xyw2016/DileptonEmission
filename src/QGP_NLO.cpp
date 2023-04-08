@@ -73,7 +73,6 @@ double rhoV_AMY(double alpha, double mu, double k) { // (1.9) and (1.10) of hep-
 void rho_OPE(double o, double k, double alpha, double mu, double &rT, double &rL) {
   // operator product expansion, see appendix D of 1910.07552
   // (mu dependence not actually published yet...)
-  double rV, r00;
   double K2 = o*o - k*k; // note: omega, k are in units of T!
   double coeff = 1. + 96.*mu*mu*OOFP*OOFP + 768.*pow(mu*OOFP,4) ;
             // = T^4 + (6/pi^2).T^2.mu^2 + (3/pi^4).mu^4 )
@@ -118,13 +117,13 @@ ThermalPhoton::Table::Table(std::vector<double>  &_x, std::vector<double>  &_y, 
 
   F = new double***[nx];
   auto val = &_F[0];
-  loop(i,0,nx) {
+  for(int i=0;i<nx;i++) {
     F[i] = new double**[ny];
-    loop(j,0,ny) {
+    for(int j=0;j<ny;j++) {
     F[i][j] = new double*[nz];
-      loop(k,0,nz) {
+      for(int k=0;k<nz;k++) {
         F[i][j][k] = new double[nw];
-        loop(l,0,nw) {
+        for(int l=0;l<nw;l++) {
           F[i][j][k][l] = (val++)[0]; // populate grid
         }
       }
@@ -252,9 +251,9 @@ int approx_rho(void *input, // omega, k, alpha, muB
 
   double M2 = o*o - k*k;
   double M = sqrt(M2);
-  double al_min = rhoT_list.x_min, al_max = rhoT_list.x_max;
+  double al_min = rhoT_list.x_min;//, al_max = rhoT_list.x_max;
   double M_min  = rhoT_list.z_min, M_max  = rhoT_list.z_max;
-  double k_min  = rhoT_list.w_min, k_max  = rhoT_list.w_max;
+  //double k_min  = rhoT_list.w_min, k_max  = rhoT_list.w_max;
 
   if (alpha<al_min-1e-5) { // use LO result to extrapolate if alpha < alpha_min
     //cout << "using LO...\n";

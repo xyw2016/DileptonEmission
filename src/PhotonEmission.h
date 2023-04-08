@@ -22,7 +22,7 @@ class PhotonEmission {
     std::shared_ptr<ParameterReader> paraRdr;
     std::string output_path;
     //photon production processes
-    std::unique_ptr<ThermalPhoton> dilepton_QGP_LO;
+    std::unique_ptr<ThermalPhoton> dilepton_QGP_thermal;
 
     int CORES;
 
@@ -39,12 +39,18 @@ class PhotonEmission {
     double tau_cut_high, tau_cut_low;
     int nTcut, n_tau_cut;
 
+    double T_test;
+    double muB_test;
+    double rhoB_eplusp_test;
+
     int hydro_flag;
     int differential_flag;
     int turn_off_transverse_flow;
     int turn_on_muB_;
     int calHGIdFlag;
     int diff_flag;
+    int emission_rate_flag;
+    int test_code_flag;
 
     double **lambda;  // Lorentz boost transverse only
 

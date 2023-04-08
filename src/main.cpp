@@ -78,13 +78,14 @@ int main(int argc, char** argv) {
     thermalPhotons.outputPhotonSpvn_individualchannel();
     thermalPhotons.outputPhoton_total_SpMatrix_and_SpvnpT();
 
-    sw.toc();
-    cout << "totally takes : " << sw.takeTime() << " seconds." << endl;
 #ifdef _OPENMP
     end_time = omp_get_wtime();
     double total_time = end_time - start_time;
-    printf("Total CPU time: %f seconds. Bye!\n", total_time);
+    printf("Total CPU time: %f seconds.\n", total_time);
 #endif
+
+    sw.toc();
+    cout << "Total wall-clock time: " << sw.takeTime() << " seconds. Bye!" << endl;
 
     // clean up
     delete [] eta_ptr;

@@ -32,7 +32,6 @@ using ARSENAL::deleteA4DMatrix;
 using ARSENAL::deleteA5DMatrix;
 using ARSENAL::deleteA6DMatrix;
 
-using PhysConsts::alpha_s;
 using PhysConsts::me;
 
 ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
@@ -56,6 +55,8 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
 
     turn_on_muB_ = static_cast<int>(paraRdr->getVal("turn_on_muB", 1));
     include_diff_deltaf = paraRdr->getVal("include_baryondiff_deltaf");
+
+    alpha_s = paraRdr->getVal("alpha_s");
 
     // if muB is off, no need to include diffusion correction
     if(turn_on_muB_==0)
@@ -171,16 +172,6 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
 
 
 ThermalPhoton::~ThermalPhoton() {
-    if (bRateTable_) {
-        int TbsizeX = EmissionrateTb_sizeX;
-        deleteA2DMatrix(Emission_eqrateTb_ptr, TbsizeX);
-        if (bShearVisCorr_) {
-            deleteA2DMatrix(Emission_viscous_rateTb_ptr, TbsizeX);
-        }
-        if (bBulkVisCorr_) {
-            deleteA2DMatrix(Emission_bulkvis_rateTb_ptr, TbsizeX);
-        }
-    }
 
     delete [] p;
     delete [] p_weight;
@@ -371,7 +362,6 @@ void ThermalPhoton::calThermalPhotonemission_3d(double Eq, double M_ll, double p
 
 void ThermalPhoton::calPhoton_SpMatrix_dTdtau(double ******dNd2pTdphidydTdtau_eq_temp, 
             double ******dNd2pTdphidydTdtau_tot_temp, double ******dNd2pTdphidydTdtau_diff_temp) {
-    //#pragma omp parallel for collapse(4)
     for (int i = 0; i < nTcut; i++) {
         for (int j = 0; j < n_tau_cut; j++) {
 		    for (int k = 0; k < nm; k++) {

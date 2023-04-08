@@ -31,6 +31,8 @@ class ThermalPhoton {
     int include_diff_deltaf;
     int turn_on_muB_;
 
+    double alpha_s;
+
     // photon emission rate
     std::unique_ptr<Table2D> Photonemission_eqrateTable_ptr;
     std::unique_ptr<Table2D> Photonemission_viscous_rateTable_ptr;

@@ -9,6 +9,7 @@
 
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
+#include "QGP_LO_analytic.h"
 #include "QGP_LO.h"
 #include "QGP_NLO.h"
 #include "tensor_trans.h"
@@ -33,7 +34,6 @@ using TENSORTRANSFORM::lorentz_boost_matrix;
 using PhysConsts::hbarC;
 using PhysConsts::eps;
 
-#define CODE_TEST 1
 
 PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     paraRdr = paraRdr_in;
@@ -43,7 +43,8 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     differential_flag = paraRdr->getVal("differential_flag");
     turn_off_transverse_flow = paraRdr->getVal("turn_off_transverse_flow");
     turn_on_muB_ = static_cast<int>(paraRdr->getVal("turn_on_muB", 1));
-
+    test_code_flag = static_cast<int>(paraRdr->getVal("test_code_flag", 0));
+    emission_rate_flag = paraRdr->getVal("dilepton_emission_rate");
     diff_flag = paraRdr->getVal("differential_flag");
 
     // omp parameters
@@ -147,6 +148,10 @@ void PhotonEmission::set_hydroGridinfo() {
     tau_cut_low = paraRdr->getVal("tau_start");
     n_tau_cut = paraRdr->getVal("n_tau_cut");
 
+    T_test =  paraRdr->getVal("T_test");
+    muB_test =  paraRdr->getVal("muB_test");
+    rhoB_eplusp_test =  paraRdr->getVal("rhoB_eplusp_test");
+
     calHGIdFlag = paraRdr->getVal("CalHGIdFlag");
 }
 
@@ -168,6 +173,8 @@ void PhotonEmission::print_hydroGridinfo() {
     cout << "T_sw = " << T_sw_low <<  " to " << T_sw_high << " GeV."<< endl;
     cout << endl;
 
+    cout << "dilepton_emission_rate = " << emission_rate_flag << endl;
+
     cout << "Photon momentum: " << paraRdr->getVal("photon_q_i")
          << " to " << paraRdr->getVal("photon_q_f") << " GeV, "
          << "n_q =" << np << endl;
@@ -187,20 +194,30 @@ void PhotonEmission::print_hydroGridinfo() {
        cout << " Yes!" << endl;
     }
 
-    
+    if (test_code_flag == 1) {
+        cout << endl;
+        cout << "Test code using: " << endl;
+        cout << "T_test = " << T_test << " GeV." << endl;
+        cout << "muB_test = " << muB_test << " GeV." << endl;
+        cout << "rhoB_eplusp_test = " << rhoB_eplusp_test  << " fm^-1." << endl;
+    }
+
 }
 
 
 void PhotonEmission::InitializePhotonEmissionRateTables() {
 
-    // To use LO analytical form
-    // dilepton_QGP_LO = std::unique_ptr<ThermalPhoton>(
-    //         new QGP_LO(paraRdr, "QGP_LO_total"));
-
-    // To use NLO table
-    dilepton_QGP_LO = std::unique_ptr<ThermalPhoton>(
+    if(emission_rate_flag==0){
+        dilepton_QGP_thermal = std::unique_ptr<ThermalPhoton>(
+            new QGP_LO_analytic(paraRdr, "QGP_LO_analytic_total"));
+    } else if(emission_rate_flag==1) { // To use LO analytical form
+        dilepton_QGP_thermal = std::unique_ptr<ThermalPhoton>(
+            new QGP_LO(paraRdr, "QGP_LO_total"));
+    } else if(emission_rate_flag==2) { // To use NLO table from GJ
+        dilepton_QGP_thermal = std::unique_ptr<ThermalPhoton>(
             new QGP_NLO(paraRdr, "QGP_NLO_total"));
-    dilepton_QGP_LO->readEmissionrateFromFile(true);// true to read in the NLO emission table
+        dilepton_QGP_thermal->readEmissionrateFromFile(true);// true to read in the NLO emission table
+    }
 }
 
 
@@ -216,18 +233,18 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double p_lab_local[4];
     double p_lab_Min[4]; // dilepton 4-momentum in Minkowski coordinates
     for (int k = 0; k < nrapidity; k++) {
-        y_q[k] = dilepton_QGP_LO->getPhotonrapidity(k);
+        y_q[k] = dilepton_QGP_thermal->getPhotonrapidity(k);
     }
     for (int l = 0; l < np; l++) {
-        p_q[l] = dilepton_QGP_LO->getPhotonp(l);
+        p_q[l] = dilepton_QGP_thermal->getPhotonp(l);
     }
     for (int m = 0; m < nphi; m++) {
-        phi_q[m] = dilepton_QGP_LO->getPhotonphi(m);
+        phi_q[m] = dilepton_QGP_thermal->getPhotonphi(m);
         sin_phiq[m] = sin(phi_q[m]);
         cos_phiq[m] = cos(phi_q[m]);
     }
     for (int j = 0; j < nm; j++) {
-        M_ll[j] = dilepton_QGP_LO->getDileptonMass(j);
+        M_ll[j] = dilepton_QGP_thermal->getDileptonMass(j);
     }
 
     // get hydro grid information
@@ -277,7 +294,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     // loop over all fluid cells
     // subdivide bite size chunks of freezeout surface across cores
     int ncells = 0;
-    #pragma omp parallel for //reduction(+:ncells) reduction(add_dNd2pTdphidydTdtau_eq:dNd2pTdphidydTdtau_eq_all)
+    // #pragma omp parallel for reduction(+:ncells) reduction(+:dNd2pTdphidy_eq_all[:CORES*np*nphi*nm*nrapidity])
     for(long n = 0; n < CORES; n++)
     {
         long endFO = FO_chunk;
@@ -316,19 +333,25 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                 muB_local = eps;
 
             // validation setup
-            if(CODE_TEST==1){
-                temp_local = 0.3;//0.25;
+            if(test_code_flag==1){
+                temp_local = T_test;
                 temp_inv = 1/temp_local;
-                muB_local = 1.0;//0.9;
-                rhoB_over_eplusp = 8.0;
+                muB_local = muB_test;
+                rhoB_over_eplusp = rhoB_eplusp_test;
                 volume = 1.0;
                 eta_local = 0.0;
                 turn_off_transverse_flow = 1;
             }
 
             // fluid cell is out of interest
-            if (temp_local < T_dec || temp_local > T_cuthigh || temp_local < T_cutlow)
+            if (temp_local < T_dec)
                 continue;
+
+            if (temp_local > T_sw_high) {
+                // total fluid cells of QGP emission
+                // #pragma omp atomic update
+                ncells++;
+            }
 
             // indices for the output in (T, tau)
             int idx_T = (int)((temp_local - T_cutlow)/dT_cut + eps);
@@ -456,7 +479,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             double diff_dot_p = qtau*p_lab_local[0] - qx*p_lab_local[1] 
                                                 - qy*p_lab_local[2] - qeta*p_lab_local[3];
                             // validation setup
-                            if(CODE_TEST==1){
+                            if(test_code_flag==1){
                                 diff_dot_p = 1.0;
                             }
                             
@@ -473,26 +496,16 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             if (temp_local > T_sw_high) {
                                 // QGP emission
                                 double QGP_fraction = 1.0;
-                                dilepton_QGP_LO->calThermalPhotonemission_3d(
+                                dilepton_QGP_thermal->calThermalPhotonemission_3d(
                                     Eq_localrest_Tb, M_ll[j], pi_photon_Tb, bulkPi_Tb, diff_Tb,
                                     temp_local, muB_local, rhoB_over_eplusp, volume, QGP_fraction,
                                     dNd2pTdphidy_cell_eq, dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot);
-
-                                // total fluid cells of QGP emission
-                                ncells++;
                             }
 
                             // add contributions from QGP and Hadronic matter, etc
                             dNd2pTdphidy_eq_all[n + CORES * i3] += dNd2pTdphidy_cell_eq;
                             dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff;
                             dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot;
-
-
-                            // These 3 lines also work for 1 thread
-                            // dNd2pTdphidydTdtau_eq[idx_T][idx_tau][j][l][m][k] += dNd2pTdphidy_cell_eq;
-                            // dNd2pTdphidydTdtau_diff[idx_T][idx_tau][j][l][m][k] += dNd2pTdphidy_cell_diff;
-                            // dNd2pTdphidydTdtau_tot[idx_T][idx_tau][j][l][m][k] += dNd2pTdphidy_cell_tot;
-
 
                             if (differential_flag == 1) {
 
@@ -508,7 +521,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         } // fluid cell
     }// cores
 
-    #pragma omp parallel for collapse(4)
+    // #pragma omp parallel for collapse(4)
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
             for (int l = 0; l < np; l++) {
@@ -520,7 +533,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                     double dN_pTdpTdphidy_diff_tmp = 0.0;
                     double dN_pTdpTdphidy_tot_tmp = 0.0;
 
-                    #pragma omp simd reduction(+:dN_pTdpTdphidy_eq_tmp,dN_pTdpTdphidy_diff_tmp,dN_pTdpTdphidy_tot_tmp)
+                    // #pragma omp simd reduction(+:dN_pTdpTdphidy_eq_tmp,dN_pTdpTdphidy_diff_tmp,dN_pTdpTdphidy_tot_tmp)
                     for(long n = 0; n < CORES; n++)
                     {
                         dN_pTdpTdphidy_eq_tmp += dNd2pTdphidy_eq_all[n+CORES*i3];
@@ -541,7 +554,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                 double dN_pTdpTdphidydTdtau_diff_tmp = 0.0;
                                 double dN_pTdpTdphidydTdtau_tot_tmp = 0.0;
 
-                                #pragma omp simd reduction(+:dN_pTdpTdphidydTdtau_eq_tmp,dN_pTdpTdphidydTdtau_diff_tmp,dN_pTdpTdphidydTdtau_tot_tmp)
+                                // #pragma omp simd reduction(+:dN_pTdpTdphidydTdtau_eq_tmp,dN_pTdpTdphidydTdtau_diff_tmp,dN_pTdpTdphidydTdtau_tot_tmp)
                                 for(long n = 0; n < CORES; n++) {
                                     dN_pTdpTdphidydTdtau_eq_tmp += dNd2pTdphidydTdtau_eq_all[iT][it][n+CORES*i3];
                                     dN_pTdpTdphidydTdtau_diff_tmp += dNd2pTdphidydTdtau_diff_all[iT][it][n+CORES*i3];
@@ -563,8 +576,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
 
     // Total number of elements that satisfy the condition
-    int total_count = ncells;
-    printf("Cells above T_sw_high=%d...\n", total_count);
+    // int total_count = ncells;
+    printf("Cells above T_sw_high=%d...\n", ncells);
 
     // free memory
     free(dNd2pTdphidy_eq_all);
@@ -574,20 +587,20 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
 
 void PhotonEmission::calPhoton_SpvnpT_individualchannel() {
-    // dilepton_QGP_LO->calPhoton_SpvnpT_shell();
+    // dilepton_QGP_thermal->calPhoton_SpvnpT_shell();
     if (differential_flag == 1) {
-        dilepton_QGP_LO->calPhoton_SpMatrix_dTdtau(dNd2pTdphidydTdtau_eq, 
+        dilepton_QGP_thermal->calPhoton_SpMatrix_dTdtau(dNd2pTdphidydTdtau_eq, 
             dNd2pTdphidydTdtau_tot, dNd2pTdphidydTdtau_diff);
-        dilepton_QGP_LO->calPhoton_SpvnpT_dTdtau();
+        dilepton_QGP_thermal->calPhoton_SpvnpT_dTdtau();
     }
 }
 
 
 void PhotonEmission::outputPhotonSpvn_individualchannel() {
-    // dilepton_QGP_LO->outputPhoton_SpvnpT_shell(output_path);
+    // dilepton_QGP_thermal->outputPhoton_SpvnpT_shell(output_path);
     if (differential_flag == 1) {
-        dilepton_QGP_LO->outputPhoton_SpvnpT_dTdtau(output_path);
-        dilepton_QGP_LO->outputPhoton_spectra_dTdtau(output_path);
+        dilepton_QGP_thermal->outputPhoton_SpvnpT_dTdtau(output_path);
+        dilepton_QGP_thermal->outputPhoton_spectra_dTdtau(output_path);
     }
 }
 
@@ -596,12 +609,12 @@ void PhotonEmission::calPhoton_total_Spvn() {
    // #pragma omp parallel for collapse(4)
     for (int m = 0; m < nm; m++) {
         for (int i = 0; i < np; i++) {
-            double p = dilepton_QGP_LO->getPhotonp(i);
-            double pweight = dilepton_QGP_LO->getPhoton_pweight(i);
+            double p = dilepton_QGP_thermal->getPhotonp(i);
+            double pweight = dilepton_QGP_thermal->getPhoton_pweight(i);
             for (int j = 0; j < nphi; j++) {
-                double phi = dilepton_QGP_LO->getPhotonphi(j);
-                double phiweight = dilepton_QGP_LO->getPhoton_phiweight(j);
-                double dy = dilepton_QGP_LO->get_dy();
+                double phi = dilepton_QGP_thermal->getPhotonphi(j);
+                double phiweight = dilepton_QGP_thermal->getPhoton_phiweight(j);
+                double dy = dilepton_QGP_thermal->get_dy();
                 double weight = phiweight*dy;
                 for (int k = 0; k < nrapidity; k++) {
                     // integrate over rapidity and azimuthal angle of momentum
@@ -678,13 +691,13 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
 
     for (int m = 0; m < nm; m++) {
         for (int i=0; i < nphi; i++) {
-            double phi = dilepton_QGP_LO->getPhotonphi(i);
+            double phi = dilepton_QGP_thermal->getPhotonphi(i);
             fphoton_eq_SpMatrix << phi << "  ";
             fphotonSpMatrix << phi << "  ";
             for (int j = 0; j < np; j++) {
                 double temp_eq = 0.0;
                 double temp_tot = 0.0;
-                double dy = dilepton_QGP_LO->get_dy();
+                double dy = dilepton_QGP_thermal->get_dy();
                 for (int k = 0; k < nrapidity; k++) {
                     temp_eq += dNd2pTdphidy_eq[m][j][i][k]*dy;
                     temp_tot += dNd2pTdphidy_tot[m][j][i][k]*dy;
@@ -702,12 +715,12 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
     // pT differential
     for (int m = 0; m < nm; m++) {
         for (int i = 0; i < np; i++) {
-            double M_ll = dilepton_QGP_LO->getDileptonMass(m);
+            double M_ll = dilepton_QGP_thermal->getDileptonMass(m);
             fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
                             << M_ll << "  ";
             fphotonSpvn << scientific << setprecision(6) << setw(16)
                         << M_ll << "  ";
-            double pT = dilepton_QGP_LO->getPhotonp(i);
+            double pT = dilepton_QGP_thermal->getPhotonp(i);
             fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
                             << pT << "  " << dNd2pTd2M_eq[m][i] << "  ";
             fphotonSpvn << scientific << setprecision(6) << setw(16)
@@ -731,7 +744,7 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
 
     // pT integrated
     for (int m = 0; m < nm; m++) {
-        double M_ll = dilepton_QGP_LO->getDileptonMass(m);
+        double M_ll = dilepton_QGP_thermal->getDileptonMass(m);
         fphotoninte_eq_Spvn << scientific << setprecision(6) << setw(16)
                         << M_ll << "  " << dNd2Mdy_eq[m]*M_ll << "  ";
         fphotoninteSpvn << scientific << setprecision(6) << setw(16)

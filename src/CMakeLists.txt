@@ -8,18 +8,20 @@ set (SOURCES
      tensor_trans.cpp
      gauss_quadrature.cpp
      Hydroinfo_MUSIC.cpp
+     QGP_LO_analytic.cpp
      QGP_NLO.cpp
      QGP_LO.cpp
     )
 
 add_library(${libname} SHARED ${SOURCES})
-target_link_libraries(${libname} ${HDF5_LIBRARIES})
+target_link_libraries(${libname} ${HDF5_LIBRARIES} gsl gslcblas)
+
 if (link_with_lib)
     add_executable(${exename} main.cpp)
-    target_link_libraries(${exename} ${libname} ${HDF5_LIBRARIES})
+    target_link_libraries(${exename} ${libname} ${HDF5_LIBRARIES} gsl)
 else (link_with_lib)
     add_executable(${exename} main.cpp ${SOURCES})
-    target_link_libraries(${exename} ${libname} ${HDF5_LIBRARIES})
+    target_link_libraries(${exename} ${libname} ${HDF5_LIBRARIES} gsl)
 endif (link_with_lib)
 
 install(TARGETS ${exename} ${libname}
