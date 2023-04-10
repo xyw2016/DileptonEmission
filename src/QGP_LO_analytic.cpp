@@ -22,10 +22,8 @@ void QGP_LO_analytic::FiniteBaryonRates(double T, double muB, double rhoB_over_e
 
     double prefac = (Qu*Qu+Qd*Qd+Qs*Qs)*aem*aem/(2.*pow(M_PI, 4))/pow(hbarC, 4);
 
-    double M = M_ll;
-    double E = Eq;
-    double p = sqrt(E*E - M*M);
-    double x = E/T;
+    double p = sqrt(Eq*Eq - M_ll*M_ll);
+    double x = Eq/T;
     double y = p/T;
     double fq = 1./(exp(x) - 1.);
     double log_r = log(cosh(0.25*(x+y))/cosh(0.25*(x-y)));

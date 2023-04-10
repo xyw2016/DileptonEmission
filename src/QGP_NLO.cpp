@@ -151,12 +151,29 @@ double ThermalPhoton::Table::interp(double _x, double _y, double _z, double _w) 
   c = (_z-z[k])/(z[k+1]-z[k]);
   d = (_w-w[l])/(w[l+1]-w[l]);
 
-  if (i < 0 || i >= nx-1 || j < 0 || j >= ny-1 
-    || k < 0 || k >= nz-1 || l < 0 || l >= nw-1) { 
+  // if (i < 0 || i >= nx-1) { 
 
-    printf("Warning: input values are out of the boundaries of the emission rate table!\n");
+  //   printf("Warning: alpha_s=%f, out of the boundaries of the emission rate table!\n", _x);
 
-  }
+  // }
+
+  // if (j < 0 || j >= ny-1) { 
+
+  //   printf("Warning: muB/T=%f, out of the boundaries of the emission rate table!\n", _y);
+
+  // }
+
+  // if (k < 0 || k >= nz-1) { 
+
+  //   printf("Warning: M_ll/T=%f, out of the boundaries of the emission rate table!\n", _z);
+
+  // }
+
+  // if (l < 0 || l >= nw-1) { 
+
+  //   printf("Warning: k/T=%f, out of the boundaries of the emission rate table!\n", _w);
+
+  // }
 
   // a,b,c,d (each value between 0 and 1)
   res = (1.-a)*(1.-b)*(1.-c)*(1.-d)*F[i][j][k][l] 

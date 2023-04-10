@@ -154,6 +154,11 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
         dNd2pTdphidydTdtau_tot = createA6DMatrix(
                     nTcut, n_tau_cut, nm, np, nphi, nrapidity, 0.);
 
+        dNpTdpTdydTdtau_eq = createA4DMatrix(nTcut, n_tau_cut, nm, np, 0.);
+        // dNpTdpTdydTdtau_vis = createA4DMatrix(nTcut, n_tau_cut, nm, np, 0.);
+        dNpTdpTdydTdtau_diff = createA4DMatrix(nTcut, n_tau_cut, nm, np, 0.);
+        dNpTdpTdydTdtau_tot = createA4DMatrix(nTcut, n_tau_cut, nm, np, 0.);
+
         dNdydTdtau_eq = createA3DMatrix(nTcut, n_tau_cut, nm, 0.);
         // dNdydTdtau_vis = createA2DMatrix(nTcut, n_tau_cut, nm, 0.);
         dNdydTdtau_diff = createA3DMatrix(nTcut, n_tau_cut, nm, 0.);
@@ -167,6 +172,27 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
         vndTdtau_sin_diff = createA4DMatrix(nTcut, n_tau_cut, nm, norder, 0.);
         vndTdtau_cos_tot = createA4DMatrix(nTcut, n_tau_cut, nm, norder, 0.);
         vndTdtau_sin_tot = createA4DMatrix(nTcut, n_tau_cut, nm, norder, 0.);
+
+        // in temperature or proper time
+        dNpTdpTdydT_eq = createA3DMatrix(nTcut, nm, np, 0.);
+        // dNpTdpTdydT_vis = createA3DMatrix(nTcut, nm, np, 0.);
+        dNpTdpTdydT_diff = createA3DMatrix(nTcut, nm, np, 0.);
+        dNpTdpTdydT_tot = createA3DMatrix(nTcut, nm, np, 0.);
+
+        dNpTdpTdydtau_eq = createA3DMatrix(n_tau_cut, nm, np, 0.);
+        // dNpTdpTdydtau_vis = createA3DMatrix(n_tau_cut, nm, np, 0.);
+        dNpTdpTdydtau_diff = createA3DMatrix(n_tau_cut, nm, np, 0.);
+        dNpTdpTdydtau_tot = createA3DMatrix(n_tau_cut, nm, np, 0.);        
+
+        dNdydT_eq = createA2DMatrix(nTcut, nm, 0.);
+        // dNdydT_vis = createA2DMatrix(nTcut, nm, 0.);
+        dNdydT_diff = createA2DMatrix(nTcut, nm, 0.);
+        dNdydT_tot = createA2DMatrix(nTcut, nm, 0.);
+
+        dNdydtau_eq = createA2DMatrix(n_tau_cut, nm, 0.);
+        // dNdydtau_vis = createA2DMatrix(n_tau_cut, nm, 0.);
+        dNdydtau_diff = createA2DMatrix(n_tau_cut, nm, 0.);
+        dNdydtau_tot = createA2DMatrix(n_tau_cut, nm, 0.);
     }
 }
 
@@ -204,10 +230,10 @@ ThermalPhoton::~ThermalPhoton() {
 
     int diff_flag = paraRdr->getVal("differential_flag");
     if (diff_flag == 1 or diff_flag > 10) {
-        deleteA3DMatrix(dNdydTdtau_eq, nTcut, nm);
-        // deleteA3DMatrix(dNdydTdtau_vis, nTcut, nm);
-        deleteA3DMatrix(dNdydTdtau_diff, nTcut, nm);
-        deleteA3DMatrix(dNdydTdtau_tot, nTcut, nm);
+        deleteA3DMatrix(dNdydTdtau_eq, nTcut, n_tau_cut);
+        // deleteA3DMatrix(dNdydTdtau_vis, nTcut, n_tau_cut);
+        deleteA3DMatrix(dNdydTdtau_diff, nTcut, n_tau_cut);
+        deleteA3DMatrix(dNdydTdtau_tot, nTcut, n_tau_cut);
 
         deleteA4DMatrix(vndTdtau_cos_eq, nTcut, n_tau_cut, nm);
         deleteA4DMatrix(vndTdtau_sin_eq, nTcut, n_tau_cut, nm);
@@ -222,8 +248,32 @@ ThermalPhoton::~ThermalPhoton() {
         // deleteA6DMatrix(dNd2pTdphidydTdtau_vis, nTcut, n_tau_cut, nm, np, nphi);
         deleteA6DMatrix(dNd2pTdphidydTdtau_diff, nTcut, n_tau_cut, nm, np, nphi);
         deleteA6DMatrix(dNd2pTdphidydTdtau_tot, nTcut, n_tau_cut, nm, np, nphi);
-    }
 
+        deleteA4DMatrix(dNpTdpTdydTdtau_eq, nTcut, n_tau_cut, nm);
+        // deleteA4DMatrix(dNpTdpTdydTdtau_vis, nTcut, n_tau_cut, nm);
+        deleteA4DMatrix(dNpTdpTdydTdtau_diff, nTcut, n_tau_cut, nm);
+        deleteA4DMatrix(dNpTdpTdydTdtau_tot, nTcut, n_tau_cut, nm);
+
+        deleteA3DMatrix(dNpTdpTdydT_eq, nTcut, nm);
+        // deleteA3DMatrix(dNpTdpTdydT_vis, nTcut, nm);
+        deleteA3DMatrix(dNpTdpTdydT_diff, nTcut, nm);
+        deleteA3DMatrix(dNpTdpTdydT_tot, nTcut, nm);
+
+        deleteA3DMatrix(dNpTdpTdydtau_eq, n_tau_cut, nm);
+        // deleteA3DMatrix(dNpTdpTdydtau_vis, n_tau_cut, nm);
+        deleteA3DMatrix(dNpTdpTdydtau_diff, n_tau_cut, nm);
+        deleteA3DMatrix(dNpTdpTdydtau_tot, n_tau_cut, nm); 
+
+        deleteA2DMatrix(dNdydT_eq, nTcut);
+        // deleteA2DMatrix(dNdydT_vis, nTcut);
+        deleteA2DMatrix(dNdydT_diff, nTcut);
+        deleteA2DMatrix(dNdydT_tot, nTcut);
+
+        deleteA2DMatrix(dNdydtau_eq, n_tau_cut);
+        // deleteA2DMatrix(dNdydtau_vis, n_tau_cut);
+        deleteA2DMatrix(dNdydtau_diff, n_tau_cut);
+        deleteA2DMatrix(dNdydtau_tot, n_tau_cut);
+    }
     deleteA4DMatrix(grid_T.F, grid_T.nx, grid_T.ny, grid_T.nz);
     deleteA4DMatrix(grid_L.F, grid_L.nx, grid_L.ny, grid_L.nz);
 }
@@ -380,8 +430,62 @@ void ThermalPhoton::calPhoton_SpMatrix_dTdtau(double ******dNd2pTdphidydTdtau_eq
 }
 
 
-void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
+void ThermalPhoton::calPhoton_Spectra_dTdtau() {
     // calculate the inverse slope of the photon spectra at T-tau interval
+    // integrated out phi and rapidity
+
+    for (int i = 0; i < nTcut; i++) {
+        for (int j = 0; j < n_tau_cut; j++) {
+
+            for (int m = 0; m < nm; m++) {
+                for (int k = 0; k < np; k++) {
+                    for (int l = 0; l < nphi; l++) {
+                        for (int irap = 0; irap < nrapidity; irap++) {
+                            dNpTdpTdydTdtau_eq[i][j][m][k] += (
+                                    dNd2pTdphidydTdtau_eq[i][j][m][k][l][irap]
+                                    *phi_weight[l]*dy);
+                            dNpTdpTdydTdtau_diff[i][j][m][k] += (
+                                    dNd2pTdphidydTdtau_diff[i][j][m][k][l][irap]
+                                    *phi_weight[l]*dy);
+                            dNpTdpTdydTdtau_tot[i][j][m][k] += (
+                                    dNd2pTdphidydTdtau_tot[i][j][m][k][l][irap]
+                                    *phi_weight[l]*dy);
+                        }
+                    }
+                    dNpTdpTdydTdtau_eq[i][j][m][k] = dNpTdpTdydTdtau_eq[i][j][m][k]/(2*M_PI);
+                    dNpTdpTdydTdtau_diff[i][j][m][k] = dNpTdpTdydTdtau_diff[i][j][m][k]/(2*M_PI);
+                    dNpTdpTdydTdtau_tot[i][j][m][k] = dNpTdpTdydTdtau_tot[i][j][m][k]/(2*M_PI);
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < nTcut; i++) {
+        for (int j = 0; j < n_tau_cut; j++) {
+            for (int m = 0; m < nm; m++) {
+                for (int k = 0; k < np; k++) {
+
+                    dNpTdpTdydT_eq[i][m][k] += dNpTdpTdydTdtau_eq[i][j][m][k];
+                    dNpTdpTdydT_diff[i][m][k] += dNpTdpTdydTdtau_diff[i][j][m][k];
+                    dNpTdpTdydT_tot[i][m][k] += dNpTdpTdydTdtau_tot[i][j][m][k];
+
+                    dNpTdpTdydtau_eq[j][m][k] += dNpTdpTdydTdtau_eq[i][j][m][k];
+                    dNpTdpTdydtau_diff[j][m][k] += dNpTdpTdydTdtau_diff[i][j][m][k];
+                    dNpTdpTdydtau_tot[j][m][k] += dNpTdpTdydTdtau_tot[i][j][m][k];
+                }
+            }
+        }
+    }
+}
+
+
+void ThermalPhoton::outputPhoton_Spectra_dTdtau(string path) {
+    // calculate the inverse slope of the photon spectra at T-tau interval
+    // integrated out phi and rapidity
+
+    double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
+    double dtau = (tau_cut_high - tau_cut_low)/(n_tau_cut - 1);
+
     ostringstream filename_SpdTdtau_eq;
     ostringstream filename_SpdTdtau_diff;
     ostringstream filename_SpdTdtau_tot;
@@ -396,9 +500,6 @@ void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
     ofstream ofdiff(filename_SpdTdtau_diff.str().c_str());
     ofstream oftot(filename_SpdTdtau_tot.str().c_str());
 
-    double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
-    double dtau = (tau_cut_high - tau_cut_low)/(n_tau_cut - 1);
-
     for (int i = 0; i < nTcut; i++) {
         double T_local = Tcut_low + i*dT;
         for (int j = 0; j < n_tau_cut; j++) {
@@ -412,25 +513,9 @@ void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
 	            oftot 	<< scientific << setw(18) << setprecision(8) 
 	                  	<< T_local << "   "  << tau_local << "   ";
                 for (int k = 0; k < np; k++) {
-                    double temp_dNdypTdpT_eq = 0.0;
-                    double temp_dNdypTdpT_diff = 0.0;
-                    double temp_dNdypTdpT_tot = 0.0;
-                    for (int l = 0; l < nphi; l++) {
-                        for (int irap = 0; irap < nrapidity; irap++) {
-                            temp_dNdypTdpT_eq += (
-                                    dNd2pTdphidydTdtau_eq[i][j][m][k][l][irap]
-                                    *phi_weight[l]*dy);
-                            temp_dNdypTdpT_diff += (
-                                    dNd2pTdphidydTdtau_diff[i][j][m][k][l][irap]
-                                    *phi_weight[l]*dy);
-                            temp_dNdypTdpT_tot += (
-                                    dNd2pTdphidydTdtau_tot[i][j][m][k][l][irap]
-                                    *phi_weight[l]*dy);
-                        }
-                    }
-                    ofeq << temp_dNdypTdpT_eq << "   ";
-                    ofdiff << temp_dNdypTdpT_diff << "   ";
-                    oftot << temp_dNdypTdpT_tot << "   ";
+                    ofeq << dNpTdpTdydTdtau_eq[i][j][m][k] << "   ";
+                    ofdiff << dNpTdpTdydTdtau_diff[i][j][m][k] << "   ";
+                    oftot << dNpTdpTdydTdtau_tot[i][j][m][k] << "   ";
                 }
                 ofeq << endl;
                 ofdiff << endl;
@@ -442,36 +527,123 @@ void ThermalPhoton::outputPhoton_spectra_dTdtau(string path) {
     ofeq.close();
     ofdiff.close();
     oftot.close();
+
+    // in temperature
+    ostringstream filename_SpdT_eq;
+    ostringstream filename_SpdT_diff;
+    ostringstream filename_SpdT_tot;
+    filename_SpdT_eq    << path << emissionProcess_name
+                            << "_SpdT_eq.dat";
+    filename_SpdT_diff  << path << emissionProcess_name
+                            << "_SpdT_diff.dat";
+    filename_SpdT_tot   << path << emissionProcess_name
+                            << "_SpdT_tot.dat";
+
+    ofstream ofdTeq(filename_SpdT_eq.str().c_str());
+    ofstream ofdTdiff(filename_SpdT_diff.str().c_str());
+    ofstream ofdTtot(filename_SpdT_tot.str().c_str());
+
+    for (int i = 0; i < nTcut; i++) {
+        double T_local = Tcut_low + i*dT;
+
+        for (int m = 0; m < nm; m++) {
+            ofdTeq    << scientific << setw(18) << setprecision(8) 
+                    << T_local << "   ";
+            ofdTdiff  << scientific << setw(18) << setprecision(8) 
+                    << T_local << "   ";
+            ofdTtot   << scientific << setw(18) << setprecision(8) 
+                    << T_local << "   ";
+            for (int k = 0; k < np; k++) {
+                ofdTeq << dNpTdpTdydT_eq[i][m][k] << "   ";
+                ofdTdiff << dNpTdpTdydT_diff[i][m][k] << "   ";
+                ofdTtot << dNpTdpTdydT_tot[i][m][k] << "   ";
+            }
+            ofdTeq << endl;
+            ofdTdiff << endl;
+            ofdTtot << endl;
+        }
+    }
+
+    ofdTeq.close();
+    ofdTdiff.close();
+    ofdTtot.close();
+
+    // in proper time
+    ostringstream filename_Spdtau_eq;
+    ostringstream filename_Spdtau_diff;
+    ostringstream filename_Spdtau_tot;
+    filename_Spdtau_eq    << path << emissionProcess_name
+                            << "_Spdtau_eq.dat";
+    filename_Spdtau_diff  << path << emissionProcess_name
+                            << "_Spdtau_diff.dat";
+    filename_Spdtau_tot   << path << emissionProcess_name
+                            << "_Spdtau_tot.dat";
+
+    ofstream ofdtaueq(filename_Spdtau_eq.str().c_str());
+    ofstream ofdtaudiff(filename_Spdtau_diff.str().c_str());
+    ofstream ofdtautot(filename_Spdtau_tot.str().c_str());
+
+    for (int j = 0; j < n_tau_cut; j++) {
+        double tau_local = tau_cut_low + j*dtau;
+
+        for (int m = 0; m < nm; m++) {
+            ofdtaueq    << scientific << setw(18) << setprecision(8) 
+                    << tau_local << "   ";
+            ofdtaudiff  << scientific << setw(18) << setprecision(8) 
+                    << tau_local << "   ";
+            ofdtautot   << scientific << setw(18) << setprecision(8) 
+                    << tau_local << "   ";
+            for (int k = 0; k < np; k++) {
+                ofdtaueq << dNpTdpTdydtau_eq[j][m][k] << "   ";
+                ofdtaudiff << dNpTdpTdydtau_diff[j][m][k] << "   ";
+                ofdtautot << dNpTdpTdydtau_tot[j][m][k] << "   ";
+            }
+            ofdtaueq << endl;
+            ofdtaudiff << endl;
+            ofdtautot << endl;
+        }
+    }
+
+    ofdtaueq.close();
+    ofdtaudiff.close();
+    ofdtautot.close();
 }
 
 
-void ThermalPhoton::calPhoton_SpvnpT_dTdtau() {
-    // calculate the photon spectra and differential vn at mid-rapidity
+void ThermalPhoton::calPhoton_Spvn_dTdtau() {
+    // calculate the dilepton, dN/dydM yields and vn
+    // integrated out pT, phi and rapidity
+    // Note that it also integrate over rapidity
     double eps = 1e-15;
     for (int i = 0; i < nTcut; i++) {
         for (int j = 0; j < n_tau_cut; j++) {
 
             for (int m = 0; m < nm; m++) {
+                double M_ll = M[m];
                 for (int k = 0; k < np; k++) {
                     for (int l = 0; l < nphi; l++) {
+
                         double weight = p[k]*p_weight[k]*phi_weight[l]*dy; // pT and phi_p integrated out
+
                         for (int irap = 0; irap < nrapidity; irap++) {
+
                             dNdydTdtau_eq[i][j][m] += (
                                     dNd2pTdphidydTdtau_eq[i][j][m][k][l][irap]
-                                    *weight);
+                                    *weight)*M_ll;
                             // dNdydTdtau_vis[i][j] += (
                             //         dNd2pTdphidydTdtau_vis[i][j][k][l][irap]
-                            //         *weight);
+                            //         *weight)*M_ll;
                             dNdydTdtau_diff[i][j][m] += (
                                     dNd2pTdphidydTdtau_diff[i][j][m][k][l][irap]
-                                    *weight);
+                                    *weight)*M_ll;
                             dNdydTdtau_tot[i][j][m] += (
                                     dNd2pTdphidydTdtau_tot[i][j][m][k][l][irap]
-                                    *weight);
+                                    *weight)*M_ll;
+
                             for (int order = 0; order < norder; order++) {
                                 vndTdtau_cos_eq[i][j][m][order] += (
                                     dNd2pTdphidydTdtau_eq[i][j][m][k][l][irap]
-                                    *cos(order*phi[l])*weight);
+                                    *weight*cos(order*phi[l]));
                                 vndTdtau_sin_eq[i][j][m][order] += (
                                     dNd2pTdphidydTdtau_eq[i][j][m][k][l][irap]
                                     *weight*sin(order*phi[l]));
@@ -525,14 +697,35 @@ void ThermalPhoton::calPhoton_SpvnpT_dTdtau() {
                             /(dNdydTdtau_tot[i][j][m] + eps));
                 }
             }
-       }
-   }
+        }
+    }
+
+    // dNdydM on both sides
+    for (int i = 0; i < nTcut; i++) {
+        for (int j = 0; j < n_tau_cut; j++) {
+            for (int m = 0; m < nm; m++) {
+
+                dNdydT_eq[i][m] += dNdydTdtau_eq[i][j][m];
+                // dNdydT_vis[i][m] += dNdydTdtau_vis[i][j][m];
+                dNdydT_diff[i][m] += dNdydTdtau_diff[i][j][m];
+                dNdydT_tot[i][m] += dNdydTdtau_tot[i][j][m];
+
+                dNdydtau_eq[j][m] += dNdydTdtau_eq[i][j][m];
+                // dNdydtau_vis[j][m] += dNdydTdtau_vis[i][j][m];
+                dNdydtau_diff[j][m] += dNdydTdtau_diff[i][j][m];
+                dNdydtau_tot[j][m] += dNdydTdtau_tot[i][j][m];
+            }
+        }
+    }
 }
 
 
-void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
+void ThermalPhoton::outputPhoton_Spvn_dTdtau(string path) {
+
     double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
     double dtau = (tau_cut_high - tau_cut_low)/(n_tau_cut - 1);
+
+    // yields in (T, tau)
     ostringstream filename_stream_dNdydTdtau_eq;
     // ostringstream filename_stream_dNdydTdtau_vis;
     ostringstream filename_stream_dNdydTdtau_diff;
@@ -565,11 +758,11 @@ void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
           	fphotondNdy_tot << scientific << setw(18) << setprecision(8) 
                    	<< T_local << "   "  << tau_local << "   ";
           	for (int m = 0; m < nm; m++) {
-          		double M_ll = M[m];
-              	fphotondNdy_eq << dNdydTdtau_eq[i][j][m]*M_ll << "    ";
-              	// fphotondNdy_vis << dNdydTdtau_vis[i][j]*M_ll << "    ";
-              	fphotondNdy_diff << dNdydTdtau_diff[i][j][m]*M_ll << "    ";
-              	fphotondNdy_tot << dNdydTdtau_tot[i][j][m]*M_ll << "    ";
+          		
+              	fphotondNdy_eq << dNdydTdtau_eq[i][j][m] << "    ";
+              	// fphotondNdy_vis << dNdydTdtau_vis[i][j][m] << "    ";
+              	fphotondNdy_diff << dNdydTdtau_diff[i][j][m] << "    ";
+              	fphotondNdy_tot << dNdydTdtau_tot[i][j][m] << "    ";
           	}
           	fphotondNdy_eq << endl;
            	// fphotondNdy_vis << endl;
@@ -582,96 +775,166 @@ void ThermalPhoton::outputPhoton_SpvnpT_dTdtau(string path) {
     fphotondNdy_diff.close();
     fphotondNdy_tot.close();
 
-    for(int order = 1; order < norder; order++)
-    {
-       	ostringstream filename_stream_vncosdTdtau_eq;
-       	// ostringstream filename_stream_vncosdTdtau_vis;
-       	ostringstream filename_stream_vncosdTdtau_diff;
-       	ostringstream filename_stream_vncosdTdtau_tot;
-       	ostringstream filename_stream_vnsindTdtau_eq;
-       	// ostringstream filename_stream_vnsindTdtau_vis;
-       	ostringstream filename_stream_vnsindTdtau_diff;
-       	ostringstream filename_stream_vnsindTdtau_tot;
-       	filename_stream_vncosdTdtau_eq 	<< path << emissionProcess_name
-                                      	<< "_v_" << order
-                                      	<< "_cos_dTdtau_eq.dat";
-       	// filename_stream_vncosdTdtau_vis << path << emissionProcess_name
-       	//                                 << "_v_" << order
-       	//                                 << "_cos_dTdtau_vis.dat";
-       	filename_stream_vncosdTdtau_diff 	<< path << emissionProcess_name
-                                           	<< "_v_" << order
-                                           	<< "_cos_dTdtau_diff.dat";
-       	filename_stream_vncosdTdtau_tot << path << emissionProcess_name
-                                       	<< "_v_" << order
-                                       	<< "_cos_dTdtau_tot.dat";
-       	filename_stream_vnsindTdtau_eq 	<< path << emissionProcess_name
-                                      	<< "_v_" << order
-                                      	<< "_sin_dTdtau_eq.dat";
-       	// filename_stream_vnsindTdtau_vis << path << emissionProcess_name
-       	//                                 << "_v_" << order
-       	//                                 << "_sin_dTdtau_vis.dat";
-       	filename_stream_vnsindTdtau_diff << path << emissionProcess_name
-                                      	<< "_v_" << order
-                                        << "_sin_dTdtau_diff.dat";
-       	filename_stream_vnsindTdtau_tot 	<< path << emissionProcess_name
-                                       	<< "_v_" << order
-                                       	<< "_sin_dTdtau_tot.dat";
 
-       	ofstream fphotonvncos_eq(filename_stream_vncosdTdtau_eq.str().c_str());
-       	// ofstream fphotonvncos_vis(filename_stream_vncosdTdtau_vis.str().c_str());
-       	ofstream fphotonvncos_diff(filename_stream_vncosdTdtau_diff.str().c_str());
-       	ofstream fphotonvncos_tot(filename_stream_vncosdTdtau_tot.str().c_str());
-       	ofstream fphotonvnsin_eq(filename_stream_vnsindTdtau_eq.str().c_str());
-       	// ofstream fphotonvnsin_vis(filename_stream_vnsindTdtau_vis.str().c_str());
-       	ofstream fphotonvnsin_diff(filename_stream_vnsindTdtau_diff.str().c_str());
-       	ofstream fphotonvnsin_tot(filename_stream_vnsindTdtau_tot.str().c_str());
-       	for(int i = 0; i < nTcut; i++)
-       	{
-          	double T_local = Tcut_low + i*dT;
-          	for(int j = 0; j < n_tau_cut; j++)
-      		{
-             	double tau_local = tau_cut_low + j*dtau;
-             	fphotonvncos_eq << scientific << setw(18) << setprecision(8) 
-                   	<< T_local << "   "  << tau_local << "   ";
-             	fphotonvncos_diff << scientific << setw(18) << setprecision(8) 
-                   	<< T_local << "   "  << tau_local << "   ";
-             	fphotonvncos_tot << scientific << setw(18) << setprecision(8) 
-                   	<< T_local << "   "  << tau_local << "   ";
-             	fphotonvnsin_eq << scientific << setw(18) << setprecision(8) 
-                   	<< T_local << "   "  << tau_local << "   ";
-             	fphotonvnsin_diff << scientific << setw(18) << setprecision(8) 
-                   	<< T_local << "   "  << tau_local << "   ";
-             	fphotonvnsin_tot << scientific << setw(18) << setprecision(8) 
-                   	<< T_local << "   "  << tau_local << "   ";
-             	for (int m = 0; m < nm; m++) {
-                 	fphotonvncos_eq << vndTdtau_cos_eq[i][j][m][order] << "    ";
-                 	// fphotonvncos_vis << vndTdtau_cos_vis[i][j][order] << "    ";
-                 	fphotonvncos_diff << vndTdtau_cos_diff[i][j][m][order] << "    ";
-                 	fphotonvncos_tot << vndTdtau_cos_tot[i][j][m][order] << "    ";
-                 	fphotonvnsin_eq << vndTdtau_sin_eq[i][j][m][order] << "    ";
-                 	// fphotonvnsin_vis << vndTdtau_sin_vis[i][j][order] << "    ";
-                 	fphotonvnsin_diff << vndTdtau_sin_diff[i][j][m][order] << "    ";
-                 	fphotonvnsin_tot << vndTdtau_sin_tot[i][j][m][order] << "    ";
-             	}
-             	fphotonvncos_eq << endl;
-             	// fphotonvncos_vis << endl;
-             	fphotonvncos_diff << endl;
-             	fphotonvncos_tot << endl;
-             	fphotonvnsin_eq << endl;
-             	// fphotonvnsin_vis << endl;
-             	fphotonvnsin_diff << endl;
-             	fphotonvnsin_tot << endl;
-          	}
-       	}
-       	fphotonvncos_eq.close();
-       	fphotonvnsin_eq.close();
-       	// fphotonvncos_vis.close();
-       	// fphotonvnsin_vis.close();
-       	fphotonvncos_diff.close();
-       	fphotonvnsin_diff.close();
-       	fphotonvncos_tot.close();
-       	fphotonvnsin_tot.close();
+    // yields in T
+    ostringstream filename_stream_dNdydT_eq;
+    // ostringstream filename_stream_dNdydT_vis;
+    ostringstream filename_stream_dNdydT_diff;
+    ostringstream filename_stream_dNdydT_tot;
+
+    filename_stream_dNdydT_eq << path << emissionProcess_name
+                                  << "_dNdydT_eq.dat";
+    // filename_stream_dNdydT_vis << path << emissionProcess_name
+    //                                << "_dNdydT_vis.dat";
+    filename_stream_dNdydT_diff << path << emissionProcess_name
+                                       << "_dNdydT_diff.dat";
+    filename_stream_dNdydT_tot << path << emissionProcess_name
+                                   << "_dNdydT_tot.dat";
+
+    ofstream fphotondNdydT_eq(filename_stream_dNdydT_eq.str().c_str());
+    // ofstream fphotondNdydT_vis(filename_stream_dNdydT_vis.str().c_str());
+    ofstream fphotondNdydT_diff(filename_stream_dNdydT_diff.str().c_str());
+    ofstream fphotondNdydT_tot(filename_stream_dNdydT_tot.str().c_str());
+
+    for(int i = 0; i < nTcut; i++)
+    {
+        double T_local = Tcut_low + i*dT;
+
+        fphotondNdydT_eq << scientific << setw(18) << setprecision(8) 
+                << T_local << "   ";
+        fphotondNdydT_diff << scientific << setw(18) << setprecision(8) 
+                << T_local << "   ";
+        fphotondNdydT_tot << scientific << setw(18) << setprecision(8) 
+                << T_local << "   ";
+        for (int m = 0; m < nm; m++) {
+            
+            fphotondNdydT_eq << dNdydT_eq[i][m] << "    ";
+            // fphotondNdydT_vis << dNdydT_vis[i][m] << "    ";
+            fphotondNdydT_diff << dNdydT_diff[i][m] << "    ";
+            fphotondNdydT_tot << dNdydT_tot[i][m] << "    ";
+        }
+        fphotondNdydT_eq << endl;
+        // fphotondNdydT_vis << endl;
+        fphotondNdydT_diff << endl;
+        fphotondNdydT_tot << endl;
     }
+
+    fphotondNdydT_eq.close();
+    // fphotondNdydT_vis.close();
+    fphotondNdydT_diff.close();
+    fphotondNdydT_tot.close();
+
+
+    // yields in tau
+    ostringstream filename_stream_dNdydtau_eq;
+    // ostringstream filename_stream_dNdydtau_vis;
+    ostringstream filename_stream_dNdydtau_diff;
+    ostringstream filename_stream_dNdydtau_tot;
+
+    filename_stream_dNdydtau_eq << path << emissionProcess_name
+                                  << "_dNdydtau_eq.dat";
+    // filename_stream_dNdydtau_vis << path << emissionProcess_name
+    //                                << "_dNdydtau_vis.dat";
+    filename_stream_dNdydtau_diff << path << emissionProcess_name
+                                       << "_dNdydtau_diff.dat";
+    filename_stream_dNdydtau_tot << path << emissionProcess_name
+                                   << "_dNdydtau_tot.dat";
+
+    ofstream fphotondNdydtau_eq(filename_stream_dNdydtau_eq.str().c_str());
+    // ofstream fphotondNdydtau_vis(filename_stream_dNdydtau_vis.str().c_str());
+    ofstream fphotondNdydtau_diff(filename_stream_dNdydtau_diff.str().c_str());
+    ofstream fphotondNdydtau_tot(filename_stream_dNdydtau_tot.str().c_str());
+
+    for(int i = 0; i < n_tau_cut; i++)
+    {
+        double tau_local = tau_cut_low + i*dtau;
+
+        fphotondNdydtau_eq << scientific << setw(18) << setprecision(8) 
+                << tau_local << "   ";
+        fphotondNdydtau_diff << scientific << setw(18) << setprecision(8) 
+                << tau_local << "   ";
+        fphotondNdydtau_tot << scientific << setw(18) << setprecision(8) 
+                << tau_local << "   ";
+        for (int m = 0; m < nm; m++) {
+            
+            fphotondNdydtau_eq << dNdydtau_eq[i][m] << "    ";
+            // fphotondNdydtau_vis << dNdydtau_vis[i][m] << "    ";
+            fphotondNdydtau_diff << dNdydtau_diff[i][m] << "    ";
+            fphotondNdydtau_tot << dNdydtau_tot[i][m] << "    ";
+        }
+        fphotondNdydtau_eq << endl;
+        // fphotondNdydtau_vis << endl;
+        fphotondNdydtau_diff << endl;
+        fphotondNdydtau_tot << endl;
+    }
+
+    fphotondNdydtau_eq.close();
+    // fphotondNdydtau_vis.close();
+    fphotondNdydtau_diff.close();
+    fphotondNdydtau_tot.close();
+
+
+    // flow coefficients
+
+    ostringstream filename_stream_vndTdtau_eq;
+    // ostringstream filename_stream_vndTdtau_vis;
+    ostringstream filename_stream_vndTdtau_diff;
+    ostringstream filename_stream_vndTdtau_tot;
+
+    filename_stream_vndTdtau_eq  << path << emissionProcess_name
+                                    << "_vn_dTdtau_eq.dat";
+    // filename_stream_vndTdtau_vis << path << emissionProcess_name
+    //                                 << "_v_" << order
+    //                                 << "_cos_dTdtau_vis.dat";
+    filename_stream_vndTdtau_diff    << path << emissionProcess_name
+                                        << "_vn_dTdtau_diff.dat";
+    filename_stream_vndTdtau_tot << path << emissionProcess_name
+                                    << "_vn_dTdtau_tot.dat";
+
+    ofstream fphotonvn_eq(filename_stream_vndTdtau_eq.str().c_str());
+    // ofstream fphotonvn_vis(filename_stream_vndTdtau_vis.str().c_str());
+    ofstream fphotonvn_diff(filename_stream_vndTdtau_diff.str().c_str());
+    ofstream fphotonvn_tot(filename_stream_vndTdtau_tot.str().c_str());
+
+    for(int i = 0; i < nTcut; i++)
+    {
+        double T_local = Tcut_low + i*dT;
+        for(int j = 0; j < n_tau_cut; j++)
+        {
+            double tau_local = tau_cut_low + j*dtau;
+            fphotonvn_eq << scientific << setw(18) << setprecision(8) 
+                << T_local << "   "  << tau_local << "   ";
+            fphotonvn_diff << scientific << setw(18) << setprecision(8) 
+                << T_local << "   "  << tau_local << "   ";
+            fphotonvn_tot << scientific << setw(18) << setprecision(8) 
+                << T_local << "   "  << tau_local << "   ";
+
+            for (int m = 0; m < nm; m++) {
+                for(int order = 1; order < norder; order++)
+                    {
+                        fphotonvn_eq << order << "   " 
+                            << vndTdtau_cos_eq[i][j][m][order] << "    " << vndTdtau_sin_eq[i][j][m][order] << "    "
+                            << sqrt(pow(vndTdtau_cos_eq[i][j][m][order], 2) + pow(vndTdtau_sin_eq[i][j][m][order], 2)) << "  ";
+                        // fphotonvncos_vis << order << "   " << vndTdtau_cos_vis[i][j][order] << "    " << vndTdtau_sin_vis[i][j][order] << "    "
+                            // << sqrt(pow(vndTdtau_cos_vis[i][j][m][order], 2) + pow(vndTdtau_sin_vis[i][j][m][order], 2)) << "  ";
+                        fphotonvn_diff << order << "   " 
+                            << vndTdtau_cos_diff[i][j][m][order] << "    " << vndTdtau_sin_diff[i][j][m][order] << "    "
+                            << sqrt(pow(vndTdtau_cos_diff[i][j][m][order], 2) + pow(vndTdtau_sin_diff[i][j][m][order], 2)) << "  ";
+                        fphotonvn_tot << order << "   " 
+                            << vndTdtau_cos_tot[i][j][m][order] << "    " << vndTdtau_sin_tot[i][j][m][order] << "    "
+                            << sqrt(pow(vndTdtau_cos_tot[i][j][m][order], 2) + pow(vndTdtau_sin_tot[i][j][m][order], 2)) << "  ";
+                    }
+            }
+            fphotonvn_eq << endl;
+            // fphotonvn_vis << endl;
+            fphotonvn_diff << endl;
+            fphotonvn_tot << endl;
+        }
+    }
+    fphotonvn_eq.close();
+    // fphotonvn_vis.close();
+    fphotonvn_diff.close();
+    fphotonvn_tot.close();
 }
 
 

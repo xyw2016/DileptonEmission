@@ -94,6 +94,8 @@ class ThermalPhoton {
     double ******dNd2pTdphidydTdtau_eq, ******dNd2pTdphidydTdtau_tot;
     // double *****dNd2pTdphidydTdtau_vis, *****dNd2pTdphidydTdtau_bulkvis;
     double ******dNd2pTdphidydTdtau_diff;
+    double ****dNpTdpTdydTdtau_eq, ****dNpTdpTdydTdtau_vis;
+    double ****dNpTdpTdydTdtau_diff, ****dNpTdpTdydTdtau_tot;
     double ***dNdydTdtau_eq, ***dNdydTdtau_tot;
     // double **dNdydTdtau_vis, **dNdydTdtau_bulkvis;
     double ***dNdydTdtau_diff;
@@ -102,6 +104,23 @@ class ThermalPhoton {
     // double ***vndTdtau_cos_bulkvis, ***vndTdtau_sin_bulkvis;
     double ****vndTdtau_cos_diff, ****vndTdtau_sin_diff;
     double ****vndTdtau_cos_tot, ****vndTdtau_sin_tot;
+
+    // yields and spectra in temperature or proper time
+    double ***dNpTdpTdydT_eq, ***dNpTdpTdydT_vis; 
+    double ***dNpTdpTdydT_diff, ***dNpTdpTdydT_tot;
+
+    double ***dNpTdpTdydtau_eq, ***dNpTdpTdydtau_vis; 
+    double ***dNpTdpTdydtau_diff, ***dNpTdpTdydtau_tot;
+
+    double **dNdydT_eq;
+    // double **dNdydT_vis;
+    double **dNdydT_diff;
+    double **dNdydT_tot;
+
+    double **dNdydtau_eq;
+    // double **dNdydtau_vis;
+    double **dNdydtau_diff;
+    double **dNdydtau_tot;
 
  public:
     ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
@@ -146,7 +165,8 @@ class ThermalPhoton {
                           std::vector<double> &vn_cos,
                           std::vector<double> &vn_sin);
     void calPhoton_SpvnpT_shell();
-    void calPhoton_SpvnpT_dTdtau();
+    void calPhoton_Spvn_dTdtau();
+    void calPhoton_Spectra_dTdtau();
     void calPhoton_SpMatrix_dTdtau(double ******dNd2pTdphidydTdtau_eq, 
             double ******dNd2pTdphidydTdtau_tot, double ******dNd2pTdphidydTdtau_diff);
     void outputPhoton_SpvnpT(std::string path, std::string type_str,
@@ -156,11 +176,8 @@ class ThermalPhoton {
                              std::vector<double> &vn_cos,
                              std::vector<double> &vn_sin);
     void outputPhoton_SpvnpT_shell(std::string path);
-    void outputPhoton_SpvnpT_dTdtau(std::string path);
-    void outputPhoton_spectra_dTdtau(std::string path);
-    void interpolation2D_bilinear(double varX, std::vector<double> &varY,
-                                  double** Table2D_ptr,
-                                  std::vector<double> &results);
+    void outputPhoton_Spvn_dTdtau(std::string path);
+    void outputPhoton_Spectra_dTdtau(std::string path);
 
     struct Table {
         int nx, ny, nz, nw;
