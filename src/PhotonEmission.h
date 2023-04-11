@@ -55,13 +55,18 @@ class PhotonEmission {
     double **lambda;  // Lorentz boost transverse only
 
     double **dNd2pTd2M_eq;
+    double **dNd2pTd2M_eqT;
+    double **dNd2pTd2M_eqL;
     double **dNd2pTd2M_tot;
     double ****dNd2pTdphidy_eq;
+    double ****dNd2pTdphidy_eqT;
+    double ****dNd2pTdphidy_eqL;
     double ***vnpT_cos_eq, ***vnpT_sin_eq;
     double ****dNd2pTdphidy_tot;
     double ***vnpT_cos_tot, ***vnpT_sin_tot;
 
     std::vector<double> dNd2Mdy_eq, dNd2Mdy_tot;
+    std::vector<double> dNd2Mdy_eqT, dNd2Mdy_eqL;
     double **vn_sin_eq;
     double **vn_cos_eq;
     double **vn_cos_tot;

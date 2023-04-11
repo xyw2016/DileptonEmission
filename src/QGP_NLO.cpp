@@ -26,7 +26,7 @@ QGP_NLO::QGP_NLO(
 #define sgn(x) (double) ((x>0)-(x<0))
 #define sz size()
 #define loop(i,a,b) for(int (i)=(a);(i)<(b);(i)++)
-#define OOFP 0.0795774715459476678844418816863
+#define OOFP 0.0795774715459476678844418816863 //1/(4*pi)
 
 double Nc=3.;
 double Cf=((Nc)*(Nc)-1)/(2.*Nc);
@@ -316,8 +316,9 @@ double B_(double x) { // kinematic factor
     return (1.+2.*x)*sqrt(1.-4.*x);
 }
 
-double ThermalPhoton::rate(struct ThermalPhoton::Table grid_T, struct ThermalPhoton::Table grid_L,
-            double o, double k, double alpha_s, double muB, double T, double m_l) {
+void ThermalPhoton::NLO_rate(struct ThermalPhoton::Table grid_T, struct ThermalPhoton::Table grid_L,
+            double o, double k, double alpha_s, double muB, double T, double m_l, double &rateTot, 
+            double &rateT, double &rateL) {
   // NB: quantities are defined in the local rest frame, i.e. u_\mu=(1,0,0,0)
   double M2 = o*o-k*k;
 
@@ -329,7 +330,13 @@ double ThermalPhoton::rate(struct ThermalPhoton::Table grid_T, struct ThermalPho
   double rhoT_app, rhoL_app;
   approx_rho(in,grid_T,grid_L,rhoT_app,rhoL_app);
 
-  return prefactor*nB(o/T)*pow(T,2.)*( 2.*rhoT_app + rhoL_app )/(3.*pow(M_PI,3.)*M2);
+  double prefac = prefactor*nB(o/T)*pow(T,2.)/(3.*pow(M_PI,3.)*M2);
+
+  rateT = prefac * rhoT_app;
+  rateL = prefac * rhoL_app;
+
+  rateTot = 2.*rateT + rateL;
+
 }
 
 

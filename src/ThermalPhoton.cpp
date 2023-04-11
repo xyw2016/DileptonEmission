@@ -348,14 +348,16 @@ void ThermalPhoton::analyticRatesBulkVis(double T, vector<double> &Eq,
 
 
 void ThermalPhoton::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, double Eq, 
-    double M_ll, double &eqrate_ptr, double &diffrate_ptr, int include_diff_deltaf) {
+    double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &diffrate_ptr, int include_diff_deltaf) {
     eqrate_ptr = 1.e-16;
+    eqrateT_ptr = 1.e-16;
+    eqrateL_ptr = 1.e-16;
     diffrate_ptr = 0.;
 }
 
 
-void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_zz, double bulkPi,
-	double diff_factor, double T, double muB, double rhoB_over_eplusp, double &eqrate_ptr, 
+void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_zz, double bulkPi, double diff_factor, 
+    double T, double muB, double rhoB_over_eplusp, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, 
 	double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr) 
 {
 
@@ -363,12 +365,11 @@ void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_zz, 
         // interpolate NLO equilibrium rate
         double k = sqrt(Eq*Eq-M_ll*M_ll);
 
-  		eqrate_ptr = rate(grid_T,grid_L,Eq,k,alpha_s,muB,T,me);
+  		NLO_rate(grid_T,grid_L,Eq,k,alpha_s,muB,T,me, eqrate_ptr, eqrateT_ptr, eqrateL_ptr);
   		diffrate_ptr = 0.;
-
     } else {
     	// use LO analytical form
-    	FiniteBaryonRates(T, muB, rhoB_over_eplusp, Eq, M_ll, eqrate_ptr, diffrate_ptr, include_diff_deltaf);
+    	FiniteBaryonRates(T, muB, rhoB_over_eplusp, Eq, M_ll, eqrate_ptr, eqrateT_ptr, eqrateL_ptr, diffrate_ptr, include_diff_deltaf);
     }
 
     diffrate_ptr = diff_factor * diffrate_ptr;
@@ -378,13 +379,16 @@ void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_zz, 
 // this function calculates the spectra for a specific Eq and M at a fluid cell
 void ThermalPhoton::calThermalPhotonemission_3d(double Eq, double M_ll, double pi_zz, double bulkPi, 
 	double diff_factor, double T, double muB, double rhoB_over_eplusp, double volume, double fraction,
-	double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot) {
+	double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_eqT, double &dNd2pTdphidy_cell_eqL, 
+    double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot) {
 
     const double volfrac = volume*fraction;
 
     // Given (T, mu), the emission rate depends on momentum and invariant mass of dilepton
     // photon emission equilibrium rate at local rest cell
     double em_eqrate = 0.;
+    double em_eqrateT = 0.;
+    double em_eqrateL = 0.;
     // photon emission viscous correction at local rest cell
     double em_visrate = 0.;
     // photon emission bulk viscous correction at local rest cell
@@ -393,15 +397,19 @@ void ThermalPhoton::calThermalPhotonemission_3d(double Eq, double M_ll, double p
     double em_diffrate = 0.;
 
     getPhotonemissionRate(Eq, M_ll, pi_zz, bulkPi, diff_factor, T, muB, rhoB_over_eplusp,
-                          em_eqrate, em_visrate, em_bulkvis, em_diffrate);
+                          em_eqrate, em_eqrateT, em_eqrateL, em_visrate, em_bulkvis, em_diffrate);
 
     double temp_eq_sum = em_eqrate*volfrac;
+    double temp_eqT_sum = em_eqrateT*volfrac;
+    double temp_eqL_sum = em_eqrateL*volfrac;
     // double temp_vis_sum = em_visrate*volfrac;
     // double temp_bulkvis_sum = em_bulkvis*volfrac;
     double temp_diff_sum = em_diffrate*volfrac;
 
     // spectra
     dNd2pTdphidy_cell_eq = temp_eq_sum;
+    dNd2pTdphidy_cell_eqT = temp_eqT_sum;
+    dNd2pTdphidy_cell_eqL = temp_eqL_sum;
     dNd2pTdphidy_cell_diff = temp_eq_sum + temp_diff_sum;
     dNd2pTdphidy_cell_tot = (temp_eq_sum + temp_diff_sum);
 

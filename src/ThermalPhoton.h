@@ -150,14 +150,15 @@ class ThermalPhoton {
     virtual void analyticRatesBulkVis(double T, std::vector<double> &Eq,
         double *M_ll, std::vector<double> &eqrate_ptr);
     virtual void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, double Eq, 
-    double M_ll, double &eqrate_ptr, double &diffrate_ptr, int include_diff_deltaf);
+    double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &diffrate_ptr, int include_diff_deltaf);
 
     void getPhotonemissionRate(double Eq, double M_ll, double pi_zz, double bulkPi,
-        double diff_factor, double T, double muB, double rhoB_over_eplusp, double &eqrate_ptr, 
-        double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr);
+        double diff_factor, double T, double muB, double rhoB_over_eplusp, double &eqrate_ptr, double &eqrateT_ptr, 
+        double &eqrateL_ptr, double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr);
     void calThermalPhotonemission_3d(double Eq, double M_ll, double pi_zz, double bulkPi, 
         double diff_factor, double T, double muB, double rhoB_over_eplusp, double volume, double fraction,
-        double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot);
+        double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_eqT, double &dNd2pTdphidy_cell_eqL, 
+        double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot);
 
     void calPhoton_SpvnpT(double ***dNd2pTdphipy,
                           double ***vnypT_cos, double *** vnypT_sin,
@@ -190,8 +191,8 @@ class ThermalPhoton {
         // ~Table();
     };
 
-    double rate(struct Table grid_T, struct Table grid_L,
-        double o, double k, double alpha_s, double muB, double T, double m_l);
+    void NLO_rate(struct Table grid_T, struct Table grid_L, double o, double k, double alpha_s, 
+                double muB, double T, double m_l, double &rateTot, double &rateT, double &rateL);
 
 private:
     Table grid_T;

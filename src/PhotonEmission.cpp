@@ -63,10 +63,16 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     lambda = createA2DMatrix(4, 4, 0.);
 
     dNd2pTdphidy_eq = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_eqT = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_eqL = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_tot = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTd2M_eq = createA2DMatrix(nm, np, 0);
+    dNd2pTd2M_eqT = createA2DMatrix(nm, np, 0);
+    dNd2pTd2M_eqL = createA2DMatrix(nm, np, 0);
     dNd2pTd2M_tot = createA2DMatrix(nm, np, 0);
     dNd2Mdy_eq.resize(nm, 0);
+    dNd2Mdy_eqT.resize(nm, 0);
+    dNd2Mdy_eqL.resize(nm, 0);
     dNd2Mdy_tot.resize(nm, 0);
 
     vnpT_cos_eq = createA3DMatrix(norder, nm, np, 0.);
@@ -95,8 +101,12 @@ PhotonEmission::~PhotonEmission() {
     deleteA2DMatrix(lambda, 4);
 
     deleteA4DMatrix(dNd2pTdphidy_eq, nm, np, nphi);
+    deleteA4DMatrix(dNd2pTdphidy_eqT, nm, np, nphi);
+    deleteA4DMatrix(dNd2pTdphidy_eqL, nm, np, nphi);
     deleteA4DMatrix(dNd2pTdphidy_tot, nm, np, nphi);
     deleteA2DMatrix(dNd2pTd2M_eq, nm);
+    deleteA2DMatrix(dNd2pTd2M_eqT, nm);
+    deleteA2DMatrix(dNd2pTd2M_eqL, nm);
     deleteA2DMatrix(dNd2pTd2M_tot, nm);
 
     deleteA3DMatrix(vnpT_cos_eq, norder, nm);
@@ -287,6 +297,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
     // arrays to store values across cores
     double *dNd2pTdphidy_eq_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
+    double *dNd2pTdphidy_eqT_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
+    double *dNd2pTdphidy_eqL_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
     double *dNd2pTdphidy_diff_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
     double *dNd2pTdphidy_tot_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
 
@@ -496,6 +508,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             double diff_Tb = prefactor_diff * diff_dot_p * M_ll[j] * M_ll[j] / pvec3;
 
                             double dNd2pTdphidy_cell_eq = 0.;
+                            double dNd2pTdphidy_cell_eqT = 0.;
+                            double dNd2pTdphidy_cell_eqL = 0.;
                             double dNd2pTdphidy_cell_diff = 0.;
                             double dNd2pTdphidy_cell_tot = 0.;
 
@@ -506,11 +520,14 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                 dilepton_QGP_thermal->calThermalPhotonemission_3d(
                                     Eq_localrest_Tb, M_ll[j], pi_photon_Tb, bulkPi_Tb, diff_Tb,
                                     temp_local, muB_local, rhoB_over_eplusp, volume, QGP_fraction,
-                                    dNd2pTdphidy_cell_eq, dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot);
+                                    dNd2pTdphidy_cell_eq, dNd2pTdphidy_cell_eqT, dNd2pTdphidy_cell_eqL, 
+                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot);
                             }
 
                             // add contributions from QGP and Hadronic matter, etc
                             dNd2pTdphidy_eq_all[n + CORES * i3] += dNd2pTdphidy_cell_eq;
+                            dNd2pTdphidy_eqT_all[n + CORES * i3] += dNd2pTdphidy_cell_eqT;
+                            dNd2pTdphidy_eqL_all[n + CORES * i3] += dNd2pTdphidy_cell_eqL;
                             dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff;
                             dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot;
 
@@ -536,6 +553,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                     int i3 = (j+(l+(m+nphi * k) * np) * nm);
 
                     double dN_pTdpTdphidy_eq_tmp = 0.0; // reduction variable
+                    double dN_pTdpTdphidy_eqT_tmp = 0.0;
+                    double dN_pTdpTdphidy_eqL_tmp = 0.0;
                     double dN_pTdpTdphidy_diff_tmp = 0.0;
                     double dN_pTdpTdphidy_tot_tmp = 0.0;
 
@@ -543,11 +562,15 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                     for(long n = 0; n < CORES; n++)
                     {
                         dN_pTdpTdphidy_eq_tmp += dNd2pTdphidy_eq_all[n+CORES*i3];
+                        dN_pTdpTdphidy_eqT_tmp += dNd2pTdphidy_eqT_all[n+CORES*i3];
+                        dN_pTdpTdphidy_eqL_tmp += dNd2pTdphidy_eqL_all[n+CORES*i3];
                         dN_pTdpTdphidy_diff_tmp += dNd2pTdphidy_diff_all[n+CORES*i3];
                         dN_pTdpTdphidy_tot_tmp += dNd2pTdphidy_tot_all[n+CORES*i3];
                     } // sum over the cores
 
                     dNd2pTdphidy_eq[j][l][m][k] = dN_pTdpTdphidy_eq_tmp;
+                    dNd2pTdphidy_eqT[j][l][m][k] = dN_pTdpTdphidy_eqT_tmp;
+                    dNd2pTdphidy_eqL[j][l][m][k] = dN_pTdpTdphidy_eqL_tmp;
                     //dNd2pTdphidy_diff[j][l][m][k] = dN_pTdpTdphidy_diff_tmp;
                     dNd2pTdphidy_tot[j][l][m][k] = dN_pTdpTdphidy_tot_tmp;
 
@@ -587,6 +610,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
     // free memory
     free(dNd2pTdphidy_eq_all);
+    free(dNd2pTdphidy_eqT_all);
+    free(dNd2pTdphidy_eqL_all);
     free(dNd2pTdphidy_diff_all);
     free(dNd2pTdphidy_tot_all);
 }
@@ -628,6 +653,8 @@ void PhotonEmission::calPhoton_total_Spvn() {
                 for (int k = 0; k < nrapidity; k++) {
                     // integrate over rapidity, azimuthal angle of momentum
                     dNd2pTd2M_eq[m][i] += dNd2pTdphidy_eq[m][i][j][k]*weight;
+                    dNd2pTd2M_eqT[m][i] += dNd2pTdphidy_eqT[m][i][j][k]*weight;
+                    dNd2pTd2M_eqL[m][i] += dNd2pTdphidy_eqL[m][i][j][k]*weight;
                     dNd2pTd2M_tot[m][i] += dNd2pTdphidy_tot[m][i][j][k]*weight;
                     for (int order = 0; order < norder; order++) {
                         vnpT_cos_eq[order][m][i] += (
@@ -642,7 +669,9 @@ void PhotonEmission::calPhoton_total_Spvn() {
                 }
             }
             // integral over pT
-            dNd2Mdy_eq[m] += dNd2pTd2M_eq[m][i]*p*pweight; 
+            dNd2Mdy_eq[m] += dNd2pTd2M_eq[m][i]*p*pweight;
+            dNd2Mdy_eqT[m] += dNd2pTd2M_eqT[m][i]*p*pweight;
+            dNd2Mdy_eqL[m] += dNd2pTd2M_eqL[m][i]*p*pweight; 
             dNd2Mdy_tot[m] += dNd2pTd2M_tot[m][i]*p*pweight;
 
             for (int order=0; order < norder; order++) {
@@ -658,6 +687,8 @@ void PhotonEmission::calPhoton_total_Spvn() {
                 vnpT_sin_tot[order][m][i] = vnpT_sin_tot[order][m][i]/dNd2pTd2M_tot[m][i];
             }
             dNd2pTd2M_eq[m][i] = dNd2pTd2M_eq[m][i]/(2*M_PI); // dN/(2pi pTdpT)
+            dNd2pTd2M_eqT[m][i] = dNd2pTd2M_eqT[m][i]/(2*M_PI);
+            dNd2pTd2M_eqL[m][i] = dNd2pTd2M_eqL[m][i]/(2*M_PI);
             dNd2pTd2M_tot[m][i] = dNd2pTd2M_tot[m][i]/(2*M_PI);
         }
     }
@@ -675,20 +706,29 @@ void PhotonEmission::calPhoton_total_Spvn() {
 
 void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
     ostringstream filename_stream_eq_SpMatrix;
+    ostringstream filename_stream_eq_TL_SpMatrix;
     ostringstream filename_stream_eq_Spvn;
+    ostringstream filename_stream_eq_TL_Spvn;
     ostringstream filename_stream_tot_SpMatrix;
     ostringstream filename_stream_tot_Spvn;
     ostringstream filename_stream_eq_inte_Spvn;
+    ostringstream filename_stream_eq_TL_inte_Spvn;
     ostringstream filename_stream_tot_inte_Spvn;
 
-    string filename = "dilepton";
+    string filename = "Total_dilepton";
 
     filename_stream_eq_SpMatrix << output_path << filename
                                 << "_eq_SpMatrix.dat";
+    filename_stream_eq_TL_SpMatrix << output_path << filename
+                                << "_eq_TL_SpMatrix.dat";
     filename_stream_eq_Spvn << output_path << filename 
                                 << "_eq_Spvn.dat";
+    filename_stream_eq_TL_Spvn << output_path << filename 
+                                << "_eq_TL_Sp.dat";
     filename_stream_eq_inte_Spvn << output_path << filename 
                                 << "_eq_Spvn_inte.dat";
+    filename_stream_eq_TL_inte_Spvn << output_path << filename 
+                                << "_eq_TL_Sp_inte.dat";
 
     filename_stream_tot_SpMatrix << output_path << filename 
                                 << "_tot_SpMatrix.dat";
@@ -700,6 +740,9 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
     ofstream fphoton_eq_SpMatrix(filename_stream_eq_SpMatrix.str().c_str());
     ofstream fphoton_eq_Spvn(filename_stream_eq_Spvn.str().c_str());
     ofstream fphotoninte_eq_Spvn(filename_stream_eq_inte_Spvn.str().c_str());
+    ofstream fphoton_eq_TL_SpMatrix(filename_stream_eq_TL_SpMatrix.str().c_str());
+    ofstream fphoton_eq_TL_Spvn(filename_stream_eq_TL_Spvn.str().c_str());
+    ofstream fphotoninte_eq_TL_Spvn(filename_stream_eq_TL_inte_Spvn.str().c_str());
     ofstream fphoton_tot_SpMatrix(filename_stream_tot_SpMatrix.str().c_str());
     ofstream fphoton_tot_Spvn(filename_stream_tot_Spvn.str().c_str());
     ofstream fphotoninte_tot_Spvn(filename_stream_tot_inte_Spvn.str().c_str());
@@ -708,21 +751,29 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
         for (int i=0; i < nphi; i++) {
             double phi = dilepton_QGP_thermal->getPhotonphi(i);
             fphoton_eq_SpMatrix << phi << "  ";
+            fphoton_eq_TL_SpMatrix << phi << "  ";
             fphoton_tot_SpMatrix << phi << "  ";
             for (int j = 0; j < np; j++) {
                 double temp_eq = 0.0;
+                double temp_eqT = 0.0;
+                double temp_eqL = 0.0;
                 double temp_tot = 0.0;
                 double dy = dilepton_QGP_thermal->get_dy();
                 for (int k = 0; k < nrapidity; k++) {
                     temp_eq += dNd2pTdphidy_eq[m][j][i][k]*dy;
+                    temp_eqT += dNd2pTdphidy_eqT[m][j][i][k]*dy;
+                    temp_eqL += dNd2pTdphidy_eqL[m][j][i][k]*dy;
                     temp_tot += dNd2pTdphidy_tot[m][j][i][k]*dy;
                 }
                 fphoton_eq_SpMatrix << scientific << setprecision(6) << setw(16)
                                     << temp_eq << "  ";
+                fphoton_eq_TL_SpMatrix << scientific << setprecision(6) << setw(16)
+                                    << temp_eqT << "  " << temp_eqL << "  ";
                 fphoton_tot_SpMatrix << scientific << setprecision(6) << setw(16)
                                 << temp_tot << "  ";
             }
             fphoton_eq_SpMatrix << endl;
+            fphoton_eq_TL_SpMatrix << endl;
             fphoton_tot_SpMatrix << endl;
         }
     }
@@ -731,15 +782,14 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
     for (int m = 0; m < nm; m++) {
         for (int i = 0; i < np; i++) {
             double M_ll = dilepton_QGP_thermal->getDileptonMass(m);
-            fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
-                            << M_ll << "  ";
-            fphoton_tot_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  ";
             double pT = dilepton_QGP_thermal->getPhotonp(i);
             fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
-                            << pT << "  " << dNd2pTd2M_eq[m][i] << "  ";
+                            << M_ll << "  "<< pT << "  " << dNd2pTd2M_eq[m][i] << "  ";
+            fphoton_eq_TL_Spvn << scientific << setprecision(6) << setw(16)
+                            << M_ll << "  "<< pT << "  " << dNd2pTd2M_eqT[m][i] << "  " << dNd2pTd2M_eqL[m][i];
             fphoton_tot_Spvn << scientific << setprecision(6) << setw(16)
-                        << pT << "  " << dNd2pTd2M_tot[m][i] << "  ";
+                        << M_ll << "  "<< pT << "  " << dNd2pTd2M_tot[m][i] << "  ";
+
             for (int order=1; order < norder; order++) {
                 fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
                                 << order << "   " << vnpT_cos_eq[order][m][i] << "  "
@@ -753,6 +803,7 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
                                     + pow(vnpT_sin_tot[order][m][i], 2)) << "  ";
             }
             fphoton_eq_Spvn << endl;
+            fphoton_eq_TL_Spvn << endl;
             fphoton_tot_Spvn << endl;
         }
     }
@@ -762,6 +813,8 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
         double M_ll = dilepton_QGP_thermal->getDileptonMass(m);
         fphotoninte_eq_Spvn << scientific << setprecision(6) << setw(16)
                         << M_ll << "  " << dNd2Mdy_eq[m]*M_ll << "  ";
+        fphotoninte_eq_TL_Spvn << scientific << setprecision(6) << setw(16)
+                        << M_ll << "  " << dNd2Mdy_eqT[m]*M_ll << "  " << dNd2Mdy_eqL[m]*M_ll;
         fphotoninte_tot_Spvn << scientific << setprecision(6) << setw(16)
                     << M_ll << "  " << dNd2Mdy_tot[m]*M_ll << "  ";
 
@@ -778,6 +831,7 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
                                     + pow(vn_sin_tot[order][m], 2)) << "  ";
         }
         fphotoninte_eq_Spvn << endl;
+        fphotoninte_eq_TL_Spvn << endl;
         fphotoninte_tot_Spvn << endl;
     }
 }

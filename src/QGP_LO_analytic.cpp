@@ -13,7 +13,7 @@ QGP_LO_analytic::QGP_LO_analytic(
 
 // PRC. 93, 044902, 2016
 void QGP_LO_analytic::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, double Eq, 
-    double M_ll, double &eqrate_ptr, double &diffrate_ptr, int include_diff_deltaf) {
+    double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &diffrate_ptr, int include_diff_deltaf) {
 
     const double aem = 1./137.;
     const double Qu  = 2./3.;

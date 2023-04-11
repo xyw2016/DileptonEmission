@@ -6,6 +6,10 @@
 using PhysConsts::hbarC;
 using PhysConsts::alphaEM;
 using PhysConsts::eps;
+using PhysConsts::me;
+
+#define OOFP 0.0795774715459476678844418816863 //1/(4*pi)
+#define sgn(x) (double) ((x>0)-(x<0))
 
 QGP_LO::QGP_LO(
         std::shared_ptr<ParameterReader> paraRdr_in,
@@ -87,8 +91,6 @@ double QGP_LO::a1(double omega,double q,double qsq,double T,double muB,double m_
 double QGP_LO::heaviside(double x) {
     if (x < 0.0) {
         return 0.0;
-    } else if (x == 0.0) {
-        return 0.5;
     } else {
         return 1.0;
     }
@@ -99,6 +101,8 @@ double QGP_LO::heaviside(double x) {
 // }
 
 double QGP_LO::l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
+double QGP_LO::l2f(double x) { return -gsl_sf_fermi_dirac_1(-x); }
+double QGP_LO::l3f(double x) { return -gsl_sf_fermi_dirac_2(-x); }
 
 double QGP_LO::nB(double x){
     return 1./(exp(x) - 1.);
@@ -120,28 +124,60 @@ double QGP_LO::rhoV(double omega,double k,double ksq, double T,double muB){
     return ps1*(T*ps2 + ps3);
 }
 
-double QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,double m_ell2){
+
+double QGP_LO::rhoL(double o, double k, double K2, double T, double muB) { 
+      // leading order result, see (2.4) of 1910.09567
+      // (mu dependence not actually published yet...)
+
+    double T2 = (T*T);
+    double mu = muB/3.;
+
+    o /= T; k /= T; K2 /= T2; mu /= T; // make them in units of T
+
+    double rL, r00;
+    double kp = .5*(o+k), km = .5*fabs(o-k), somk = sgn(o-k);
+
+    double ps1 = l3f(kp+mu) + l3f(kp-mu) - l3f(km+mu) - l3f(km-mu);
+    double ps2 = l2f(kp+mu) + l2f(kp-mu) + somk*( l2f(km+mu) + l2f(km-mu) );
+    double ps3 = .5*k*k*(somk+1.);
+    r00 = -OOFP * ((ps1*2./k + ps2)*6. + ps3);
+
+    rL =  - K2*r00/(k*k);
+
+    return rL*T2;// put back the unit
+}
+
+void QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,double m_ell2, double &rV, double &rL, double &rT){
     // omega = q^0, q = magnitude of 3-vec q, T = temperature, muB = Baryon chemical potential, m_ell2 = the lepton mass squared
+
     double C_EM = 2./3.;
+    double prefacor = C_EM*pow(alphaEM,2)*nB(omega/T)*Bfun(m_ell2/qsq)/(3.*pow(M_PI,3)*qsq);
 
-    double rate = C_EM*pow(alphaEM,2)*nB(omega/T)*Bfun(m_ell2/qsq)*rhoV(omega,q,qsq,T,muB)/(3.*pow(M_PI,3)*qsq);
+    rV = prefacor*rhoV(omega,q,qsq,T,muB);
+    rL = prefacor*rhoL(omega,q,qsq,T,muB);
+    rT = .5*(rV-rL);
 
-    return rate;
 }
 
 
 void QGP_LO::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, double Eq, 
-    double M_ll, double &eqrate_ptr, double &diffrate_ptr, int include_diff_deltaf){
+    double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &diffrate_ptr, int include_diff_deltaf){
 
-    double me = 0.0051;
     double m_ell2 = me * me;
-    double prefac = 1./pow(hbarC, 4);
-
+    
     double M2 = M_ll*M_ll;
     double p = sqrt(Eq*Eq - M2);// magnitude of 3-vec p in LRF
 
+    double rV = 0.0;
+    double rL = 0.0;
+    double rT = 0.0;
+    fmuB_rate(Eq,p,M2,T,muB,m_ell2,rV, rL, rT);
+
+    double prefac = 1./pow(hbarC, 4); // prefac to give the right unit
     // equilibrium rate
-    eqrate_ptr= prefac*fmuB_rate(Eq,p,M2,T,muB,m_ell2);
+    eqrate_ptr = prefac*rV;
+    eqrateL_ptr= prefac*rL;
+    eqrateT_ptr= prefac*rT;
 
     // diffusion correction
     if(include_diff_deltaf==1)
