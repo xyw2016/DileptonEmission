@@ -87,23 +87,11 @@ void rho_OPE(double o, double k, double alpha, double mu, double &rT, double &rL
 
 int id(double _x, double *x, int nx) { // locate _x (assume x[nx] ordered)
 
-  // Check if _x is within the range of x[] array
-  if (_x < x[0] || _x > x[nx-1]) {
-    // handle out of bounds error
-    return -1;
-  }
-
   int iU=nx-1, iM, iL=0;
   while (iU-iL > 1) {
     iM = (iU+iL) >> 1; // midpoint
     if (_x >= x[iM]) iL=iM;
     else iU=iM;
-  }
-
-  // Check if iL and iL+1 are within the range of the x[] array
-  if (iL < 0 || iL >= nx-1 || iL+1 < 0 || iL+1 >= nx) {
-    // handle out of bounds error
-    return -1;
   }
 
   return iL;
@@ -150,30 +138,6 @@ double ThermalPhoton::Table::interp(double _x, double _y, double _z, double _w) 
   b = (_y-y[j])/(y[j+1]-y[j]);
   c = (_z-z[k])/(z[k+1]-z[k]);
   d = (_w-w[l])/(w[l+1]-w[l]);
-
-  // if (i < 0 || i >= nx-1) { 
-
-  //   printf("Warning: alpha_s=%f, out of the boundaries of the emission rate table!\n", _x);
-
-  // }
-
-  // if (j < 0 || j >= ny-1) { 
-
-  //   printf("Warning: muB/T=%f, out of the boundaries of the emission rate table!\n", _y);
-
-  // }
-
-  // if (k < 0 || k >= nz-1) { 
-
-  //   printf("Warning: M_ll/T=%f, out of the boundaries of the emission rate table!\n", _z);
-
-  // }
-
-  // if (l < 0 || l >= nw-1) { 
-
-  //   printf("Warning: k/T=%f, out of the boundaries of the emission rate table!\n", _w);
-
-  // }
 
   // a,b,c,d (each value between 0 and 1)
   res = (1.-a)*(1.-b)*(1.-c)*(1.-d)*F[i][j][k][l] 
