@@ -195,6 +195,8 @@ class fluidCell_3D_new {
     float qy = 0.;
     float qz = 0.;
 
+    // An addition operator that allows adding two fluid cells together, 
+    // resulting in a new fluid cell with the summed properties.
     fluidCell_3D_new operator + (fluidCell_3D_new const &obj) {
         fluidCell_3D_new res;
         res.ed = ed + obj.ed;
@@ -218,6 +220,8 @@ class fluidCell_3D_new {
         return(res);
     }
 
+    // A multiplication operator that multiplies all the properties 
+    // of the fluid cell by a scalar value.
     fluidCell_3D_new operator * (const double a) {
         fluidCell_3D_new res;
         res.ed = ed*a;

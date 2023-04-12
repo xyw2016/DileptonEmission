@@ -232,6 +232,8 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
 
 
 void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
+
+    // hydro data read in main.cpp
     Hydroinfo_MUSIC *hydroinfo_MUSIC_ptr;
     hydroinfo_MUSIC_ptr =
                 reinterpret_cast<Hydroinfo_MUSIC*>(hydroinfo_ptr_in);
@@ -276,6 +278,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double flow_u_mu_low[4];
     double flow_u_mu_Min[4]; // fluid velocity in Minkowski
     fluidCell_3D_new fluidCellptr;
+
+    // Lorentz boost matrix
     double **lambda_munu = createA2DMatrix(4, 4, 0.);
 
     // number of fluid cells
@@ -335,16 +339,14 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             const double ed_local = fluidCellptr.ed;
             const double pd_local = fluidCellptr.pressure;
             double temp_local = fluidCellptr.temperature;
-            double muB_local = turn_on_muB_*fluidCellptr.muB;
-            const double rhoB_local = turn_on_muB_*fluidCellptr.rhoB;
             double temp_inv = 1/temp_local;
+
+            // note that when turn_on_muB_=0, muB and rhoB are set to zero as follows
+            double muB_local = turn_on_muB_*fluidCellptr.muB;
+            double rhoB_local = turn_on_muB_*fluidCellptr.rhoB;
             double rhoB_over_eplusp = rhoB_local/(ed_local+pd_local);
 
-            // if muB is off, muB is set to a tiny value
-            if(turn_on_muB_==0)
-                muB_local = eps;
-
-            // validation setup
+            // validation setup, using some constant values to test the code
             if(test_code_flag==1){
                 temp_local = T_test;
                 temp_inv = 1/temp_local;
@@ -370,12 +372,11 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                 ncells++;
             }
 
-            // printf("temperature=%f\n", temp_local);
-
             // indices for the output in (T, tau)
             int idx_T = (int)std::floor((temp_local - T_cutlow)/dT_cut + eps);
             int idx_tau = (int)std::floor((tau_local - tau_cut_low)/dtau_cut + eps);
 
+            // ueta = tau*ueta
             double ux, uy, ueta;
             if (turn_off_transverse_flow == 1) {
                 ux = 0.0;
@@ -398,17 +399,16 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double sinh_eta = sinh(eta_local);
 
             // 4 velocity in Minkowski in lab frame
-
             flow_u_mu_Min[0] = cosh_eta*utau + sinh_eta*ueta;
             flow_u_mu_Min[1] = ux;
             flow_u_mu_Min[2] = uy;
             flow_u_mu_Min[3] = sinh_eta*utau + cosh_eta*ueta;
 
             // Lorentz boost matrix from lab to local rest frame
-
             lorentz_boost_matrix(lambda_munu, flow_u_mu_Min[0], 
                 flow_u_mu_Min[1], flow_u_mu_Min[2], flow_u_mu_Min[3]);
 
+            // Wij is reduced variables Wij/(e+P), Wieta = tau*Wieta
             double pi11 = fluidCellptr.pi11;
             double pi12 = fluidCellptr.pi12;
             double pi13 = fluidCellptr.pi13;
@@ -430,6 +430,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double qeta = fluidCellptr.qz;
             double qtau = (ux*qx + uy*qy + ueta*qeta)/utau;
 
+            // prefactors in the dissipative correction
             double prefactor_pimunu = 1./2.;
             double prefactor_diff = 1./(4.*pow(2*M_PI, 5)) * temp_inv/pow(hbarC, 4);
 
@@ -447,9 +448,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                         for (int j = 0; j < nm; j++) {
                             int i3 = (j+i2);
 
+                            // p_q is p_T magnitude array
                             double M_T = sqrt(p_q[l]*p_q[l]+M_ll[j]*M_ll[j]); // transverse mass
 
-                            // p_q is p_T array
                             // Minkowski four momentum in lab frame
                             p_lab_Min[0] = M_T * cosh_y;
                             p_lab_Min[1] = p_q[l]*cos_phiq[m];
@@ -460,9 +461,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             p_lab_local[0] = M_T * cosh_y_minus_eta;
                             p_lab_local[1] = p_q[l]*cos_phiq[m];
                             p_lab_local[2] = p_q[l]*sin_phiq[m];
-                            p_lab_local[3] = M_T * sinh_y_minus_eta;
+                            p_lab_local[3] = M_T * sinh_y_minus_eta; // tau*p^eta
 
-                            // from Lab frame to LRF frame
+                            // Minkowski four momentum from Lab frame to LRF frame
                             double p_Min_lrf[4];
                             for (int j = 0; j < 4; j++) {
                                 p_Min_lrf[j] = 0.;
@@ -471,10 +472,11 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                 }                            
                             }
 
-                            double pvec_lrf, pvec3; // spatial magnitude, |vec p| and |vec p|^5
+                            double pvec_lrf, pvec3; // Minkowski spatial magnitude |vec p| and |vec p|^3
                             pvec_lrf = sqrt(p_Min_lrf[1]*p_Min_lrf[1] + p_Min_lrf[2]*p_Min_lrf[2] + p_Min_lrf[3]*p_Min_lrf[3]);
                             pvec3 = pow(pvec_lrf, 3);
 
+                            // E=u_mu*p^mu in Milne, which is p_Min_lrf[0]
                             double Eq_localrest_temp = 0.0e0;
                             for (int local_i = 0; local_i < 4; local_i++) {
                                 Eq_localrest_temp += (flow_u_mu_low[local_i]
