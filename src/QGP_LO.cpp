@@ -1,3 +1,4 @@
+// Adapted by L. Du from H. Gao
 #include "QGP_LO.h"
 #include "data_struct.h"
 #include <gsl/gsl_sf_fermi_dirac.h>
@@ -30,7 +31,7 @@ double QGP_LO::cross_sec(double omega, double q, double qsq, double m_ell2){
     double C_EM = 2./3.;
     double Nc = 3.;
 
-    return Nc*C_EM*(4.* M_PI/3.)*(pow(alphaEM,2)/qsq)*Bfun(m_ell2/qsq);
+    return 4*Nc*C_EM*(4.*M_PI/3.)*(pow(alphaEM,2)/qsq)*Bfun(m_ell2/qsq); // 4=initial spin configurations not to be average. i.e., the x-sec used used be 4-times larger than p&s (5.13)
 }
 
 // for a_1 part of diff rate
@@ -71,14 +72,14 @@ double QGP_LO::intJn(int n, double a, double b, double z) { // computing J_n(a,b
     return result;
 }
 
-double QGP_LO::a1(double omega,double q,double qsq,double T,double muB,double m_ell2,double nB_o_epp){
+double QGP_LO::a1(double omega,double q,double qsq,double T,double muB,double m_ell2,double sigma,double nB_o_epp){
     // omega = q^0, q = magnitude of 3-vec q, T = temperature, muB = Baryon chemical potential, m_ell2 = the lepton mass squared
     // nB_o_epp = n_B/(e+p) must be import from hydro
     // final rate for a1 is d4R/d4q = a1*q.V/(T^2*kappa-hat) where V is the diffusion current
-    // note that the factor T*qsq/(4.*pow((2.*M_PI),5)*pow(q,3)) is not included in a1 here.
+    // note that the factor T*qsq/(4.*pow((2.*M_PI),5)*pow(q,3)) is not included in a1 here. Moved to PhotonEmission.cpp
     
     double muq = muB/3.;
-    double sigma = cross_sec(omega,q,qsq,m_ell2);
+    // double sigma = cross_sec(omega,q,qsq,m_ell2);
     //double ps1 = T*qsq*sigma/(4.*pow((2.*M_PI),5)*pow(q,3));
     double ps2 = 2*omega*nB_o_epp*pow(T,3)*intJn(1,omega/T,q/T,muq/T) - pow(T,2)*(qsq*nB_o_epp + 2.*omega/3.)*intJn(0,omega/T,q/T,muq/T) 
                     + qsq*T*intJn(-1,omega/T,q/T,muq/T)/3.;
@@ -86,6 +87,24 @@ double QGP_LO::a1(double omega,double q,double qsq,double T,double muB,double m_
                     - qsq*T*intJn(-1,omega/T,q/T,-muq/T)/3.;
 
     return sigma*(ps2 + ps3);
+}
+
+double QGP_LO::s2(double omega,double q,double qsq,double T,double muB,double m_ell2,double sigma){
+    // omega = q^0, q = magnitude of 3-vec q, qsq = (q^0)^2 - q^2, T = temperature, muB = Baryon chemical potential, m_ell2 = the lepton mass squared
+    // The final DPR is given by
+    // deltaDPR_shear = q^a q^b pi^ab *s2 /(T^2(E+P))
+    // note that the factor Cq*T*qsq/(4.*pow((2.*M_PI),5)*pow(q,5)) is not included in s2 here. Moved to PhotonEmission.cpp
+
+    double muq = muB/3.;
+
+    double j2 = intJn(2,omega/T,q/T,-muq/T) + intJn(2,omega/T,q/T,muq/T);
+    double j1 = intJn(1,omega/T,q/T,-muq/T) + intJn(1,omega/T,q/T,muq/T);
+    double j0 = intJn(0,omega/T,q/T,-muq/T) + intJn(0,omega/T,q/T,muq/T);
+
+    // double sigma = cross_sec(omega,q,qsq,m_ell2);
+    double ps2 = (3.*pow(omega,2) - pow(q,2))*pow(T,2)*j2 - 3.*omega*qsq*T*j1 + 3.*pow(qsq,2)*j0/4.;
+
+    return sigma*ps2;
 }
 
 double QGP_LO::heaviside(double x) {
@@ -160,28 +179,37 @@ void QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,doub
 }
 
 
-void QGP_LO::FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, double Eq, 
-    double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &diffrate_ptr, int include_diff_deltaf){
+void QGP_LO::FiniteBaryonRates(double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double Eq, 
+    double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, double &diffrate_ptr,
+    int include_visc_deltaf, int include_diff_deltaf){
 
     double m_ell2 = me * me;
     
     double M2 = M_ll*M_ll;
     double p = sqrt(Eq*Eq - M2);// magnitude of 3-vec p in LRF
 
+    // equilibrium rate
     double rV = 0.0;
     double rL = 0.0;
     double rT = 0.0;
     fmuB_rate(Eq,p,M2,T,muB,m_ell2,rV, rL, rT);
 
     double prefac = 1./pow(hbarC, 4); // prefac to give the right unit
-    // equilibrium rate
     eqrate_ptr = prefac*rV;
     eqrateL_ptr= prefac*rL;
     eqrateT_ptr= prefac*rT;
 
+    double sigma = cross_sec(Eq,p,M2,m_ell2);
+
+    // shear correction
+    if(include_visc_deltaf==1)
+        viscrate_ptr = s2(Eq, p, M2, T, muB, m_ell2, sigma);
+    else
+        viscrate_ptr = 0.0;
+
     // diffusion correction
     if(include_diff_deltaf==1)
-        diffrate_ptr = a1(Eq, p, M2, T, muB, m_ell2, rhoB_over_eplusp);
+        diffrate_ptr = a1(Eq, p, M2, T, muB, m_ell2, sigma, rhoB_over_eplusp);
     else
         diffrate_ptr = 0.0;
 

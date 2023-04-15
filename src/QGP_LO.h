@@ -13,8 +13,9 @@ class QGP_LO : public ThermalPhoton {
                         std::string emissionProcess);
     ~QGP_LO() {}
 
-    void FiniteBaryonRates(double T, double muB, double rhoB_over_eplusp, double Eq, 
-        double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &diffrate_ptr, int include_diff_deltaf);
+    void FiniteBaryonRates(double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double Eq, 
+        double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, 
+        double &diffrate_ptr, int include_visc_deltaf, int include_diff_deltaf);
 
     double integrand_J(double x,int n,double a,double z);
     double gaussLegendre(double* xs, double* ws, int m, int n, double a, double b, double z);
@@ -24,7 +25,8 @@ class QGP_LO : public ThermalPhoton {
     double Bfun(double x);
     double heaviside(double x) ;
     double cross_sec(double omega, double q, double qsq, double m_ell2);
-    double a1(double omega,double q, double qsq,double T,double muB,double m_ell2,double nB_o_epp);
+    double a1(double omega,double q, double qsq,double T,double muB,double m_ell2,double sigma,double nB_o_epp);
+    double s2(double omega,double q,double qsq,double T,double muB,double m_ell2,double sigma);
     double l1f(double x);
     double l2f(double x);
     double l3f(double x);
