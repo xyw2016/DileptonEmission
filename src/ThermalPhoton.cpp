@@ -82,22 +82,29 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     gauss_quadrature(np, 1, 0.0, 0.0, p_i, p_f, p, p_weight);
     gauss_quadrature(nphi, 1, 0.0, 0.0, phi_i, phi_f, phi, phi_weight);
 
+    // dilepton rapidity
+    y_weight = new double [nrapidity];
+    
     if (nrapidity > 1) {
-        dy = (y_f - y_i)/(nrapidity - 1 + 1e-100);
+        Dy = y_f - y_i;
+        dy = Dy/(nrapidity - 1);
+        trapezoidal_weights(nrapidity, y_weight);
     } else {
+        Dy = 1.0;
         dy = 1.0;
+        y_weight[0] = 1.0;
     }
 
     y.resize(nrapidity, 0);
-    theta.resize(nrapidity, 0);
+    
     for (int i=0;i<nrapidity;i++) {
         y[i] = y_i + i*dy;
-        theta[i] = acos(tanh(y[i]));  //rapidity's corresponding polar angle
     }
 
+    // dilepton invariant mass
     M.resize(nm, 0);
-    dM = (m_f - m_i)/(nm + 1e-100);
-    for (int i=0;i<nm;i++) {
+    dM = (m_f - m_i)/nm;
+    for (int i=0; i<nm; i++) {
         M[i] = m_i + i*dM;
     }
 
@@ -204,6 +211,7 @@ ThermalPhoton::~ThermalPhoton() {
     delete [] p_weight;
     delete [] phi;
     delete [] phi_weight;
+    delete [] y_weight;
 
     // deleteA4DMatrix(dNd2pTdphidy_eq, nm, np, nphi);
     // deleteA4DMatrix(dNd2pTdphidy_visc, nm, np, nphi);
@@ -459,18 +467,19 @@ void ThermalPhoton::calPhoton_Spectra_dTdtau() {
                         for (int irap = 0; irap < nrapidity; irap++) {
                             dNpTdpTdydTdtau_eq[i][j][m][k] += (
                                     dNd2pTdphidydTdtau_eq[i][j][m][k][l][irap]
-                                    *phi_weight[l]*dy);
+                                    *phi_weight[l]*y_weight[irap]*dy/Dy);
                             dNpTdpTdydTdtau_visc[i][j][m][k] += (
                                     dNd2pTdphidydTdtau_visc[i][j][m][k][l][irap]
-                                    *phi_weight[l]*dy);
+                                    *phi_weight[l]*y_weight[irap]*dy/Dy);
                             dNpTdpTdydTdtau_diff[i][j][m][k] += (
                                     dNd2pTdphidydTdtau_diff[i][j][m][k][l][irap]
-                                    *phi_weight[l]*dy);
+                                    *phi_weight[l]*y_weight[irap]*dy/Dy);
                             dNpTdpTdydTdtau_tot[i][j][m][k] += (
                                     dNd2pTdphidydTdtau_tot[i][j][m][k][l][irap]
-                                    *phi_weight[l]*dy);
+                                    *phi_weight[l]*y_weight[irap]*dy/Dy);
                         }
                     }
+                    // 
                     dNpTdpTdydTdtau_eq[i][j][m][k] = dNpTdpTdydTdtau_eq[i][j][m][k]/(2*M_PI);
                     dNpTdpTdydTdtau_visc[i][j][m][k] = dNpTdpTdydTdtau_visc[i][j][m][k]/(2*M_PI);
                     dNpTdpTdydTdtau_diff[i][j][m][k] = dNpTdpTdydTdtau_diff[i][j][m][k]/(2*M_PI);
@@ -504,6 +513,7 @@ void ThermalPhoton::calPhoton_Spectra_dTdtau() {
 void ThermalPhoton::outputPhoton_Spectra_dTdtau(string path) {
     // calculate the inverse slope of the photon spectra at T-tau interval
     // integrated out phi and rapidity
+    // pT differential spectra, dN/(2pi pTdpT MdM dy)
 
     double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
     double dtau = (tau_cut_high - tau_cut_low)/(n_tau_cut - 1);
@@ -512,7 +522,7 @@ void ThermalPhoton::outputPhoton_Spectra_dTdtau(string path) {
     ostringstream filename_SpdTdtau_visc;
     ostringstream filename_SpdTdtau_diff;
     ostringstream filename_SpdTdtau_tot;
-    
+
     filename_SpdTdtau_eq 	<< path << emissionProcess_name
                          	<< "_SpdTdtau_eq.dat";
     filename_SpdTdtau_visc  << path << emissionProcess_name
@@ -661,7 +671,6 @@ void ThermalPhoton::outputPhoton_Spectra_dTdtau(string path) {
 void ThermalPhoton::calPhoton_Spvn_dTdtau() {
     // calculate the dilepton, dN/dydM yields and vn
     // integrated out pT, phi and rapidity
-    // Note that it also integrate over rapidity
     double eps = 1e-15;
     for (int i = 0; i < nTcut; i++) {
         for (int j = 0; j < n_tau_cut; j++) {
@@ -669,8 +678,10 @@ void ThermalPhoton::calPhoton_Spvn_dTdtau() {
             for (int m = 0; m < nm; m++) {
                 for (int k = 0; k < np; k++) {
                     for (int l = 0; l < nphi; l++) {
-                        double weight = p[k]*p_weight[k]*phi_weight[l]*dy; // pT and phi_p integrated out
+                        double weight = p[k]*p_weight[k]*phi_weight[l]; // pT and phi_p integrated out
                         for (int irap = 0; irap < nrapidity; irap++) {
+
+                            weight *=y_weight[irap]*dy/Dy;
 
                             dNdydTdtau_eq[i][j][m] += (
                                     dNd2pTdphidydTdtau_eq[i][j][m][k][l][irap]*weight);

@@ -30,6 +30,7 @@ class PhotonEmission {
     int nm;
     int np, nphi, nrapidity;
     int norder;
+    double Dy;
 
     double gridDx, gridDy, gridDtau;
     double gridX0, gridY0;

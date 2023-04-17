@@ -205,6 +205,13 @@ int scale_gausspoints(int order, int kind, double alpha, double beta, double a, 
   return 0;
 }
 
+void trapezoidal_weights(int n, double* w) {
+    w[0] = w[n-1] = 0.5;
+    for (int i = 1; i < n-1; i++) {
+        w[i] = 1.0;
+    }
+}
+
 //****************************************************************************80
 
 void cdgqf ( int nt, int kind, double alpha, double beta, double t[], 

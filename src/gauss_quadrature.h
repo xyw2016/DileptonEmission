@@ -4,6 +4,7 @@
 int gauss_quadrature(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]);
 int gauss_quadrature_standard(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]);
 int scale_gausspoints(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]);
+void trapezoidal_weights(int n, double* w);
 
 void cdgqf ( int nt, int kind, double alpha, double beta, double t[], 
   double wts[] );

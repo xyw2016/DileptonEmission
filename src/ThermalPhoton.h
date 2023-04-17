@@ -22,6 +22,7 @@ class ThermalPhoton {
 
     double dy;
     double dM;
+    double Dy;
 
     bool bRateTable_;
     bool bShearVisCorr_;
@@ -60,9 +61,9 @@ class ThermalPhoton {
     std::string emissionProcess_name;
     double *p, *p_weight;
     double *phi, *phi_weight;
+    double *y_weight;
     std::vector<double> M;
     std::vector<double> y;
-    std::vector<double> theta;
 
     double ****dNd2pTdphidy_eq, ****dNd2pTdphidy_visc, ****dNd2pTdphidy_tot;
     double ***dNd2pTdphidy_bulkvis, ****dNd2pTdphidy_diff;
@@ -134,14 +135,16 @@ class ThermalPhoton {
         std::vector<double> &k_list, std::vector<double> &rhoT_list, std::vector<double> &rhoL_list);
 
     double get_dy() {return(dy);}
+    double get_Dy() {return(Dy);}
 
     double getPhotonp(int i) {return(p[i]);}
     double getPhoton_pweight(int i) {return(p_weight[i]);}
     double getPhotonphi(int i) {return(phi[i]);}
     double getPhoton_phiweight(int i) {return(phi_weight[i]);}
     double getDileptonMass(int i) {return(M[i]);}
-    double getPhotontheta(int i) {return(theta[i]);}
+    // double getPhotontheta(int i) {return(theta[i]);}
     double getPhotonrapidity(int i) {return(y[i]);}
+    double getPhoton_yweight(int i) {return(y_weight[i]);}
 
     virtual void analyticRates(double T, double muB, std::vector<double> &Eq,
         double *M_ll, std::vector<double> &eqrate_ptr, int nm,

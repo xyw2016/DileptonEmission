@@ -6,7 +6,6 @@
 
 using PhysConsts::hbarC;
 using PhysConsts::alphaEM;
-using PhysConsts::eps;
 using PhysConsts::me;
 
 #define OOFP 0.0795774715459476678844418816863 //1/(4*pi)
