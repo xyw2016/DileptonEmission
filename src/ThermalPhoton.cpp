@@ -142,9 +142,9 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     // vn_cos_tot.resize(norder,0.);
     // vn_sin_tot.resize(norder,0.);
 
-    int diff_flag = paraRdr->getVal("differential_flag");
+    int differential_flag = paraRdr->getVal("differential_flag");
 
-    if (diff_flag == 1 or diff_flag > 10) {
+    if (differential_flag == 1 or differential_flag > 10) {
         nTcut = paraRdr->getVal("nTcut");
         n_tau_cut = paraRdr->getVal("n_tau_cut");
 
@@ -237,8 +237,8 @@ ThermalPhoton::~ThermalPhoton() {
     // deleteA3DMatrix(vnypT_cos_tot, norder, np);
     // deleteA3DMatrix(vnypT_sin_tot, norder, np);
 
-    int diff_flag = paraRdr->getVal("differential_flag");
-    if (diff_flag == 1 or diff_flag > 10) {
+    int differential_flag = paraRdr->getVal("differential_flag");
+    if (differential_flag == 1 or differential_flag > 10) {
         deleteA3DMatrix(dNdydTdtau_eq, nTcut, n_tau_cut);
         deleteA3DMatrix(dNdydTdtau_visc, nTcut, n_tau_cut);
         deleteA3DMatrix(dNdydTdtau_diff, nTcut, n_tau_cut);

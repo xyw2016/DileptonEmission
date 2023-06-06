@@ -130,16 +130,17 @@ double QGP_LO::nB(double x){
 // for finite muB rate
 double QGP_LO::rhoV(double omega,double k,double ksq, double T,double muB){
     // k is the magnitude of 3-vec k
-
+    
     double kplus = (omega + k)*0.5;
     double kminus = (omega - k)*0.5;
     double muq = muB/3.;
     double Nc = 3.;
     double ps1 = Nc*ksq/(4.*M_PI*k);
-    double ps2 = l1f((kplus - muq)/T) - l1f((abs(kminus) - muq)/T) + l1f((kplus + muq)/T) - l1f((abs(kminus) + muq)/T);
-    double ps3 = k*heaviside(kminus);
-
-    return ps1*(T*ps2 + ps3);
+    //double ps2 = l1f((kplus - muq)/T) - l1f((abs(kminus) - muq)/T) + l1f((kplus + muq)/T) - l1f((abs(kminus) + muq)/T);
+    //double ps3 = k*heaviside(kminus);
+    double ps2 = log((cosh(kplus/T) + cosh(muq/T))/(cosh(kminus/T) + cosh(muq/T)));
+    // return ps1*(T*ps2 + ps3);
+    return ps1*(T*ps2);
 }
 
 

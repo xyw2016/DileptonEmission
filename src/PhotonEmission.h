@@ -50,7 +50,6 @@ class PhotonEmission {
     int turn_off_transverse_flow;
     int turn_on_muB_;
     int calHGIdFlag;
-    int diff_flag;
     int emission_rate_flag;
     int test_code_flag;
 

@@ -39,7 +39,7 @@ T_dec = 0.105                 # freeze out temperature (GeV), below which is out
 HydroinfoVisflag = 1          # determine whether to read in the viscous evolution information
 HydroinfoBuffersize = 500     # set the buffer size for hydro evolution profile
 
-include_baryondiff_deltaf = 0 # switch to include baryon diffusion corrections
+include_baryondiff_deltaf = 1 # switch to include baryon diffusion corrections
 include_shearvisc_deltaf = 1  # switch to include shear viscous corrections
 turn_off_transverse_flow = 0  # flag to turn off transverse flow in the photon calculation
 turn_on_muB = 1               # flag to include muB dependence in photon rates
@@ -47,7 +47,7 @@ turn_on_muB = 1               # flag to include muB dependence in photon rates
 test_code_flag = 1            # flag to test the code with constant T, muB etc.
 T_test = 0.2
 muB_test = 0.3
-rhoB_eplusp_test = 8.0
+rhoB_eplusp_test = 2.0
 inv_eplusp_test = 1.0
 
 
@@ -55,27 +55,27 @@ inv_eplusp_test = 1.0
 
 np = 20                       # number of points for photon momentum
 nphi = 40                     # number of points for angles of photons momenta
-nrapidity = 1                 # number of points for photon rapidity
-nm = 15                       # number of points for dilepton invariant mass
+nrapidity = 1                 # number of points for photon rapidity, odd number
+nm = 10                       # number of points for dilepton invariant mass
 
-photon_q_i = 0.2              # the smallest photon momentum to be calculated
+photon_q_i = 0.001              # the smallest photon momentum to be calculated
 photon_q_f = 4.0              # the largest photon momentum to be calculated
 photon_phi_q_i = 0.0          # the smallest angle of photon momentum
 photon_phi_q_f = 6.2831853    # the largest angle of photon momentum
 photon_y_i = 0.0              # the smallest photon rapidity
 photon_y_f = 0.0              # the largest photon rapidity
-dilepton_mass_i = 0.5         # the smallest dilepton invariant mass
-dilepton_mass_f = 3.5         # the largest dilepton invariant mass
+dilepton_mass_i = 0.1         # the smallest dilepton invariant mass
+dilepton_mass_f = 3.6         # the largest dilepton invariant mass
 
 norder = 3                    # calculate photon vn to norder
 
-differential_flag = 1        # determine whether to output differential photon yield and vn
+differential_flag = 0        # determine whether to output differential photon yield and vn
                              # 1: differential in T and tau
                              # 2: differential in x and tau
                              # 10: differeitial in all options above
-tau_start = 1.79              # emission start time (fm)
-tau_end = 8.8               # emission end time (fm)
-n_tau_cut = 14               # number of points in tau (range of tau is specified by tau_start and tau_end)
+tau_start = 3.0              # emission start time (fm)
+tau_end = 13.0               # emission end time (fm)
+n_tau_cut = 15               # number of points in tau (range of tau is specified by tau_start and tau_end)
 T_cuthigh = 0.25             # maximum allowed emission T (GeV)
 T_cutlow = 0.1              # minimum allowed emission T (GeV)
 nTcut = 10                   # number of points in T (range of T is specified by T_cuthigh and T_cutlow)

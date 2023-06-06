@@ -45,7 +45,6 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     turn_on_muB_ = static_cast<int>(paraRdr->getVal("turn_on_muB", 1));
     test_code_flag = static_cast<int>(paraRdr->getVal("test_code_flag", 0));
     emission_rate_flag = paraRdr->getVal("dilepton_emission_rate");
-    diff_flag = paraRdr->getVal("differential_flag");
 
     // omp parameters
     CORES = 1;
@@ -99,7 +98,7 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     vn_cos_tot = createA2DMatrix(norder, nm, 0.);
     vn_sin_tot = createA2DMatrix(norder, nm, 0.);
 
-    if (diff_flag == 1) {
+    if (differential_flag == 1) {
         dNd2pTdphidydTdtau_eq = createA6DMatrix(nTcut, n_tau_cut, nm, np, nphi, nrapidity, 0.);
         dNd2pTdphidydTdtau_visc = createA6DMatrix(nTcut, n_tau_cut, nm, np, nphi, nrapidity, 0.);
         dNd2pTdphidydTdtau_diff = createA6DMatrix(nTcut, n_tau_cut, nm, np, nphi, nrapidity, 0.);
@@ -147,7 +146,7 @@ PhotonEmission::~PhotonEmission() {
     deleteA2DMatrix(vn_cos_tot, norder);
     deleteA2DMatrix(vn_sin_tot, norder);
 
-    if (diff_flag == 1) {
+    if (differential_flag == 1) {
         nTcut = paraRdr->getVal("nTcut");
         n_tau_cut = paraRdr->getVal("n_tau_cut");
         deleteA6DMatrix(dNd2pTdphidydTdtau_eq, nTcut, n_tau_cut, nm, np, nphi);
@@ -295,6 +294,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     // get hydro grid information
     double tau0 = hydroinfo_MUSIC_ptr->get_hydro_tau0();
     double dtau = hydroinfo_MUSIC_ptr->get_hydro_dtau();
+    double tau_max = hydroinfo_MUSIC_ptr->get_hydro_tau_max();
     double dx = hydroinfo_MUSIC_ptr->get_hydro_dx();
     double deta = hydroinfo_MUSIC_ptr->get_hydro_deta();
     double eta_max = hydroinfo_MUSIC_ptr->get_hydro_eta_max();
@@ -304,9 +304,17 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double volume_base = Nskip_tau*dtau*Nskip_x*dx*Nskip_x*dx*Nskip_eta*deta;
 
     // output results in (T, tau)
+
     double dT_cut = (T_cuthigh - T_cutlow)/(nTcut - 1);
     double dtau_cut = (tau_cut_high - tau_cut_low)/(n_tau_cut - 1);
 
+    if (differential_flag == 1){
+        if (tau_max>tau_cut_high||tau0<tau_cut_low){
+            printf("Warning: proper time out of [tau_cut_low, tau_cut_high].\n");
+            printf("The boundaries should be enlarged to encolse all hydro cells...\n");
+        }
+    }
+    
     double tau_now = 0.0;
     double flow_u_mu_low[4];
     double flow_u_mu_Min[4]; // fluid velocity in Minkowski
@@ -397,9 +405,12 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             if (temp_local < T_dec)
                 continue;
 
-            if (temp_local > T_cuthigh||temp_local < T_cutlow||tau_local>tau_cut_high||tau_local<tau_cut_low){
-                printf("Warning: local temperature or proper time out of [T_cutlow, T_cuthigh] or [tau_cut_low, tau_cut_high].\n");
-                printf("The boundaries should be enlarged to encolse all hydro cells...\n");
+            if (differential_flag == 1){
+                if (temp_local > T_cuthigh||temp_local < T_cutlow||tau_local>tau_cut_high||tau_local<tau_cut_low){
+                    printf("Warning: local temperature or proper time out of [T_cutlow, T_cuthigh] or [tau_cut_low, tau_cut_high].\n");
+                    printf("The boundaries should be enlarged to encolse all hydro cells...\n");
+                    continue;
+                }
             }
 
             if (temp_local > T_sw_high) {
