@@ -10,7 +10,7 @@ hydro_nskip_tau = 1           # read in hydro slice every hydro_nskip_tau
 
 ##### emission rate #####
 
-dilepton_emission_rate = 1    # 0: analytical emission rate; PRC. 93, 044902, 2016
+dilepton_emission_rate = 2    # 0: analytical emission rate; PRC. 93, 044902, 2016
                               # 1: LO rate; (2.4) of 1910.09567
                               # 2: resummed NLO; from GJ, extrapolation will NOT work properly for large alpha_s, large muB, 
                               # or if q falls outside the grid! In these cases, just the boundary value is used.
@@ -39,12 +39,12 @@ T_dec = 0.105                 # freeze out temperature (GeV), below which is out
 HydroinfoVisflag = 1          # determine whether to read in the viscous evolution information
 HydroinfoBuffersize = 500     # set the buffer size for hydro evolution profile
 
-include_baryondiff_deltaf = 1 # switch to include baryon diffusion corrections
-include_shearvisc_deltaf = 1  # switch to include shear viscous corrections
+include_baryondiff_deltaf = 0 # switch to include baryon diffusion corrections
+include_shearvisc_deltaf = 0  # switch to include shear viscous corrections
 turn_off_transverse_flow = 0  # flag to turn off transverse flow in the photon calculation
 turn_on_muB = 1               # flag to include muB dependence in photon rates
 
-test_code_flag = 1            # flag to test the code with constant T, muB etc.
+test_code_flag = 0            # flag to test the code with constant T, muB etc.
 T_test = 0.2
 muB_test = 0.3
 rhoB_eplusp_test = 2.0
@@ -69,16 +69,16 @@ dilepton_mass_f = 3.6         # the largest dilepton invariant mass
 
 norder = 3                    # calculate photon vn to norder
 
-differential_flag = 0        # determine whether to output differential photon yield and vn
+differential_flag = 1        # determine whether to output differential photon yield and vn
                              # 1: differential in T and tau
                              # 2: differential in x and tau
                              # 10: differeitial in all options above
-tau_start = 3.0              # emission start time (fm)
+tau_start = 1.5              # emission start time (fm)
 tau_end = 13.0               # emission end time (fm)
-n_tau_cut = 15               # number of points in tau (range of tau is specified by tau_start and tau_end)
+n_tau_cut = 50               # number of points in tau (range of tau is specified by tau_start and tau_end)
 T_cuthigh = 0.25             # maximum allowed emission T (GeV)
 T_cutlow = 0.1              # minimum allowed emission T (GeV)
-nTcut = 10                   # number of points in T (range of T is specified by T_cuthigh and T_cutlow)
+nTcut = 30                   # number of points in T (range of T is specified by T_cuthigh and T_cutlow)
 dTau = 0.1                   # lattice spacing along tau direction
 
 calHGIdFlag = 0               # Flag to decide whether to calculate individual HG channels

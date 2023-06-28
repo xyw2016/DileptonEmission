@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-    This script contains all the default parameters in the iEBE-MUSIC package.
+    This script contains all the default parameters in the code.
 """
 
 from os import path, makedirs
@@ -10,28 +10,28 @@ import argparse
 
 # control parameters
 control_dict = {
-    'walltime': "10:00:00",  # walltime to run
+    'walltime': "10:00:00",         # walltime to run
 }
 
 dilepton_dict = {
     'hydro_flag': 2,                # read in mode for hydro medium
-                                  # 0: read in hdf5 file
-                                  # 1: read in binary file output from MUSIC
-                                  # 2: read in binary file output from new MUSIC (no grid)
-                                  # 3: read in binary file output from new MUSIC (on grid)
+                                    # 0: read in hdf5 file
+                                    # 1: read in binary file output from MUSIC
+                                    # 2: read in binary file output from new MUSIC (no grid)
+                                    # 3: read in binary file output from new MUSIC (on grid)
     'hydro_nskip_tau': 1,           # read in hydro slice every hydro_nskip_tau 
-                                  # steps from the medium file
-                                  # (only works for hydro_flag = 1)
+                                    # steps from the medium file
+                                    # (only works for hydro_flag = 1)
 
 
     ##### emission rate #####
 
     'dilepton_emission_rate': 2,    # 0: analytical emission rate; PRC. 93, 044902, 2016
-                                  # 1: LO rate; (2.4) of 1910.09567
-                                  # 2: resummed NLO; from GJ, extrapolation will NOT work properly for large alpha_s, large muB, 
-                                  # or if q falls outside the grid! In these cases, just the boundary value is used.
+                                    # 1: LO rate; (2.4) of 1910.09567
+                                    # 2: resummed NLO; from GJ, extrapolation will NOT work properly for large alpha_s, large muB, 
+                                    # or if q falls outside the grid! In these cases, just the boundary value is used.
 
-    'alpha_s': 0.0,                 # strong coupling, works for dilepton_emission_rate = 2
+    'alpha_s': 0.3,                 # strong coupling, works for dilepton_emission_rate = 2
 
 
     ##### hydro profile #####
@@ -44,6 +44,8 @@ dilepton_dict = {
     'neta': 10,                     # number of points in eta direction
     'eta_i': 0.0,                   # beginning value of eta slice
     'eta_f': 3.0,                   # end value of eta slice
+
+    'ETAmax': 2.0,                  # fluid cells outside this boundary are not considered
 
     'T_sw_high': 0.140,             # high end of the switching temperature, above which is full QGP
     'T_sw_low': 0.135,              # low end of the switching temperature
@@ -60,7 +62,7 @@ dilepton_dict = {
     'turn_off_transverse_flow': 0,  # flag to turn off transverse flow in the photon calculation
     'turn_on_muB': 1,               # flag to include muB dependence in photon rates
 
-    'test_code_flag': 1,            # flag to test the code with constant T, muB etc.
+    'test_code_flag': 0,            # flag to test the code with constant T, muB etc.
     'T_test': 0.2,
     'muB_test': 0.3,
     'rhoB_eplusp_test': 2.0,
@@ -70,11 +72,11 @@ dilepton_dict = {
     ##### photon kinematics #####
 
     'np': 20,                       # number of points for photon momentum
-    'nphi': 40,                     # number of points for angles of photons momenta
+    'nphi': 20,                     # number of points for angles of photons momenta
     'nrapidity': 1,                 # number of points for photon rapidity, odd number
-    'nm': 3,                       # number of points for dilepton invariant mass
+    'nm': 3,                        # number of points for dilepton invariant mass
 
-    'photon_q_i': 0.001,              # the smallest photon momentum to be calculated
+    'photon_q_i': 0.001,            # the smallest photon momentum to be calculated
     'photon_q_f': 4.0,              # the largest photon momentum to be calculated
     'photon_phi_q_i': 0.0,          # the smallest angle of photon momentum
     'photon_phi_q_f': 6.2831853,    # the largest angle of photon momentum
@@ -85,17 +87,19 @@ dilepton_dict = {
 
     'norder': 3,                    # calculate photon vn to norder
 
-    'differential_flag': 0,        # determine whether to output differential photon yield and vn
-                                 # 1: differential in T and tau
-                                 # 2: differential in x and tau
-                                 # 10: differeitial in all options above
-    'tau_start': 3.0,              # emission start time (fm)
-    'tau_end': 13.0,               # emission end time (fm)
-    'n_tau_cut': 15,               # number of points in tau (range of tau is specified by tau_start and tau_end)
-    'T_cuthigh': 0.25,             # maximum allowed emission T (GeV)
-    'T_cutlow': 0.1,              # minimum allowed emission T (GeV)
-    'nTcut': 10,                   # number of points in T (range of T is specified by T_cuthigh and T_cutlow)
-    'dTau': 0.1,                   # lattice spacing along tau direction
+    ##### differential setting #####
+
+    'differential_flag': 1,         # determine whether to output differential photon yield and vn
+                                    # 1: differential in T and tau
+                                    # 2: differential in x and tau
+                                    # 10: differeitial in all options above
+    'tau_start': 1.0,               # emission start time (fm)
+    'tau_end': 13.0,                # emission end time (fm)
+    'n_tau_cut': 50,                # number of points in tau (range of tau is specified by tau_start and tau_end)
+    'T_cuthigh': 0.25,              # maximum allowed emission T (GeV)
+    'T_cutlow': 0.1,                # minimum allowed emission T (GeV)
+    'nTcut': 30,                    # number of points in T (range of T is specified by T_cuthigh and T_cutlow)
+    'dTau': 0.1,                    # lattice spacing along tau direction
 
     'calHGIdFlag': 0,               # Flag to decide whether to calculate individual HG channels
 

@@ -34,6 +34,7 @@ class PhotonEmission {
 
     double gridDx, gridDy, gridDtau;
     double gridX0, gridY0;
+    double ETAmax;
 
     double T_dec, T_sw_high, T_sw_low;
     double T_cuthigh, T_cutlow;

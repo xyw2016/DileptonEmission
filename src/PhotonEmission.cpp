@@ -168,9 +168,10 @@ void PhotonEmission::set_hydroGridinfo() {
     gridDx = paraRdr->getVal("dx");
     gridDy = paraRdr->getVal("dy");
     gridDtau = paraRdr->getVal("dTau");
+    neta = paraRdr->getVal("neta");
+    ETAmax = paraRdr->getVal("ETAmax");
 
     nm = paraRdr->getVal("nm");
-    neta = paraRdr->getVal("neta");
     np = paraRdr->getVal("np");
     nphi = paraRdr->getVal("nphi");
     nrapidity = paraRdr->getVal("nrapidity");
@@ -401,8 +402,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                 turn_off_transverse_flow = 1;
             }
 
-            // fluid cell is out of interest
-            if (temp_local < T_dec)
+            // fluid cell is out of interest, temperature below T_dec or eta larger than ETAmax
+            if (temp_local < T_dec || eta_local > ETAmax)
                 continue;
 
             if (differential_flag == 1){
