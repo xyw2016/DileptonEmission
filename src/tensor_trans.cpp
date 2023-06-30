@@ -3,6 +3,7 @@
 #include<fstream>
 #include<cmath>
 #include<iomanip>
+#include <vector>
 #include "tensor_trans.h"
 using namespace std;
 
@@ -48,35 +49,66 @@ void boost_matrix(double** lambda_munu, double vx, double vy, double vz) {
 }
 
 // inputs are 4-velocity in Minkowski coordinates in lab frame
-void lorentz_boost_matrix(double** lambda_munu, double ut, double ux, double uy, double uz) {
-      double gamma;
-      double beta, beta_1, beta_2, beta_3;
-      double eps = 1e-100;
+// void lorentz_boost_matrix(double** lambda_munu, double ut, double ux, double uy, double uz) {
+//       double gamma;
+//       double beta, beta_1, beta_2, beta_3;
+//       double eps = 1e-100;
 
-      gamma = ut;
+//       gamma = ut;
 
-      beta_1 = ux/gamma; // vx
-      beta_2 = uy/gamma; // vy
-      beta_3 = uz/gamma; // vz
-      beta = sqrt(beta_1*beta_1 + beta_2*beta_2 + beta_3*beta_3 + eps);
+//       beta_1 = ux/gamma; // vx
+//       beta_2 = uy/gamma; // vy
+//       beta_3 = uz/gamma; // vz
+//       beta = sqrt(beta_1*beta_1 + beta_2*beta_2 + beta_3*beta_3 + eps);
 
-      lambda_munu[0][0] = gamma;
-      lambda_munu[0][1] = -gamma*beta_1;
-      lambda_munu[0][2] = -gamma*beta_2;
-      lambda_munu[0][3] = -gamma*beta_3;
-      lambda_munu[1][0] = lambda_munu[0][1];
-      lambda_munu[1][1] = 1+(gamma-1)*beta_1*beta_1/beta/beta;
-      lambda_munu[1][2] = (gamma-1)*beta_1*beta_2/beta/beta;
-      lambda_munu[1][3] = (gamma-1)*beta_1*beta_3/beta/beta;
-      lambda_munu[2][0] = lambda_munu[0][2];
-      lambda_munu[2][1] = lambda_munu[1][2];
-      lambda_munu[2][2] = 1+(gamma-1)*beta_2*beta_2/beta/beta;
-      lambda_munu[2][3] = (gamma-1)*beta_2*beta_3/beta/beta;
-      lambda_munu[3][0] = lambda_munu[0][3];
-      lambda_munu[3][1] = lambda_munu[1][3];
-      lambda_munu[3][2] = lambda_munu[2][3];
-      lambda_munu[3][3] = 1+(gamma-1)*beta_3*beta_3/beta/beta;
+//       lambda_munu[0][0] = gamma;
+//       lambda_munu[0][1] = -gamma*beta_1;
+//       lambda_munu[0][2] = -gamma*beta_2;
+//       lambda_munu[0][3] = -gamma*beta_3;
+//       lambda_munu[1][0] = lambda_munu[0][1];
+//       lambda_munu[1][1] = 1+(gamma-1)*beta_1*beta_1/beta/beta;
+//       lambda_munu[1][2] = (gamma-1)*beta_1*beta_2/beta/beta;
+//       lambda_munu[1][3] = (gamma-1)*beta_1*beta_3/beta/beta;
+//       lambda_munu[2][0] = lambda_munu[0][2];
+//       lambda_munu[2][1] = lambda_munu[1][2];
+//       lambda_munu[2][2] = 1+(gamma-1)*beta_2*beta_2/beta/beta;
+//       lambda_munu[2][3] = (gamma-1)*beta_2*beta_3/beta/beta;
+//       lambda_munu[3][0] = lambda_munu[0][3];
+//       lambda_munu[3][1] = lambda_munu[1][3];
+//       lambda_munu[3][2] = lambda_munu[2][3];
+//       lambda_munu[3][3] = 1+(gamma-1)*beta_3*beta_3/beta/beta;
+// }
+
+void lorentz_boost_matrix(std::vector<std::vector<double>>& lambda_munu, double ut, double ux, double uy, double uz) {
+    double gamma;
+    double beta, beta_1, beta_2, beta_3;
+    double eps = 1e-100;
+
+    gamma = ut;
+
+    beta_1 = ux / gamma; // vx
+    beta_2 = uy / gamma; // vy
+    beta_3 = uz / gamma; // vz
+    beta = sqrt(beta_1 * beta_1 + beta_2 * beta_2 + beta_3 * beta_3 + eps);
+
+    lambda_munu[0][0] = gamma;
+    lambda_munu[0][1] = -gamma * beta_1;
+    lambda_munu[0][2] = -gamma * beta_2;
+    lambda_munu[0][3] = -gamma * beta_3;
+    lambda_munu[1][0] = lambda_munu[0][1];
+    lambda_munu[1][1] = 1 + (gamma - 1) * beta_1 * beta_1 / beta / beta;
+    lambda_munu[1][2] = (gamma - 1) * beta_1 * beta_2 / beta / beta;
+    lambda_munu[1][3] = (gamma - 1) * beta_1 * beta_3 / beta / beta;
+    lambda_munu[2][0] = lambda_munu[0][2];
+    lambda_munu[2][1] = lambda_munu[1][2];
+    lambda_munu[2][2] = 1 + (gamma - 1) * beta_2 * beta_2 / beta / beta;
+    lambda_munu[2][3] = (gamma - 1) * beta_2 * beta_3 / beta / beta;
+    lambda_munu[3][0] = lambda_munu[0][3];
+    lambda_munu[3][1] = lambda_munu[1][3];
+    lambda_munu[3][2] = lambda_munu[2][3];
+    lambda_munu[3][3] = 1 + (gamma - 1) * beta_3 * beta_3 / beta / beta;
 }
+
 
 void getTransverseflow_u_mu_low(double* flow_u_mu_low,
                                 double vx, double vy, double vz) {

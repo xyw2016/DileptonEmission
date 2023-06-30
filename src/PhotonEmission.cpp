@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <string>
 #include <omp.h>
+#include <vector>
 
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
@@ -59,8 +60,6 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     // read the photon emission rate tables
     InitializePhotonEmissionRateTables();
 
-    lambda = createA2DMatrix(4, 4, 0.);
-
     dNd2pTdphidy_eq = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_eqT = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_eqL = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
@@ -113,7 +112,6 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
 
 
 PhotonEmission::~PhotonEmission() {
-    deleteA2DMatrix(lambda, 4);
 
     deleteA4DMatrix(dNd2pTdphidy_eq, nm, np, nphi);
     deleteA4DMatrix(dNd2pTdphidy_eqT, nm, np, nphi);
@@ -273,8 +271,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double M_ll[nm]; // invariant mass array
     double p_q[np], phi_q[nphi], y_q[nrapidity];
     double sin_phiq[nphi], cos_phiq[nphi];
-    double p_lab_local[4];
-    double p_lab_Min[4]; // dilepton 4-momentum in Minkowski coordinates
+
     for (int k = 0; k < nrapidity; k++) {
         y_q[k] = dilepton_QGP_thermal->getPhotonrapidity(k);
     }
@@ -316,14 +313,6 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         }
     }
     
-    double tau_now = 0.0;
-    double flow_u_mu_low[4];
-    double flow_u_mu_Min[4]; // fluid velocity in Minkowski
-    fluidCell_3D_new fluidCellptr;
-
-    // Lorentz boost matrix
-    double **lambda_munu = createA2DMatrix(4, 4, 0.);
-
     // number of fluid cells
     long int number_of_cells =(
                 hydroinfo_MUSIC_ptr->get_number_of_fluid_cells_3d());
@@ -353,7 +342,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     // loop over all fluid cells
     // subdivide bite size chunks of freezeout surface across cores
     int ncells = 0;
-    // #pragma omp parallel for reduction(+:ncells) reduction(+:dNd2pTdphidy_eq_all[:CORES*np*nphi*nm*nrapidity])
+
+    #pragma omp parallel for reduction(+:ncells)
     for(long n = 0; n < CORES; n++)
     {
         long endFO = FO_chunk;
@@ -364,12 +354,22 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
             long cell_id = n  +  icell * CORES;
 
+            // fluid velocity in Minkowski
+            double flow_u_mu_low[4];
+            double flow_u_mu_Min[4]; 
+            // dilepton 4-momentum in Minkowski coordinates
+            double p_lab_local[4];
+            double p_lab_Min[4]; 
+
+            fluidCell_3D_new fluidCellptr;
+
             hydroinfo_MUSIC_ptr->get_hydro_cell_info_3d(cell_id, fluidCellptr);
 
             double tau_local = tau0 + fluidCellptr.itau*dtau;
             double eta_local = -eta_max + fluidCellptr.ieta*deta;
 
 #ifndef _OPENMP
+            double tau_now = 0.0;
             if (fabs(tau_now - tau_local) > 1e-10) {
                 tau_now = tau_local;
                 cout << "Calculating tau = " << setw(4) << setprecision(3)
@@ -379,8 +379,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             // volume element: tau*dtau*dx*dy*deta,
             double volume = tau_local*volume_base;
 
-            const double ed_local = fluidCellptr.ed;
-            const double pd_local = fluidCellptr.pressure;
+            double ed_local = fluidCellptr.ed;
+            double pd_local = fluidCellptr.pressure;
             double temp_local = fluidCellptr.temperature;
             double temp_inv = 1/temp_local;
 
@@ -453,6 +453,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             flow_u_mu_Min[3] = sinh_eta*utau + cosh_eta*ueta;
 
             // Lorentz boost matrix from lab to local rest frame
+            std::vector<std::vector<double>> lambda_munu(4, std::vector<double>(4, 0.0));
             lorentz_boost_matrix(lambda_munu, flow_u_mu_Min[0], 
                 flow_u_mu_Min[1], flow_u_mu_Min[2], flow_u_mu_Min[3]);
 
@@ -484,7 +485,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double prefactor_visc = Cq*prefactor_diff;
             
             // photon momentum loops
-            #pragma omp parallel for collapse(4) private(p_lab_Min, p_lab_local)
+            // #pragma omp parallel for collapse(4) private(p_lab_Min, p_lab_local)
             for (int k = 0; k < nrapidity; k++) {
                 for (int m = 0; m < nphi; m++) {
                     for (int l = 0; l < np; l++) {
@@ -577,27 +578,17 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
                             // add contributions from QGP and Hadronic matter, etc
                             // these are dN/(MdM pTdpTdphi dy)
-                            #pragma omp atomic
                             dNd2pTdphidy_eq_all[n + CORES * i3] += dNd2pTdphidy_cell_eq;
-                            #pragma omp atomic
                             dNd2pTdphidy_eqT_all[n + CORES * i3] += dNd2pTdphidy_cell_eqT;
-                            #pragma omp atomic
                             dNd2pTdphidy_eqL_all[n + CORES * i3] += dNd2pTdphidy_cell_eqL;
-                            #pragma omp atomic
                             dNd2pTdphidy_visc_all[n + CORES * i3] += dNd2pTdphidy_cell_visc;
-                            #pragma omp atomic
                             dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff;
-                            #pragma omp atomic
                             dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot;
 
                             if (differential_flag == 1) {
-                                #pragma omp atomic
                                 dNd2pTdphidydTdtau_eq_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_eq;;
-                                #pragma omp atomic
                                 dNd2pTdphidydTdtau_visc_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_visc;
-                                #pragma omp atomic
                                 dNd2pTdphidydTdtau_diff_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_diff;
-                                #pragma omp atomic
                                 dNd2pTdphidydTdtau_tot_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_tot;
                             }
 
