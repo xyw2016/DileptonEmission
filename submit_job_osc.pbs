@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#SBATCH -J event_0
+#SBATCH -N 1
+#SBATCH -n 1
+#SBATCH --mem=4G
+#SBATCH -e test.err
+#SBATCH -o test.log
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=lipei.du@mail.mcgill.ca
+#SBATCH -t 4:00:00
+#SBARCH -D /users/PAS0254/osu10088/dilepton
+
+module load gcc-compatibility/10.3.0
+
+./dilepton_emission.e

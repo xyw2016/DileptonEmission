@@ -81,11 +81,11 @@ int main(int argc, char** argv) {
 #ifdef _OPENMP
     end_time = omp_get_wtime();
     double total_time = end_time - start_time;
-    printf("Total CPU time: %f seconds.\n", total_time);
+    printf("Total wall time: %f seconds.\n", total_time);
 #endif
 
     sw.toc();
-    cout << "Total wall-clock time: " << sw.takeTime() << " seconds. Bye!" << endl;
+    cout << "Total CPU time: " << sw.takeTime() << " seconds. Bye!" << endl;
 
     // clean up
     delete [] eta_ptr;
