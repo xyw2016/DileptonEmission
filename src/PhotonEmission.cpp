@@ -604,7 +604,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         } // fluid cell
     }// cores
 
-    // #pragma omp parallel for collapse(4)
+    #pragma omp parallel for collapse(4)
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
             for (int l = 0; l < np; l++) {
@@ -619,7 +619,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                     double dN_pTdpTdphidy_diff_tmp = 0.0;
                     double dN_pTdpTdphidy_tot_tmp = 0.0;
 
-                    // #pragma omp simd reduction(+:dN_pTdpTdphidy_eq_tmp,dN_pTdpTdphidy_diff_tmp,dN_pTdpTdphidy_tot_tmp)
+                    #pragma omp simd reduction(+:dN_pTdpTdphidy_eq_tmp,dN_pTdpTdphidy_eqT_tmp,dN_pTdpTdphidy_eqL_tmp,\
+                            dN_pTdpTdphidy_visc_tmp,dN_pTdpTdphidy_diff_tmp,dN_pTdpTdphidy_tot_tmp)
                     for(long n = 0; n < CORES; n++)
                     {
                         dN_pTdpTdphidy_eq_tmp += dNd2pTdphidy_eq_all[n+CORES*i3];
@@ -647,7 +648,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                 double dN_pTdpTdphidydTdtau_diff_tmp = 0.0;
                                 double dN_pTdpTdphidydTdtau_tot_tmp = 0.0;
 
-                                // #pragma omp simd reduction(+:dN_pTdpTdphidydTdtau_eq_tmp,dN_pTdpTdphidydTdtau_diff_tmp,dN_pTdpTdphidydTdtau_tot_tmp)
+                                #pragma omp simd reduction(+:dN_pTdpTdphidydTdtau_eq_tmp,dN_pTdpTdphidydTdtau_visc_tmp,\
+                                    dN_pTdpTdphidydTdtau_diff_tmp,dN_pTdpTdphidydTdtau_tot_tmp)
                                 for(long n = 0; n < CORES; n++) {
                                     dN_pTdpTdphidydTdtau_eq_tmp += dNd2pTdphidydTdtau_eq_all[iT][it][n+CORES*i3];
                                     dN_pTdpTdphidydTdtau_visc_tmp += dNd2pTdphidydTdtau_visc_all[iT][it][n+CORES*i3];
