@@ -484,18 +484,18 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double prefactor_visc = Cq*prefactor_diff;
             
             // photon momentum loops
+            #pragma omp parallel for collapse(4) private(p_lab_Min, p_lab_local)
             for (int k = 0; k < nrapidity; k++) {
-                double cosh_y = cosh(y_q[k]);
-                double sinh_y = sinh(y_q[k]);
-                double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
-                double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
-                int i0 = nphi * k;
                 for (int m = 0; m < nphi; m++) {
-                    int i1 = (m+i0) * np;
                     for (int l = 0; l < np; l++) {
-                        int i2 = (l+i1) * nm;
                         for (int j = 0; j < nm; j++) {
-                            int i3 = (j+i2);
+
+                            int i3 = (j+(l+(m+nphi * k) * np) * nm);
+
+                            double cosh_y = cosh(y_q[k]);
+                            double sinh_y = sinh(y_q[k]);
+                            double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
+                            double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
 
                             // p_q is p_T magnitude array
                             double M_T = sqrt(p_q[l]*p_q[l]+M_ll[j]*M_ll[j]); // transverse mass
@@ -526,12 +526,6 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             pvec3 = pow(pvec_lrf, 3);
                             pvec5 = pow(pvec_lrf, 5);
 
-                            // E=u_mu*p^mu in Milne, which is p_Min_lrf[0]
-                            double Eq_localrest_temp = 0.0e0;
-                            for (int local_i = 0; local_i < 4; local_i++) {
-                                Eq_localrest_temp += (flow_u_mu_low[local_i]
-                                                      *p_lab_local[local_i]);
-                            }
 
                             // pi^\mu\nu p_\mu p_\nu, calculated in lab frame
                             double pi_photon = (
@@ -556,7 +550,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                 diff_dot_p = 1.0;
                             }
                             
-                            double Eq_localrest_Tb = Eq_localrest_temp;
+                            double Eq_localrest_Tb = p_Min_lrf[0];
 
                             double M2 = M_ll[j] * M_ll[j];
                             double visc_fac = prefactor_visc * pi_photon * M2 / pvec5;
@@ -583,17 +577,27 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
                             // add contributions from QGP and Hadronic matter, etc
                             // these are dN/(MdM pTdpTdphi dy)
+                            #pragma omp atomic
                             dNd2pTdphidy_eq_all[n + CORES * i3] += dNd2pTdphidy_cell_eq;
+                            #pragma omp atomic
                             dNd2pTdphidy_eqT_all[n + CORES * i3] += dNd2pTdphidy_cell_eqT;
+                            #pragma omp atomic
                             dNd2pTdphidy_eqL_all[n + CORES * i3] += dNd2pTdphidy_cell_eqL;
+                            #pragma omp atomic
                             dNd2pTdphidy_visc_all[n + CORES * i3] += dNd2pTdphidy_cell_visc;
+                            #pragma omp atomic
                             dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff;
+                            #pragma omp atomic
                             dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot;
 
                             if (differential_flag == 1) {
+                                #pragma omp atomic
                                 dNd2pTdphidydTdtau_eq_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_eq;;
+                                #pragma omp atomic
                                 dNd2pTdphidydTdtau_visc_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_visc;
+                                #pragma omp atomic
                                 dNd2pTdphidydTdtau_diff_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_diff;
+                                #pragma omp atomic
                                 dNd2pTdphidydTdtau_tot_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_tot;
                             }
 
