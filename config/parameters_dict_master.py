@@ -11,6 +11,7 @@ import argparse
 # control parameters
 control_dict = {
     'walltime': "10:00:00",         # walltime to run
+    'n_threads': 10,                # number of threads
 }
 
 dilepton_dict = {

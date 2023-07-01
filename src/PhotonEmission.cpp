@@ -704,7 +704,6 @@ void PhotonEmission::outputPhotonSpvn_individualchannel() {
 void PhotonEmission::calPhoton_total_Spvn() {
     // integrate over rapidity, azimuthal angle of momentum, and pT
     // calculate dN/(2pi dydM)
-    // #pragma omp parallel for collapse(4)
 
     double dy = dilepton_QGP_thermal->get_dy();
     for (int m = 0; m < nm; m++) {

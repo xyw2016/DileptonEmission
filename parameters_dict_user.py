@@ -5,7 +5,8 @@
 
 # control parameters
 control_dict = {
-    'walltime': "12:00:00",  # walltime to run
+    'walltime': "12:00:00",         # walltime to run
+    'n_threads': 10,                # number of threads
 }
 
 dilepton_dict = {

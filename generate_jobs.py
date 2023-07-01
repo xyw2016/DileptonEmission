@@ -5,16 +5,17 @@ import shutil
 import subprocess
 
 
-def generate_submit_jobs(script_dir, directory, walltime):
+def generate_submit_jobs(script_dir, directory, walltime, n_threads):
 
     working_folder = os.path.join(script_dir, directory)
     submit_jobs_path = os.path.join(script_dir, directory, "submit_jobs.pbs")
+    mem = 4*n_threads
     # Generate the submit_jobs.pbs script content
     script_content = """#!/usr/bin/env bash
 #SBATCH -J dilepton_event_0
 #SBATCH -N 1
-#SBATCH -n 1
-#SBATCH --mem=15G
+#SBATCH -n {2:d}
+#SBATCH --mem={3:d}G
 #SBATCH -e test.err
 #SBATCH -o test.log
 #SBATCH --mail-type=ALL
@@ -29,9 +30,9 @@ module load hdf5-mpi/1.8.18
 module load StdEnv/2020 intel/2020.1.217 hdf5/1.12.1
 module load gcc
 
-# Run the dilepton_emission.e program
+export OMP_NUM_THREADS={2:d}
 ./dilepton_emission.e
-    """.format(working_folder, walltime)
+    """.format(working_folder, walltime, n_threads, mem)
 
     # Write the script content to a file
     with open('submit_jobs.pbs', 'w') as script_file:
@@ -118,8 +119,10 @@ if __name__ == '__main__':
     if "walltime" in parameter_dict.control_dict.keys():
         walltime = parameter_dict.control_dict["walltime"]
 
+    n_threads = parameter_dict.control_dict["n_threads"]
+
     # Call the function to generate submit_jobs.pbs inside the created directory
-    generate_submit_jobs(script_dir, dir_name, walltime)
+    generate_submit_jobs(script_dir, dir_name, walltime, n_threads)
 
 
 
