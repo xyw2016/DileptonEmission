@@ -5,21 +5,11 @@
 
 # control parameters
 control_dict = {
-    'walltime': "12:00:00",         # walltime to run
-    'n_threads': 10,                # number of threads
+    'walltime': "5:00:00",         # walltime to run
+    'n_threads': 40,                # number of threads
 }
 
 dilepton_dict = {
-    'hydro_flag': 2,                # read in mode for hydro medium
-                                    # 0: read in hdf5 file
-                                    # 1: read in binary file output from MUSIC
-                                    # 2: read in binary file output from new MUSIC (no grid)
-                                    # 3: read in binary file output from new MUSIC (on grid)
-    'hydro_nskip_tau': 1,           # read in hydro slice every hydro_nskip_tau 
-                                    # steps from the medium file
-                                    # (only works for hydro_flag = 1)
-
-
     ##### emission rate #####
 
     'dilepton_emission_rate': 2,    # 0: analytical emission rate; PRC. 93, 044902, 2016
@@ -32,16 +22,7 @@ dilepton_dict = {
 
     ##### hydro profile #####
 
-    'Xmin': -15.0,                  # minimum points along x direction
-    'dx': 0.3,                      # lattice spacing along x direction
-    'Ymin': -15.0,                  # minimum points along y direction
-    'dy': 0.3,                      # lattice spacing along y direction
-
-    'neta': 10,                     # number of points in eta direction
-    'eta_i': 0.0,                   # beginning value of eta slice
-    'eta_f': 3.0,                   # end value of eta slice
-
-    'ETAmax': 2.0,                  # fluid cells outside this boundary are not considered
+    'ETAmax': 4.0,                  # fluid cells outside this boundary are not considered
 
     'T_sw_high': 0.140,             # high end of the switching temperature, above which is full QGP
     'T_sw_low': 0.135,              # low end of the switching temperature
@@ -49,9 +30,6 @@ dilepton_dict = {
 
 
     ##### hydro settings #####
-
-    'HydroinfoVisflag': 1,          # determine whether to read in the viscous evolution information
-    'HydroinfoBuffersize': 500,     # set the buffer size for hydro evolution profile
 
     'include_baryondiff_deltaf': 0, # switch to include baryon diffusion corrections
     'include_shearvisc_deltaf': 0,  # switch to include shear viscous corrections
@@ -68,11 +46,11 @@ dilepton_dict = {
     ##### photon kinematics #####
 
     'np': 20,                       # number of points for photon momentum
-    'nphi': 20,                     # number of points for angles of photons momenta
+    'nphi': 40,                     # number of points for angles of photons momenta
     'nrapidity': 1,                 # number of points for photon rapidity, odd number
-    'nm': 3,                        # number of points for dilepton invariant mass
+    'nm': 15,                       # number of points for dilepton invariant mass
 
-    'photon_q_i': 0.001,            # the smallest photon momentum to be calculated
+    'photon_q_i': 0.0,              # the smallest photon momentum to be calculated
     'photon_q_f': 4.0,              # the largest photon momentum to be calculated
     'photon_phi_q_i': 0.0,          # the smallest angle of photon momentum
     'photon_phi_q_f': 6.2831853,    # the largest angle of photon momentum
@@ -89,14 +67,6 @@ dilepton_dict = {
                                     # 1: differential in T and tau
                                     # 2: differential in x and tau
                                     # 10: differeitial in all options above
-    'tau_start': 1.0,               # emission start time (fm)
-    'tau_end': 13.0,                # emission end time (fm)
-    'n_tau_cut': 50,                # number of points in tau (range of tau is specified by tau_start and tau_end)
-    'T_cuthigh': 0.25,              # maximum allowed emission T (GeV)
-    'T_cutlow': 0.1,                # minimum allowed emission T (GeV)
-    'nTcut': 30,                    # number of points in T (range of T is specified by T_cuthigh and T_cutlow)
-    'dTau': 0.1,                    # lattice spacing along tau direction
-
-    'calHGIdFlag': 0,               # Flag to decide whether to calculate individual HG channels
-
+    'n_tau_cut': 80,                # number of points in tau (range of tau is specified by tau_start and tau_end)
+    'nTcut': 50,                    # number of points in T (range of T is specified by T_cuthigh and T_cutlow)
 }

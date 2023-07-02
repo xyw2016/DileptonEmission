@@ -179,11 +179,7 @@ void PhotonEmission::set_hydroGridinfo() {
     T_sw_high = paraRdr->getVal("T_sw_high");
     T_sw_low = paraRdr->getVal("T_sw_low");
 
-    T_cuthigh = paraRdr->getVal("T_cuthigh");
-    T_cutlow = paraRdr->getVal("T_cutlow");
     nTcut = paraRdr->getVal("nTcut");
-    tau_cut_high = paraRdr->getVal("tau_end");
-    tau_cut_low = paraRdr->getVal("tau_start");
     n_tau_cut = paraRdr->getVal("n_tau_cut");
 
     T_test =  paraRdr->getVal("T_test");
@@ -290,9 +286,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     }
 
     // get hydro grid information
-    double tau0 = hydroinfo_MUSIC_ptr->get_hydro_tau0();
     double dtau = hydroinfo_MUSIC_ptr->get_hydro_dtau();
-    double tau_max = hydroinfo_MUSIC_ptr->get_hydro_tau_max();
     double dx = hydroinfo_MUSIC_ptr->get_hydro_dx();
     double deta = hydroinfo_MUSIC_ptr->get_hydro_deta();
     double eta_max = hydroinfo_MUSIC_ptr->get_hydro_eta_max();
@@ -300,9 +294,14 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double Nskip_eta = hydroinfo_MUSIC_ptr->get_hydro_Nskip_eta();
     double Nskip_tau = hydroinfo_MUSIC_ptr->get_hydro_Nskip_tau();
     double volume_base = Nskip_tau*dtau*Nskip_x*dx*Nskip_x*dx*Nskip_eta*deta;
+    tau0 = hydroinfo_MUSIC_ptr->get_hydro_tau0();
+    tau_max = hydroinfo_MUSIC_ptr->get_hydro_tau_max();
+    tau_cut_low = tau0 - dtau;
+    tau_cut_high = tau_max + dtau;
+    T_cutlow = hydroinfo_MUSIC_ptr->get_hydro_T_min();
+    T_cuthigh =hydroinfo_MUSIC_ptr->get_hydro_T_max();
 
     // output results in (T, tau)
-
     double dT_cut = (T_cuthigh - T_cutlow)/(nTcut - 1);
     double dtau_cut = (tau_cut_high - tau_cut_low)/(n_tau_cut - 1);
 
@@ -342,6 +341,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     // loop over all fluid cells
     // subdivide bite size chunks of freezeout surface across cores
     int ncells = 0;
+    double tau_now = 0.0;
 
     #pragma omp parallel for reduction(+:ncells)
     for(long n = 0; n < CORES; n++)
@@ -369,7 +369,6 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double eta_local = -eta_max + fluidCellptr.ieta*deta;
 
 #ifndef _OPENMP
-            double tau_now = 0.0;
             if (fabs(tau_now - tau_local) > 1e-10) {
                 tau_now = tau_local;
                 cout << "Calculating tau = " << setw(4) << setprecision(3)
@@ -695,8 +694,8 @@ void PhotonEmission::calPhoton_SpvnpT_individualchannel() {
 void PhotonEmission::outputPhotonSpvn_individualchannel() {
     // dilepton_QGP_thermal->outputPhoton_SpvnpT_shell(output_path);
     if (differential_flag == 1) {
-        dilepton_QGP_thermal->outputPhoton_Spectra_dTdtau(output_path);
-        dilepton_QGP_thermal->outputPhoton_Spvn_dTdtau(output_path);
+        dilepton_QGP_thermal->outputPhoton_Spectra_dTdtau(output_path, T_cuthigh, T_cutlow, tau_cut_high, tau_cut_low);
+        dilepton_QGP_thermal->outputPhoton_Spvn_dTdtau(output_path, T_cuthigh, T_cutlow, tau_cut_high, tau_cut_low);
     }
 }
 

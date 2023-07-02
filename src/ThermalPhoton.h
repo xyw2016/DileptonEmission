@@ -91,8 +91,6 @@ class ThermalPhoton {
 
     // matrix for cuts on temperature and proper time
     int nTcut, n_tau_cut;
-    double Tcut_high, Tcut_low;
-    double tau_cut_high, tau_cut_low;
     double ******dNd2pTdphidydTdtau_eq, ******dNd2pTdphidydTdtau_tot;
     double ******dNd2pTdphidydTdtau_visc, *****dNd2pTdphidydTdtau_bulkvis;
     double ******dNd2pTdphidydTdtau_diff;
@@ -182,8 +180,8 @@ class ThermalPhoton {
                              std::vector<double> &vn_cos,
                              std::vector<double> &vn_sin);
     void outputPhoton_SpvnpT_shell(std::string path);
-    void outputPhoton_Spvn_dTdtau(std::string path);
-    void outputPhoton_Spectra_dTdtau(std::string path);
+    void outputPhoton_Spvn_dTdtau(std::string path, double Tcut_high, double Tcut_low, double tau_cut_high, double tau_cut_low);
+    void outputPhoton_Spectra_dTdtau(std::string path, double Tcut_high, double Tcut_low, double tau_cut_high, double tau_cut_low);
 
     struct Table {
         int nx, ny, nz, nw;

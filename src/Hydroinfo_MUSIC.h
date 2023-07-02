@@ -20,12 +20,15 @@ class Hydroinfo_MUSIC {
     float hydroTauMax;     // tau_max in the hydro data files
     float hydroDtau;       // step dtau in fm/c in the hydro data files
     float hydroXmax;       // maximum x in fm in the hydro data files
-                            // [-xmax, +xmax] for both x and y
-    float hydro_eta_max;       // maximum z in fm in the hydro data files
-                            // [-zmax, +zmax] for 3D hydro
+                           // [-xmax, +xmax] for both x and y
+    float hydro_eta_max;   // maximum z in fm in the hydro data files
+                           // [-zmax, +zmax] for 3D hydro
     float hydroDx;         // step dx in fm in the hydro data files
-    float hydroDeta;         // step dz in fm in the hydro data files in
-                            // the z-direction for 3D hydro
+    float hydroDeta;       // step dz in fm in the hydro data files in
+                           // the z-direction for 3D hydro
+
+    float hydroTmax;       // max temperature
+    float hydroTmin;       // min temperature
 
     int nskip_tau, nskip_x, nskip_eta;
 
@@ -58,6 +61,8 @@ class Hydroinfo_MUSIC {
     float get_hydro_deta() {return(hydroDeta);}
     float get_hydro_eta_max() {return(hydro_eta_max);}
     float get_hydro_x_max() {return(hydroXmax);}
+    float get_hydro_T_max() {return(hydroTmax);}
+    float get_hydro_T_min() {return(hydroTmin);}
     int get_hydro_Nskip_tau() {return(nskip_tau);}
     int get_hydro_Nskip_x() {return(nskip_x);}
     int get_hydro_Nskip_eta() {return(nskip_eta);}

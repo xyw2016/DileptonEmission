@@ -148,11 +148,6 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
         nTcut = paraRdr->getVal("nTcut");
         n_tau_cut = paraRdr->getVal("n_tau_cut");
 
-        Tcut_high = paraRdr->getVal("T_cuthigh");
-        Tcut_low = paraRdr->getVal("T_cutlow");
-        tau_cut_high = paraRdr->getVal("tau_end");
-        tau_cut_low = paraRdr->getVal("tau_start");
-
         dNd2pTdphidydTdtau_eq = createA6DMatrix(
                     nTcut, n_tau_cut, nm, np, nphi, nrapidity, 0.);
         dNd2pTdphidydTdtau_visc = createA6DMatrix(
@@ -510,7 +505,7 @@ void ThermalPhoton::calPhoton_Spectra_dTdtau() {
 }
 
 
-void ThermalPhoton::outputPhoton_Spectra_dTdtau(string path) {
+void ThermalPhoton::outputPhoton_Spectra_dTdtau(string path, double Tcut_high, double Tcut_low, double tau_cut_high, double tau_cut_low) {
     // calculate the inverse slope of the photon spectra at T-tau interval
     // integrated out phi and rapidity
     // pT differential spectra, dN/(2pi pTdpT MdM dy)
@@ -774,7 +769,7 @@ void ThermalPhoton::calPhoton_Spvn_dTdtau() {
 }
 
 
-void ThermalPhoton::outputPhoton_Spvn_dTdtau(string path) {
+void ThermalPhoton::outputPhoton_Spvn_dTdtau(string path, double Tcut_high, double Tcut_low, double tau_cut_high, double tau_cut_low) {
 
     double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
     double dtau = (tau_cut_high - tau_cut_low)/(n_tau_cut - 1);

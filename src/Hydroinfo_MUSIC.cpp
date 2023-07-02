@@ -14,6 +14,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <limits>  // Needed for std::numeric_limits
 
 #include "data_struct.h"
 #include "Hydroinfo_MUSIC.h"
@@ -752,6 +753,10 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         turn_on_diff = static_cast<int>(header[14]);
         const int nVar_per_cell = static_cast<int>(header[15]);
 
+        // initialize the max and min temperatures
+        hydroTmin = std::numeric_limits<float>::max();
+        hydroTmax = 0.0;
+
         float cell_info[nVar_per_cell];
 
         int itau_max = 0;
@@ -800,6 +805,8 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             newCell.ed = cell_info[4];
             newCell.pressure = cell_info[5];
             newCell.temperature = cell_info[6];
+            if (newCell.temperature > hydroTmax) hydroTmax = newCell.temperature;
+            if (newCell.temperature < hydroTmin) hydroTmin = newCell.temperature;
             newCell.cs2 = cell_info[7];
             newCell.ux = cell_info[8];
             newCell.uy = cell_info[9];
@@ -893,6 +900,8 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
     cout << "hydro_dx = " << hydroDx << " fm" << endl;
     cout << "hydro_eta_max = " << hydro_eta_max << endl;
     cout << "hydro_deta = " << hydroDeta << endl;
+    cout << "hydro_T_max = " << hydroTmax << endl;
+    cout << "hydro_T_min = " << hydroTmin << endl;
 }
 
 

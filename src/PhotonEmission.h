@@ -36,6 +36,8 @@ class PhotonEmission {
     double gridX0, gridY0;
     double ETAmax;
 
+    double tau0, tau_max;
+
     double T_dec, T_sw_high, T_sw_low;
     double T_cuthigh, T_cutlow;
     double tau_cut_high, tau_cut_low;

@@ -15,7 +15,7 @@ dilepton_emission_rate = 2    # 0: analytical emission rate; PRC. 93, 044902, 20
                               # 2: resummed NLO; from GJ, extrapolation will NOT work properly for large alpha_s, large muB, 
                               # or if q falls outside the grid! In these cases, just the boundary value is used.
 
-alpha_s = 0.3                 # strong coupling, works for dilepton_emission_rate = 2
+alpha_s = 0.0                 # strong coupling, works for dilepton_emission_rate = 2
 
 
 ##### hydro profile #####
@@ -24,6 +24,8 @@ Xmin = -15.0                  # minimum points along x direction
 dx = 0.3                      # lattice spacing along x direction
 Ymin = -15.0                  # minimum points along y direction
 dy = 0.3                      # lattice spacing along y direction
+
+ETAmax = 1.0                  # fluid cells outside this boundary are not considered
 
 neta = 10                     # number of points in eta direction
 eta_i = 0.0                   # beginning value of eta slice
@@ -53,10 +55,10 @@ inv_eplusp_test = 1.0
 
 ##### photon kinematics #####
 
-np = 20                       # number of points for photon momentum
+np = 4                       # number of points for photon momentum
 nphi = 40                     # number of points for angles of photons momenta
 nrapidity = 1                 # number of points for photon rapidity, odd number
-nm = 10                       # number of points for dilepton invariant mass
+nm = 4                       # number of points for dilepton invariant mass
 
 photon_q_i = 0.001              # the smallest photon momentum to be calculated
 photon_q_f = 4.0              # the largest photon momentum to be calculated
