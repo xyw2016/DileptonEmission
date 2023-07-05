@@ -32,7 +32,9 @@ module load gcc
 
 export OMP_NUM_THREADS={2:d}
 ./dilepton_emission.e
-    """.format(working_folder, walltime, n_threads, mem)
+
+python3 hdf5_zip_results.py {4:s}
+    """.format(working_folder, walltime, n_threads, mem, directory)
 
     # Write the script content to a file
     with open('submit_jobs.pbs', 'w') as script_file:
@@ -102,6 +104,9 @@ if __name__ == '__main__':
     par_dict_path = os.path.join(script_dir, par_dict)
     dir_path = os.path.join(script_dir, dir_name)
     shutil.copy2(par_dict_path, dir_path)
+
+    # zip_hdf5_py = "hdf5_zip_results.py"
+    shutil.copy2('{}/hdf5_zip_results.py'.format(script_dir), dir_path)
 
     subprocess.call("(cd {}/config; ".format(script_dir)  + "python3 parameters_dict_master.py "
         + "-path {} -par {};)".format(dir_path, path.abspath(par_dict)), shell=True)

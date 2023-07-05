@@ -31,8 +31,8 @@ dilepton_dict = {
 
     ##### hydro settings #####
 
-    'include_baryondiff_deltaf': 0, # switch to include baryon diffusion corrections
-    'include_shearvisc_deltaf': 0,  # switch to include shear viscous corrections
+    'include_baryondiff_deltaf': 1, # switch to include baryon diffusion corrections
+    'include_shearvisc_deltaf': 1,  # switch to include shear viscous corrections
     'turn_off_transverse_flow': 0,  # flag to turn off transverse flow in the photon calculation
     'turn_on_muB': 1,               # flag to include muB dependence in photon rates
 
