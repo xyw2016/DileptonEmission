@@ -7,6 +7,7 @@
 #include <string>
 #include <omp.h>
 #include <vector>
+#include <unordered_set>
 
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
@@ -348,6 +349,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     {
         long endFO = FO_chunk;
 
+        int processedCells = 0;  // Counter for processed cells
+        int printInterval = 0.25 * endFO;  // Print at 25% intervals
+
         for(long int icell = 0; icell < endFO; icell++)  // cell index inside each chunk
         {
             if((icell == endFO - 1) && (remainder != 0) && (n > remainder - 1)) continue;
@@ -368,13 +372,24 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double tau_local = tau0 + fluidCellptr.itau*dtau;
             double eta_local = -eta_max + fluidCellptr.ieta*deta;
 
-#ifndef _OPENMP
+            #ifdef _OPENMP
+            processedCells++;  // Increment the counter for processed cells
+
+            if (processedCells % printInterval == 0)
+            {
+                double progress = (processedCells * 100) / FO_chunk;
+                int threadNum = omp_get_thread_num();
+                std::cout << "Thread " << threadNum << ": Processing " << progress << "% of cells" << std::endl;
+            }
+            #else
+
             if (fabs(tau_now - tau_local) > 1e-10) {
                 tau_now = tau_local;
                 cout << "Calculating tau = " << setw(4) << setprecision(3)
                      << tau_now << " fm/c..." << endl;
-            }
-#endif
+             }
+            #endif         
+
             // volume element: tau*dtau*dx*dy*deta,
             double volume = tau_local*volume_base;
 
