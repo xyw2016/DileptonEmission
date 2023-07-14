@@ -29,6 +29,8 @@ module load gsl
 module load hdf5-mpi/1.8.18
 module load StdEnv/2020 intel/2020.1.217 hdf5/1.12.1
 module load gcc
+module load python
+module load scipy-stack/2023a
 
 export OMP_NUM_THREADS={2:d}
 ./dilepton_emission.e

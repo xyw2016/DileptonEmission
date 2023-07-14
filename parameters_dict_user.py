@@ -48,7 +48,7 @@ dilepton_dict = {
     'np': 20,                       # number of points for photon momentum
     'nphi': 40,                     # number of points for angles of photons momenta
     'nrapidity': 1,                 # number of points for photon rapidity, odd number
-    'nm': 15,                       # number of points for dilepton invariant mass
+    'nm': 14,                       # number of points for dilepton invariant mass
 
     'photon_q_i': 0.0,              # the smallest photon momentum to be calculated
     'photon_q_f': 4.0,              # the largest photon momentum to be calculated
@@ -56,8 +56,8 @@ dilepton_dict = {
     'photon_phi_q_f': 6.2831853,    # the largest angle of photon momentum
     'photon_y_i': 0.0,              # the smallest photon rapidity
     'photon_y_f': 0.0,              # the largest photon rapidity
-    'dilepton_mass_i': 0.1,         # the smallest dilepton invariant mass
-    'dilepton_mass_f': 3.6,         # the largest dilepton invariant mass
+    'dilepton_mass_i': 0.001,         # the smallest dilepton invariant mass
+    'dilepton_mass_f': 3.501,         # the largest dilepton invariant mass
 
     'norder': 3,                    # calculate photon vn to norder
 
