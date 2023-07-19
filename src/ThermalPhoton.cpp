@@ -103,7 +103,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
 
     // dilepton invariant mass
     M.resize(nm, 0);
-    dM = (m_f - m_i)/nm;
+    dM = (m_f - m_i)/(nm - 1);
     for (int i=0; i<nm; i++) {
         M[i] = m_i + i*dM;
     }
