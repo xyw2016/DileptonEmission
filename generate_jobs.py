@@ -5,11 +5,11 @@ import shutil
 import subprocess
 
 
-def generate_submit_jobs(script_dir, directory, walltime, n_threads):
+def generate_submit_jobs(script_dir, directory, walltime, n_threads, n_memory_to_thread):
 
     working_folder = os.path.join(script_dir, directory)
     submit_jobs_path = os.path.join(script_dir, directory, "submit_jobs.pbs")
-    mem = 4*n_threads
+    mem = n_memory_to_thread*n_threads
     # Generate the submit_jobs.pbs script content
     script_content = """#!/usr/bin/env bash
 #SBATCH -J dilepton_event_0
@@ -77,7 +77,7 @@ def create_directory(folder_name, beam_energy, centrality_low, centrality_high):
 if __name__ == '__main__':
     # Check if all required arguments are provided
     if len(sys.argv) != 6:
-        print("Usage: python script.py folder_name beam_energy centrality_low centrality_high")
+        print("Usage: python script.py folder_name beam_energy centrality_low centrality_high parameter_dict")
         sys.exit(1)
 
     # Retrieve the command line arguments
@@ -115,21 +115,21 @@ if __name__ == '__main__':
 
     # Create symbolic links
     os.symlink('{}/dilepton_emission.e'.format(script_dir), '{}/dilepton_emission.e'.format(event_dir))
-    #os.symlink('{}/parameters.dat'.format(script_dir), '{}/parameters.dat'.format(event_dir))
     os.symlink('{}/ph_rates'.format(script_dir), '{}/ph_rates'.format(event_dir))
 
+    shutil.copy2("{0:s}/iEBE-sampler/{1:s}/event_0/EVENT_RESULTS_MCGlb{1:s}_0/hydro_results_MCGlb{1:s}_0/music_input".format(parent_directory,dir_name), 
+        "{}/results".format(event_dir))
     os.symlink("{0:s}/iEBE-sampler/{1:s}/event_0/EVENT_RESULTS_MCGlb{1:s}_0/hydro_results_MCGlb{1:s}_0/evolution_all_xyeta.dat".format(parent_directory,dir_name), 
         "{}/results/evolution_all_xyeta.dat".format(event_dir))
-    os.symlink("{0:s}/iEBE-sampler/{1:s}/event_0/EVENT_RESULTS_MCGlb{1:s}_0/hydro_results_MCGlb{1:s}_0/music_input".format(parent_directory,dir_name), 
-        "{}/results/music_input".format(event_dir))
 
     if "walltime" in parameter_dict.control_dict.keys():
         walltime = parameter_dict.control_dict["walltime"]
 
     n_threads = parameter_dict.control_dict["n_threads"]
+    n_memory_to_thread = parameter_dict.control_dict['n_memory_to_thread']
 
     # Call the function to generate submit_jobs.pbs inside the created directory
-    generate_submit_jobs(script_dir, dir_name, walltime, n_threads)
+    generate_submit_jobs(script_dir, dir_name, walltime, n_threads, n_memory_to_thread)
 
 
 

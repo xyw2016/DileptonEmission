@@ -5,8 +5,9 @@
 
 # control parameters
 control_dict = {
-    'walltime': "5:00:00",         # walltime to run
+    'walltime': "20:00:00",         # walltime to run
     'n_threads': 40,                # number of threads
+    'n_memory_to_thread': 10,       # memory per thread
 }
 
 dilepton_dict = {
@@ -22,7 +23,7 @@ dilepton_dict = {
 
     ##### hydro profile #####
 
-    'ETAmax': 4.0,                  # fluid cells outside this boundary are not considered
+    'ETAmax': 10.0,                  # fluid cells outside this boundary are not considered
 
     'T_sw_high': 0.140,             # high end of the switching temperature, above which is full QGP
     'T_sw_low': 0.135,              # low end of the switching temperature
@@ -47,17 +48,17 @@ dilepton_dict = {
 
     'np': 20,                       # number of points for photon momentum
     'nphi': 40,                     # number of points for angles of photons momenta
-    'nrapidity': 1,                 # number of points for photon rapidity, odd number
-    'nm': 14,                       # number of points for dilepton invariant mass
+    'nrapidity': 7,                 # number of points for photon rapidity, odd number
+    'nm': 8,                       # number of points for dilepton invariant mass
 
     'photon_q_i': 0.0,              # the smallest photon momentum to be calculated
     'photon_q_f': 4.0,              # the largest photon momentum to be calculated
     'photon_phi_q_i': 0.0,          # the smallest angle of photon momentum
     'photon_phi_q_f': 6.2831853,    # the largest angle of photon momentum
-    'photon_y_i': 0.0,              # the smallest photon rapidity
-    'photon_y_f': 0.0,              # the largest photon rapidity
-    'dilepton_mass_i': 0.001,         # the smallest dilepton invariant mass
-    'dilepton_mass_f': 3.501,         # the largest dilepton invariant mass
+    'photon_y_i': -1.0,              # the smallest photon rapidity
+    'photon_y_f': 1.0,              # the largest photon rapidity
+    'dilepton_mass_i': 0.1,         # the smallest dilepton invariant mass
+    'dilepton_mass_f': 3.0,         # the largest dilepton invariant mass
 
     'norder': 3,                    # calculate photon vn to norder
 
