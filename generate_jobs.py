@@ -42,9 +42,7 @@ python3 hdf5_zip_results.py {4:s}
     with open('submit_jobs.pbs', 'w') as script_file:
         script_file.write(script_content)
 
-def create_directory(folder_name, beam_energy, centrality_low, centrality_high):
-    # Create directory name
-    dir_name = f"{folder_name}{beam_energy}_{centrality_low}_{centrality_high}"
+def create_directory(dir_name):
 
     # Check if the directory already exists
     if os.path.exists(dir_name):
@@ -70,14 +68,12 @@ def create_directory(folder_name, beam_energy, centrality_low, centrality_high):
     os.makedirs('results', exist_ok=True)
     #os.makedirs('model_parameters', exist_ok=True)
 
-    # Return the created directory name
-    return dir_name
 
 
 if __name__ == '__main__':
     # Check if all required arguments are provided
-    if len(sys.argv) != 6:
-        print("Usage: python script.py folder_name beam_energy centrality_low centrality_high parameter_dict")
+    if len(sys.argv) != 7:
+        print("Usage: python generate_jobs.py folder_name beam_energy centrality_low centrality_high folder_name_suffix parameter_dict")
         sys.exit(1)
 
     # Retrieve the command line arguments
@@ -85,7 +81,8 @@ if __name__ == '__main__':
     beam_energy = sys.argv[2]
     centrality_low = sys.argv[3]
     centrality_high = sys.argv[4]
-    par_dict = sys.argv[5] # parameters_dict_user.py
+    folder_name_suffix = sys.argv[5]
+    par_dict = sys.argv[6] # parameters_dict_user.py
 
     par_diretory = path.dirname(path.abspath(par_dict))
     sys.path.insert(0, par_diretory)
@@ -98,13 +95,15 @@ if __name__ == '__main__':
     parent_directory = os.path.dirname(script_dir)
 
     # Call the function to create the directory structure and get the directory name, e.g. AuAu_19.6_0_10
-    dir_name = create_directory(folder_name, beam_energy, centrality_low, centrality_high)
+    dir_name = f"{folder_name}{beam_energy}_{centrality_low}_{centrality_high}" # hydro folders name
+    dilepton_dir_name = f"{dir_name}_{folder_name_suffix}" # dilepton folders name
+    create_directory(dilepton_dir_name)
 
-    event_dir = os.path.join(script_dir, dir_name)
+    event_dir = os.path.join(script_dir, dilepton_dir_name)
 
     # copy parameter python files
     par_dict_path = os.path.join(script_dir, par_dict)
-    dir_path = os.path.join(script_dir, dir_name)
+    dir_path = os.path.join(script_dir, dilepton_dir_name)
     shutil.copy2(par_dict_path, dir_path)
 
     # zip_hdf5_py = "hdf5_zip_results.py"
@@ -122,6 +121,8 @@ if __name__ == '__main__':
     os.symlink("{0:s}/iEBE-sampler/{1:s}/event_0/EVENT_RESULTS_MCGlb{1:s}_0/hydro_results_MCGlb{1:s}_0/evolution_all_xyeta.dat".format(parent_directory,dir_name), 
         "{}/results/evolution_all_xyeta.dat".format(event_dir))
 
+    ### for submit_jobs.pbs ###
+
     if "walltime" in parameter_dict.control_dict.keys():
         walltime = parameter_dict.control_dict["walltime"]
 
@@ -129,7 +130,7 @@ if __name__ == '__main__':
     n_memory_to_thread = parameter_dict.control_dict['n_memory_to_thread']
 
     # Call the function to generate submit_jobs.pbs inside the created directory
-    generate_submit_jobs(script_dir, dir_name, walltime, n_threads, n_memory_to_thread)
+    generate_submit_jobs(script_dir, dilepton_dir_name, walltime, n_threads, n_memory_to_thread)
 
 
 
