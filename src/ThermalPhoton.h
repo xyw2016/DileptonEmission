@@ -20,6 +20,8 @@ class ThermalPhoton {
     int nm;
     std::string rate_path_;
 
+    int use_logarithmic_mass_grid;
+
     double dy;
     double dM;
     double Dy;

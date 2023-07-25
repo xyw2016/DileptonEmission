@@ -31,6 +31,7 @@ using ARSENAL::deleteA3DMatrix;
 using ARSENAL::deleteA4DMatrix;
 using ARSENAL::deleteA5DMatrix;
 using ARSENAL::deleteA6DMatrix;
+using ARSENAL::logarithmic_mass_grid;
 
 using PhysConsts::me;
 
@@ -74,6 +75,9 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     double m_i = paraRdr->getVal("dilepton_mass_i");
     double m_f = paraRdr->getVal("dilepton_mass_f");
 
+    // Choose between equal steps and logarithmically spaced mass grid
+    use_logarithmic_mass_grid =  paraRdr->getVal("use_logarithmic_mass_grid");
+
     p = new double [np];
     p_weight = new double [np];
     phi = new double [nphi];
@@ -102,10 +106,14 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     }
 
     // dilepton invariant mass
-    M.resize(nm, 0);
-    dM = (m_f - m_i)/(nm - 1);
-    for (int i=0; i<nm; i++) {
-        M[i] = m_i + i*dM;
+    if (use_logarithmic_mass_grid) {
+        M = logarithmic_mass_grid(m_i, m_f, nm);
+    } else {
+        M.resize(nm, 0);
+        dM = (m_f - m_i)/(nm - 1);
+        for (int i=0; i<nm; i++) {
+            M[i] = m_i + i*dM;
+        }
     }
 
 

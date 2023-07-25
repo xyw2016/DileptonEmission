@@ -87,6 +87,8 @@ dilepton_dict = {
     'dilepton_mass_i': 0.1,         # the smallest dilepton invariant mass
     'dilepton_mass_f': 3.6,         # the largest dilepton invariant mass
 
+    'use_logarithmic_mass_grid': 1, # Choose between equal steps and logarithmically spaced mass grid
+
     'norder': 3,                    # calculate photon vn to norder
 
     ##### differential setting #####

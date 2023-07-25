@@ -7,6 +7,7 @@
 
 namespace ARSENAL {
 
+std::vector<double> logarithmic_mass_grid(double m_min, double m_max, int num_points);
 double Simpson_sum(double* , int, double);
 
 std::vector< std::vector<double>* >* readBlockData(std::istream &stream_in);

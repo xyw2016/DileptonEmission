@@ -13,6 +13,19 @@ using std::endl;
 
 namespace ARSENAL {
 
+// Function to generate logarithmically spaced mass grid
+std::vector<double> logarithmic_mass_grid(double m_min, double m_max, int num_points) {
+    std::vector<double> log_mass_list;
+    double log_m_min = std::log10(m_min);
+    double log_m_max = std::log10(m_max);
+    double dLogM = (log_m_max - log_m_min) / (num_points - 1);
+    for (int i = 0; i < num_points; i++) {
+        double log_mass = log_m_min + i * dLogM;
+        log_mass_list.push_back(std::pow(10, log_mass));
+    }
+    return log_mass_list;
+}
+
 double Simpson_sum(double* array, int num, double h_step)
 {
       double sum=0;
