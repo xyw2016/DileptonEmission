@@ -25,9 +25,9 @@ dilepton_dict = {
 
     'ETAmax': 10.0,                  # fluid cells outside this boundary are not considered
 
-    'T_sw_high': 0.140,             # high end of the switching temperature, above which is full QGP
-    'T_sw_low': 0.135,              # low end of the switching temperature
-    'T_dec': 0.105,                 # freeze out temperature (GeV), below which is out of interest
+    'T_sw_high': 0.105,             # high end of the switching temperature, above which is full QGP
+    'T_sw_low': 0.103,              # low end of the switching temperature
+    'T_dec': 0.100,                 # freeze out temperature (GeV), below which is out of interest
 
 
     ##### hydro settings #####
@@ -49,7 +49,7 @@ dilepton_dict = {
     'np': 20,                       # number of points for photon momentum
     'nphi': 40,                     # number of points for angles of photons momenta
     'nrapidity': 7,                 # number of points for photon rapidity, odd number
-    'nm': 8,                       # number of points for dilepton invariant mass
+    'nm': 10,                       # number of points for dilepton invariant mass
 
     'photon_q_i': 0.0,              # the smallest photon momentum to be calculated
     'photon_q_f': 4.0,              # the largest photon momentum to be calculated

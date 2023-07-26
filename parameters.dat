@@ -15,7 +15,7 @@ dilepton_emission_rate = 2    # 0: analytical emission rate; PRC. 93, 044902, 20
                               # 2: resummed NLO; from GJ, extrapolation will NOT work properly for large alpha_s, large muB, 
                               # or if q falls outside the grid! In these cases, just the boundary value is used.
 
-alpha_s = 0.0                 # strong coupling, works for dilepton_emission_rate = 2
+alpha_s = 0.3                 # strong coupling, works for dilepton_emission_rate = 2
 
 
 ##### hydro profile #####
@@ -31,7 +31,7 @@ neta = 10                     # number of points in eta direction
 eta_i = 0.0                   # beginning value of eta slice
 eta_f = 3.0                   # end value of eta slice
 
-T_sw_high = 0.190             # high end of the switching temperature, above which is full QGP
+T_sw_high = 0.20             # high end of the switching temperature, above which is full QGP
 T_sw_low = 0.135              # low end of the switching temperature
 T_dec = 0.105                 # freeze out temperature (GeV), below which is out of interest
 
@@ -69,7 +69,7 @@ photon_y_f = 0.              # the largest photon rapidity
 dilepton_mass_i = 0.1         # the smallest dilepton invariant mass
 dilepton_mass_f = 3.0         # the largest dilepton invariant mass
 
-use_logarithmic_mass_grid = 0 # choose between equal steps and logarithmically spaced mass grid
+use_logarithmic_mass_grid = 1 # choose between equal steps and logarithmically spaced mass grid
 
 norder = 3                    # calculate photon vn to norder
 
