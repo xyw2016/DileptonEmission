@@ -5,7 +5,7 @@
 
 # control parameters
 control_dict = {
-    'walltime': "20:00:00",         # walltime to run
+    'walltime': "10:00:00",         # walltime to run
     'n_threads': 40,                # number of threads
     'n_memory_to_thread': 10,       # memory per thread
 }
@@ -27,7 +27,7 @@ dilepton_dict = {
 
     'T_sw_high': 0.105,             # high end of the switching temperature, above which is full QGP
     'T_sw_low': 0.103,              # low end of the switching temperature
-    'T_dec': 0.100,                 # freeze out temperature (GeV), below which is out of interest
+    'T_dec': 0.120,                 # freeze out temperature (GeV), below which is out of interest
 
 
     ##### hydro settings #####

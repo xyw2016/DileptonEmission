@@ -404,6 +404,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double inv_eplusp = 1./(ed_local+pd_local);
             double rhoB_over_eplusp = rhoB_local*inv_eplusp;
 
+            T_sw_high = 0.166 - 0.139 * pow(muB_local, 2) - 0.053 * pow(muB_local, 4); // Cleymans et al
+
             // validation setup, using some constant values to test the code
             if(test_code_flag==1){
                 temp_local = T_test;
