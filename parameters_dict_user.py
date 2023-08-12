@@ -5,7 +5,7 @@
 
 # control parameters
 control_dict = {
-    'walltime': "10:00:00",         # walltime to run
+    'walltime': "3:00:00",         # walltime to run
     'n_threads': 40,                # number of threads
     'n_memory_to_thread': 10,       # memory per thread
 }
@@ -52,7 +52,7 @@ dilepton_dict = {
     'nm': 10,                       # number of points for dilepton invariant mass
 
     'photon_q_i': 0.0,              # the smallest photon momentum to be calculated
-    'photon_q_f': 4.0,              # the largest photon momentum to be calculated
+    'photon_q_f': 6.0,              # the largest photon momentum to be calculated
     'photon_phi_q_i': 0.0,          # the smallest angle of photon momentum
     'photon_phi_q_f': 6.2831853,    # the largest angle of photon momentum
     'photon_y_i': -1.0,              # the smallest photon rapidity
@@ -70,6 +70,6 @@ dilepton_dict = {
                                     # 1: differential in T and tau
                                     # 2: differential in x and tau
                                     # 10: differeitial in all options above
-    'n_tau_cut': 80,                # number of points in tau (range of tau is specified by tau_start and tau_end)
+    'n_tau_cut': 100,                # number of points in tau (range of tau is specified by tau_start and tau_end)
     'nTcut': 50,                    # number of points in T (range of T is specified by T_cuthigh and T_cutlow)
 }
