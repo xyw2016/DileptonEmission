@@ -399,8 +399,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double temp_inv = 1/temp_local;
 
             // note that when turn_on_muB_=0, muB and rhoB are set to zero as follows
-            double muB_local = turn_on_muB_*fluidCellptr.muB;
-            double rhoB_local = turn_on_muB_*fluidCellptr.rhoB;
+            double muB_local = fluidCellptr.muB;
+            double rhoB_local = fluidCellptr.rhoB;
             double inv_eplusp = 1./(ed_local+pd_local);
             double rhoB_over_eplusp = rhoB_local*inv_eplusp;
 
@@ -585,6 +585,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             if (temp_local > T_sw) {
                                 // QGP emission
                                 double QGP_fraction = 1.0;
+                                muB_local = turn_on_muB_*muB_local;
+                                rhoB_over_eplusp = turn_on_muB_*rhoB_over_eplusp;
                                 dilepton_QGP_thermal->calThermalPhotonemission_3d(
                                     Eq_localrest_Tb, M_ll[j], visc_fac, bulkPi_fac, diff_fac,
                                     temp_local, muB_local, inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,

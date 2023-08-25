@@ -18,7 +18,7 @@ def generate_submit_jobs(script_dir, directory, walltime, n_threads, n_memory_to
 #SBATCH --mem={3:d}G
 #SBATCH -e test.err
 #SBATCH -o test.log
-#SBATCH --mail-type=ALL
+#SBATCH --mail-type=FAIL
 #SBATCH --mail-user=lipei.du@mail.mcgill.ca
 #SBATCH --account=def-gale
 #SBATCH -t {1:s}
