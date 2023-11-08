@@ -5,9 +5,15 @@
 #include <cmath>
 #include <iomanip>
 #include <string>
-#include <omp.h>
+//#include <omp.h>
 #include <vector>
 #include <unordered_set>
+#ifndef _OPENMP
+    #define omp_get_thread_num() 0
+    #define omp_get_num_threads() 1
+#else
+    #include <omp.h>
+#endif
 
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"

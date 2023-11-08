@@ -10,7 +10,13 @@
 #include <iomanip>
 #include <string>
 #include <fstream>
-#include <omp.h>
+//#include <omp.h>
+#ifndef _OPENMP
+    #define omp_get_thread_num() 0
+    #define omp_get_num_threads() 1
+#else
+    #include <omp.h>
+#endif
 
 #include "Table2D.h"
 #include "ThermalPhoton.h"
