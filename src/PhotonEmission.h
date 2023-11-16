@@ -104,6 +104,7 @@ class PhotonEmission {
     void calPhoton_SpvnpT_individualchannel();
     void outputPhoton_total_SpMatrix_and_SpvnpT();
     void outputPhotonSpvn_individualchannel();
+    double suppression_factor(double tau);
 };
 
 #endif   // SRC_PHOTONEMISSION_H_

@@ -709,7 +709,170 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             idx_map_[cell_idx] = i;
         }
         hydroTauMax = hydroTau0 + hydroDtau*itaumax;
-    } else if (whichHydro == 12) {
+    } 
+    else if (whichHydro == 13) {
+        // new pre-equlibirum stage format (no grid)
+        cout << "Using pre-equlibirum stage format (no grid) reading data ..."
+             << endl;
+
+        // read in temperature and flow velocity
+        // The name of the evolution file: evolution_name
+        string evolution_name = "results/evolution_pre_stage.dat";
+        cout << "Evolution file name = " << evolution_name << endl;
+        std::FILE *fin;
+        fin = std::fopen(evolution_name.c_str(), "rb");
+        if (fin == NULL) {
+            cerr << "[Hydroinfo_pre_equlibirum::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_name << endl;
+            exit(1);
+        }
+
+        float header[16];
+        int status = std::fread(&header, sizeof(float), 16, fin);
+        if (status == 0) {
+            cerr << "[Hydroinfo_pre_equlibirum::readHydroData]: ERROR: "
+                 << "Can not read the evolution file header" << endl;
+            exit(1);
+        }
+
+        hydroTau0 = header[0];
+        hydroDtau = header[1];
+        ixmax = static_cast<int>(header[2]);
+        hydroDx = header[3];
+        hydroXmax = std::abs(header[4]);
+        ietamax = static_cast<int>(header[8]);
+        if (ietamax == 1) {
+            boost_invariant_ = true;
+        } else {
+            boost_invariant_ = false;
+        }
+        hydroDeta = header[9];
+        hydro_eta_max = std::abs(header[10]);
+        turn_on_rhob = static_cast<int>(header[11]);
+        turn_on_shear = static_cast<int>(header[12]);
+        turn_on_bulk = static_cast<int>(header[13]);
+        turn_on_diff = static_cast<int>(header[14]);
+        const int nVar_per_cell = static_cast<int>(header[15]);
+
+        // initialize the max and min temperatures
+        hydroTmin = std::numeric_limits<float>::max();
+        hydroTmax = 0.0;
+
+        float cell_info[nVar_per_cell];
+
+        int itau_max = 0;
+        fluidCell_3D_new zeroCell;
+        zeroCell.itau = 0;
+        zeroCell.ix = 0;
+        zeroCell.iy = 0;
+        zeroCell.ieta = 0;
+        zeroCell.ed = 0.;
+        zeroCell.pressure = 0.;
+        zeroCell.temperature = 0.;
+        zeroCell.cs2 = 0.;
+        zeroCell.muB = 0.;
+        zeroCell.rhoB = 0.;
+        zeroCell.ux = 0.;
+        zeroCell.uy = 0.;
+        zeroCell.ueta = 0.;
+        zeroCell.pi11 = 0.;
+        zeroCell.pi12 = 0.;
+        zeroCell.pi13 = 0.;
+        zeroCell.pi22 = 0.;
+        zeroCell.pi23 = 0.;
+        zeroCell.bulkPi = 0.;
+        zeroCell.qx = 0.;
+        zeroCell.qy = 0.;
+        zeroCell.qz = 0.;
+        //lattice_new_.push_back(zeroCell);
+        int ik = 0;
+        while (true) {
+            status = 0;
+            status = std::fread(&cell_info, sizeof(float), nVar_per_cell, fin);
+            if (status == 0) break;
+            if (status != nVar_per_cell) {
+                cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                     << "the evolution file format is not correct" <<" " <<status<<endl;
+                exit(1);
+            }
+
+            if (itau_max < static_cast<int>(cell_info[0]))
+                itau_max = static_cast<int>(cell_info[0]);
+            fluidCell_3D_new newCell;
+            newCell.itau = static_cast<int>(cell_info[0]);
+            newCell.ix   = static_cast<int>(cell_info[1]);
+            newCell.iy   = static_cast<int>(cell_info[2]);
+            newCell.ieta = static_cast<int>(cell_info[3]);
+            newCell.ed = cell_info[4];
+            newCell.pressure = cell_info[5];
+            newCell.temperature = cell_info[6];
+            if (newCell.temperature > hydroTmax) hydroTmax = newCell.temperature;
+            if (newCell.temperature < hydroTmin) hydroTmin = newCell.temperature;
+            newCell.cs2 = cell_info[7];
+            newCell.ux = cell_info[8];
+            newCell.uy = cell_info[9];
+            newCell.ueta = cell_info[10];
+            if (turn_on_rhob == 1) {
+                newCell.rhoB = cell_info[11];
+                newCell.muB = cell_info[12];
+            } else {
+                newCell.rhoB = 0.;
+                newCell.muB = 0.;
+            }
+            if (turn_on_shear == 1) {
+                newCell.pi11 = cell_info[11 + turn_on_rhob*2];
+                newCell.pi12 = cell_info[12 + turn_on_rhob*2];
+                newCell.pi13 = cell_info[13 + turn_on_rhob*2];
+                newCell.pi22 = cell_info[14 + turn_on_rhob*2];
+                newCell.pi23 = cell_info[15 + turn_on_rhob*2];
+            } else {
+                newCell.pi11 = 0.;
+                newCell.pi12 = 0.;
+                newCell.pi13 = 0.;
+                newCell.pi22 = 0.;
+                newCell.pi23 = 0.;
+            }
+            if (turn_on_bulk == 1) {
+                newCell.bulkPi = (
+                    cell_info[11 + turn_on_rhob*2 + turn_on_shear*5]);
+            } else {
+                newCell.bulkPi = 0.;
+            }
+            if (turn_on_diff == 1) {
+                newCell.qx = (
+                    cell_info[11 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+                newCell.qy = (
+                    cell_info[12 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+                newCell.qz = (
+                    cell_info[13 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+            } else {
+                newCell.qx = 0.;
+                newCell.qy = 0.;
+                newCell.qz = 0.;
+            }
+            std::cout << newCell.muB<< " " <<newCell.temperature << " "<<newCell.ux<<" "<<newCell.uy<<" "<<newCell.ueta<<" "
+                      << newCell.pi11 << " "<<newCell.pi12 <<" "<<newCell.pi13 <<" "<<newCell.pi22 <<" "<<newCell.pi23  <<" "<< newCell.qx 
+                      << newCell.qy << " "<<newCell.qz <<" "<<newCell.ed<<" "<<newCell.pressure <<std::endl;
+            lattice_new_.push_back(newCell);
+            ik++;
+            if (ik%50000 == 0)
+                cout << "o" << flush;
+        }
+        cout << endl;
+        std::fclose(fin);
+        itaumax = itau_max;
+        // create the index map
+        long long ncells = (itaumax + 1)*ixmax*ixmax*ietamax;
+        idx_map_.resize(ncells, 0);
+        for (unsigned int i = 0; i < lattice_new_.size(); i++) {
+            const auto cell_i = lattice_new_[i];
+            int cell_idx = (
+                (  (cell_i.itau*ietamax + cell_i.ieta)*ixmax
+                 + cell_i.iy)*ixmax + cell_i.ix);
+            idx_map_[cell_idx] = i;
+        }
+        hydroTauMax = hydroTau0 + hydroDtau*itaumax;
+    }else if (whichHydro == 12) {
         // new MUSIC hydro format (no grid)
         cout << "Using new MUSIC hydro format (no grid) reading data ..."
              << endl;
@@ -791,7 +954,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             if (status == 0) break;
             if (status != nVar_per_cell) {
                 cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
-                     << "the evolution file format is not correct" << endl;
+                     << "the evolution file format is not correct " << status <<endl;
                 exit(1);
             }
 
@@ -868,7 +1031,8 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             idx_map_[cell_idx] = i;
         }
         hydroTauMax = hydroTau0 + hydroDtau*itaumax;
-    } else {
+    }  
+    else {
         cout << "Hydroinfo_MUSIC:: This option is obsolete! whichHydro = "
              << whichHydro << endl;
         exit(1);
@@ -1223,6 +1387,7 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
 
 void Hydroinfo_MUSIC::get_hydro_cell_info_3d(int cell_id, fluidCell_3D_new &info) {
     info = lattice_new_[cell_id];
+    std::cout<< cell_id<< " www  "<< info.temperature<<std::endl;
 }
 
 

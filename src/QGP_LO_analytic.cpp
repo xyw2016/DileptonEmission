@@ -2,6 +2,8 @@
 #include "QGP_LO_analytic.h"
 #include "data_struct.h"
 #include <cmath>
+#include <iostream>
+
 
 using PhysConsts::hbarC;
 
@@ -16,13 +18,18 @@ void QGP_LO_analytic::FiniteBaryonRates(double T, double muB, double inv_eplusp,
     double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, 
     double &diffrate_ptr, int include_visc_deltaf, int include_diff_deltaf) {
 
+    // M_ll = 0.1;
+    // T = 0.2;
+    // muB = 0.0;
+    // Eq = 0.102;
     const double aem = 1./137.;
     const double Qu  = 2./3.;
     const double Qd  = -1./3.;
     const double Qs  = -1./3.;
 
     double prefac = (Qu*Qu+Qd*Qd+Qs*Qs)*aem*aem/(2.*pow(M_PI, 4))/pow(hbarC, 4);
-
+    // if (Eq < M_ll)
+    // std::cout<<Eq<<" "<<M_ll<<std::endl;
     double p = sqrt(Eq*Eq - M_ll*M_ll);
     double x = Eq/T;
     double y = p/T;
@@ -31,6 +38,8 @@ void QGP_LO_analytic::FiniteBaryonRates(double T, double muB, double inv_eplusp,
 
     eqrate_ptr = prefac/y*fq*log_r;
     diffrate_ptr = 0.0;
+
+    //std::cout<<  eqrate_ptr<<" " <<prefac << " "<<y<<" "<<fq<<" "<<log_r<< std::endl;
 
 }
 

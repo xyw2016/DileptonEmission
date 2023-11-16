@@ -103,7 +103,7 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     vn_sin_diff = createA2DMatrix(norder, nm, 0.);
     vn_cos_tot = createA2DMatrix(norder, nm, 0.);
     vn_sin_tot = createA2DMatrix(norder, nm, 0.);
-
+     
     if (differential_flag == 1) {
         dNd2pTdphidydTdtau_eq = createA6DMatrix(nTcut, n_tau_cut, nm, np, nphi, nrapidity, 0.);
         dNd2pTdphidydTdtau_visc = createA6DMatrix(nTcut, n_tau_cut, nm, np, nphi, nrapidity, 0.);
@@ -115,6 +115,7 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
         dNd2pTdphidydTdtau_diff_all = createA3DMatrix(nTcut, n_tau_cut, CORES*nrapidity*np*nphi*nm, 0.);
         dNd2pTdphidydTdtau_tot_all = createA3DMatrix(nTcut, n_tau_cut, CORES*nrapidity*np*nphi*nm, 0.);
     }
+
 }
 
 
@@ -262,6 +263,14 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
     }
 }
 
+double PhotonEmission::suppression_factor(double tau){
+    //double lambda= 0.651; //tau_chem = 1.5
+    double lambda= 0.434; //tau_chem = 1.0
+    
+
+    return 1-exp(- tau/lambda);
+}
+
 
 void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
@@ -269,6 +278,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     Hydroinfo_MUSIC *hydroinfo_MUSIC_ptr;
     hydroinfo_MUSIC_ptr =
                 reinterpret_cast<Hydroinfo_MUSIC*>(hydroinfo_ptr_in);
+    //wxy: 
+    int hydro_flag = paraRdr->getVal("hydro_flag");
 
     // photon momentum in the lab frame
     double M_ll[nm]; // invariant mass array
@@ -300,7 +311,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double Nskip_x = hydroinfo_MUSIC_ptr->get_hydro_Nskip_x();
     double Nskip_eta = hydroinfo_MUSIC_ptr->get_hydro_Nskip_eta();
     double Nskip_tau = hydroinfo_MUSIC_ptr->get_hydro_Nskip_tau();
+    
     double volume_base = Nskip_tau*dtau*Nskip_x*dx*Nskip_x*dx*Nskip_eta*deta;
+
+
     tau0 = hydroinfo_MUSIC_ptr->get_hydro_tau0();
     tau_max = hydroinfo_MUSIC_ptr->get_hydro_tau_max();
     tau_cut_low = tau0 - dtau;
@@ -331,6 +345,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     cout << "Number of cores : " << CORES << endl;
     cout << "Chunk size = " << FO_chunk << endl;
     cout << "Remainder cells = " << remainder << endl;
+    cout << "Volume base = " << volume_base << endl;
 
     if(remainder != 0) FO_chunk++;
 
@@ -353,7 +368,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     #pragma omp parallel for reduction(+:ncells)
     for(long n = 0; n < CORES; n++)
     {
-        long endFO = FO_chunk;
+        //long endFO = FO_chunk;
+        long endFO = 1;
 
         int processedCells = 0;  // Counter for processed cells
         int printInterval = 0.25 * endFO;  // Print at 25% intervals
@@ -361,7 +377,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         for(long int icell = 0; icell < endFO; icell++)  // cell index inside each chunk
         {
             if((icell == endFO - 1) && (remainder != 0) && (n > remainder - 1)) continue;
-
+            std::cout<< icell<<" "<< endFO<<std::endl;
             long cell_id = n  +  icell * CORES;
 
             // fluid velocity in Minkowski
@@ -396,19 +412,32 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
              }
             #endif         
 
+            // wxy
             // volume element: tau*dtau*dx*dy*deta,
             double volume = tau_local*volume_base;
+            if(hydro_flag == 22){
+                volume = volume_base;
+                volume = 1.0;
+            }
+            // else{
+            //     cout<<"Volume: unrecognized hydro_flag = "<< hydro_flag << endl;
+            //     exit(1);
+            // }
+            
 
             double ed_local = fluidCellptr.ed;
             double pd_local = fluidCellptr.pressure;
             double temp_local = fluidCellptr.temperature;
             double temp_inv = 1/temp_local;
 
+
             // note that when turn_on_muB_=0, muB and rhoB are set to zero as follows
             double muB_local = fluidCellptr.muB;
             double rhoB_local = fluidCellptr.rhoB;
             double inv_eplusp = 1./(ed_local+pd_local);
             double rhoB_over_eplusp = rhoB_local*inv_eplusp;
+
+            std::cout<<volume<<" "<<ed_local<<" "<<pd_local<<" "<<temp_local<<" "<<temp_inv<<" "<<muB_local<<" "<<rhoB_local<<" "<<inv_eplusp<<" "<<rhoB_eplusp_test<<std::endl;
 
             double T_sw = 0.166 - 0.139 * pow(muB_local, 2) - 0.053 * pow(muB_local, 4); // Cleymans et al
 
@@ -425,8 +454,11 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             }
 
             // fluid cell is out of interest, temperature below T_dec or eta larger than ETAmax
-            if (temp_local < T_dec || eta_local > ETAmax)
+            if (hydro_flag==2 && (temp_local < T_dec || eta_local > ETAmax))
                 continue;
+            if (hydro_flag==22 && (temp_local < T_dec || eta_local > ETAmax))
+                continue;
+            //wxy
 
             if (differential_flag == 1){
                 if (temp_local > T_cuthigh||temp_local < T_cutlow||tau_local>tau_cut_high||tau_local<tau_cut_low){
@@ -435,7 +467,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                     continue;
                 }
             }
-
+            //wxy
             if (temp_local > T_sw) {
                 // total fluid cells of QGP emission
                 // #pragma omp atomic update
@@ -464,7 +496,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             flow_u_mu_low[1] = -ux;
             flow_u_mu_low[2] = -uy;
             flow_u_mu_low[3] = -ueta;
+            
 
+            if( hydro_flag == 2)
+            {
             double cosh_eta = cosh(eta_local);
             double sinh_eta = sinh(eta_local);
 
@@ -473,12 +508,28 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             flow_u_mu_Min[1] = ux;
             flow_u_mu_Min[2] = uy;
             flow_u_mu_Min[3] = sinh_eta*utau + cosh_eta*ueta;
+            
+            
+            }
+ 
+            if( hydro_flag == 22)
+            {
+             //wxy    
+            // 4 velocity in Minkowski in lab frame
+            flow_u_mu_Min[0] = utau ;
+            flow_u_mu_Min[1] = ux;
+            flow_u_mu_Min[2] = uy;
+            flow_u_mu_Min[3] = ueta;  
+            }
+
+            
 
             // Lorentz boost matrix from lab to local rest frame
             std::vector<std::vector<double>> lambda_munu(4, std::vector<double>(4, 0.0));
             lorentz_boost_matrix(lambda_munu, flow_u_mu_Min[0], 
                 flow_u_mu_Min[1], flow_u_mu_Min[2], flow_u_mu_Min[3]);
-
+            
+            
             // Wij is reduced variables Wij/(e+P), Wieta = tau*Wieta
             double pi11 = fluidCellptr.pi11;
             double pi12 = fluidCellptr.pi12;
@@ -505,6 +556,25 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double Cq = 0.97; //https://journals.aps.org/prc/pdf/10.1103/PhysRevC.89.034904 under eq.6
             double prefactor_diff = 1./(4.*pow(2*M_PI, 5)) * temp_inv/pow(hbarC, 4);
             double prefactor_visc = Cq*prefactor_diff;
+
+            double spsfactor = 1.0;
+            // if(hydro_flag ==22){
+            //     //wxy
+            //     double cell_t = tau0 + fluidCellptr.itau*dtau;
+            //     double cell_z = -eta_max + fluidCellptr.ieta*deta;
+            //     double cell_tau = 0.0;
+            //     if( fabs(cell_t) >= fabs(cell_z))
+            //     {
+            //         cell_tau = sqrt(cell_t*cell_t - cell_z*cell_z);
+            //     }
+
+            //     spsfactor = suppression_factor(cell_tau);
+            //     // if(spsfactor > 0)
+            //     // std::cout <<"t: "<< cell_t <<"  z: "<< cell_z <<" tau: "<< cell_tau<<" factor: "
+            //     //           << spsfactor<< "Tem: "<< temp_local<<std::endl;
+            // }
+
+         
             
             // photon momentum loops
             // #pragma omp parallel for collapse(4) private(p_lab_Min, p_lab_local)
@@ -514,26 +584,51 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                         for (int j = 0; j < nm; j++) {
 
                             int i3 = (j+(l+(m+nphi * k) * np) * nm);
-
-                            double cosh_y = cosh(y_q[k]);
-                            double sinh_y = sinh(y_q[k]);
-                            double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
-                            double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
-
                             // p_q is p_T magnitude array
                             double M_T = sqrt(p_q[l]*p_q[l]+M_ll[j]*M_ll[j]); // transverse mass
+
+                            y_q[k]=0.0;
+                            //cos_phiq[m]=1.0;sin_phiq[m]=0.0;
+                            double cosh_y = cosh(y_q[k]);
+                            double sinh_y = sinh(y_q[k]);
+
+                              
+                            double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
+                            double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
+                             // from Minkowski to Milne in lab frame
+                            p_lab_local[0] = M_T * cosh_y_minus_eta;
+                            p_lab_local[1] = p_q[l]*cos_phiq[m];
+                            p_lab_local[2] = p_q[l]*sin_phiq[m];
+                            p_lab_local[3] = M_T * sinh_y_minus_eta; // tau*p^eta
+                           
+                            //if( fabs(M_T - 1.88154)<1e-6 && fabs(y_q[k])<1e-6 && fabs(M_ll[j] - 0.1)<1e-6)
+                            //if( fabs(y_q[k])<1e-6 )
+                            // if(k==3 && j==0 && l==0)
+                            // {
+                            //     std::cout<< y_q[k]<<" "<<M_T<<" "<<M_ll[j]<<" "<<" "<<p_q[l]<<" "<<temp_local<<std::endl;
+                            // }
+                            //std::cout<< dNd2pTdphidy_cell_eq<< "  wwwww "<<std::endl;
+
+
+                            if(hydro_flag == 22)
+                            {
+
+                                p_lab_local[0] = M_T * cosh_y;
+                                p_lab_local[1] = p_q[l]*cos_phiq[m];
+                                p_lab_local[2] = p_q[l]*sin_phiq[m];
+                                p_lab_local[3] = M_T * sinh_y; // tau*p^eta
+
+                            }
+
+                            
 
                             // Minkowski four momentum in lab frame
                             p_lab_Min[0] = M_T * cosh_y;
                             p_lab_Min[1] = p_q[l]*cos_phiq[m];
                             p_lab_Min[2] = p_q[l]*sin_phiq[m];
                             p_lab_Min[3] = M_T * sinh_y;
-
-                            // from Minkowski to Milne in lab frame
-                            p_lab_local[0] = M_T * cosh_y_minus_eta;
-                            p_lab_local[1] = p_q[l]*cos_phiq[m];
-                            p_lab_local[2] = p_q[l]*sin_phiq[m];
-                            p_lab_local[3] = M_T * sinh_y_minus_eta; // tau*p^eta
+                            
+                           
 
                             // Minkowski four momentum from Lab frame to LRF frame
                             double p_Min_lrf[4];
@@ -543,7 +638,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                     p_Min_lrf[j] += lambda_munu[j][i]*p_lab_Min[i];
                                 }                            
                             }
+                            //std::cout<< p_lab_Min[0]<<" "<< p_lab_Min[1]<<" "<< p_lab_Min[2]<<" "<< p_lab_Min[3]<<std::endl;
+                            //std::cout<< p_Min_lrf[0]<<" "<< p_Min_lrf[1]<<" "<< p_Min_lrf[2]<<" "<< p_Min_lrf[3]<<" "<<volume<<std::endl;
 
+                            
                             double pvec_lrf, pvec3, pvec5; // Minkowski spatial magnitude |vec p| and |vec p|^3
                             pvec_lrf = sqrt(p_Min_lrf[1]*p_Min_lrf[1] + p_Min_lrf[2]*p_Min_lrf[2] + p_Min_lrf[3]*p_Min_lrf[3]);
                             pvec3 = pow(pvec_lrf, 3);
@@ -562,16 +660,18 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                 + p_lab_local[2]*p_lab_local[2]*pi22
                                 + 2.*p_lab_local[2]*p_lab_local[3]*pi23
                                 + p_lab_local[3]*p_lab_local[3]*pi33);
-
+                            
                             // dot product of diffusion and dilepton momentum, calculated in lab frame
                             // note that 1/kappa_hat included in q^\mu
                             double diff_dot_p = qtau*p_lab_local[0] - qx*p_lab_local[1] 
                                                 - qy*p_lab_local[2] - qeta*p_lab_local[3];
                             // validation setup
                             if(test_code_flag==1){
-                                pi_photon = 10.0;
-                                diff_dot_p = 1.0;
+                                pi_photon = 0.0;
+                                diff_dot_p = 0.0;
                             }
+
+                            //std::cout<<" "<<diff_dot_p<<" "<<pi_photon<< " "<<bulkPi_local<<std::endl;
                             
                             double Eq_localrest_Tb = p_Min_lrf[0];
 
@@ -588,7 +688,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             double dNd2pTdphidy_cell_tot = 0.;
 
                             // begin to calculate thermal photon emission
-                            if (temp_local > T_sw) {
+                            if (hydro_flag==2 && temp_local > T_sw) {
                                 // QGP emission
                                 double QGP_fraction = 1.0;
                                 muB_local = turn_on_muB_*muB_local;
@@ -599,21 +699,42 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                     dNd2pTdphidy_cell_eq, dNd2pTdphidy_cell_eqT, dNd2pTdphidy_cell_eqL, dNd2pTdphidy_cell_visc,
                                     dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot);
                             }
+                            if (hydro_flag == 22 ){
+                                double QGP_fraction = 1.0;
+                                muB_local = turn_on_muB_*muB_local;
+                                rhoB_over_eplusp = turn_on_muB_*rhoB_over_eplusp;
+                                dilepton_QGP_thermal->calThermalPhotonemission_3d(
+                                    Eq_localrest_Tb, M_ll[j], visc_fac, bulkPi_fac, diff_fac,
+                                    temp_local, muB_local, inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,
+                                    dNd2pTdphidy_cell_eq, dNd2pTdphidy_cell_eqT, dNd2pTdphidy_cell_eqL, dNd2pTdphidy_cell_visc,
+                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot);
+
+                            }
 
                             // add contributions from QGP and Hadronic matter, etc
                             // these are dN/(MdM pTdpTdphi dy)
-                            dNd2pTdphidy_eq_all[n + CORES * i3] += dNd2pTdphidy_cell_eq;
-                            dNd2pTdphidy_eqT_all[n + CORES * i3] += dNd2pTdphidy_cell_eqT;
-                            dNd2pTdphidy_eqL_all[n + CORES * i3] += dNd2pTdphidy_cell_eqL;
-                            dNd2pTdphidy_visc_all[n + CORES * i3] += dNd2pTdphidy_cell_visc;
-                            dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff;
-                            dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot;
+                            //if( fabs(M_T - 1.88154)<1e-6 && fabs(y_q[k])<1e-6 && fabs(M_ll[j] - 0.1)<1e-6)
+                            //std::cout<< dNd2pTdphidy_cell_eq<< "  wwwww "<<std::endl;
+                             //if(k==3 && j==0 && l==0)
+                              {
+                                std::cout<<M_T<<" "<<y_q[k]<<" "<< M_ll[j]<<" "
+                                         << dNd2pTdphidy_cell_eq<< "  wwwww "
+                                         <<dNd2pTdphidy_cell_visc << " "
+                                         <<dNd2pTdphidy_cell_diff<<" "
+                                         <<dNd2pTdphidy_cell_tot<<" "<< spsfactor<<pi_photon<<" "<<diff_fac<<" "<<bulkPi_fac<<std::endl;
+                             }
+                            dNd2pTdphidy_eq_all[n + CORES * i3] += dNd2pTdphidy_cell_eq*spsfactor;
+                            dNd2pTdphidy_eqT_all[n + CORES * i3] += dNd2pTdphidy_cell_eqT*spsfactor;
+                            dNd2pTdphidy_eqL_all[n + CORES * i3] += dNd2pTdphidy_cell_eqL*spsfactor;
+                            dNd2pTdphidy_visc_all[n + CORES * i3] += dNd2pTdphidy_cell_visc*spsfactor;
+                            dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff*spsfactor;
+                            dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot*spsfactor;
 
                             if (differential_flag == 1) {
-                                dNd2pTdphidydTdtau_eq_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_eq;;
-                                dNd2pTdphidydTdtau_visc_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_visc;
-                                dNd2pTdphidydTdtau_diff_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_diff;
-                                dNd2pTdphidydTdtau_tot_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_tot;
+                                dNd2pTdphidydTdtau_eq_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_eq*spsfactor;
+                                dNd2pTdphidydTdtau_visc_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_visc*spsfactor;
+                                dNd2pTdphidydTdtau_diff_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_diff*spsfactor;
+                                dNd2pTdphidydTdtau_tot_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_tot*spsfactor;
                             }
 
                         } // M_ll
@@ -676,6 +797,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                     dN_pTdpTdphidydTdtau_tot_tmp += dNd2pTdphidydTdtau_tot_all[iT][it][n+CORES*i3];
                                 }
 
+                              
+
                                 dNd2pTdphidydTdtau_eq[iT][it][j][l][m][k] = dN_pTdpTdphidydTdtau_eq_tmp;
                                 dNd2pTdphidydTdtau_visc[iT][it][j][l][m][k] = dN_pTdpTdphidydTdtau_visc_tmp;
                                 dNd2pTdphidydTdtau_diff[iT][it][j][l][m][k] = dN_pTdpTdphidydTdtau_diff_tmp;
@@ -732,16 +855,18 @@ void PhotonEmission::calPhoton_total_Spvn() {
     double dy = dilepton_QGP_thermal->get_dy();
     for (int m = 0; m < nm; m++) {
         for (int i = 0; i < np; i++) {
-            double p = dilepton_QGP_thermal->getPhotonp(i);
+            double p = dilepton_QGP_thermal->getPhotonp(i); //p_T
             double pweight = dilepton_QGP_thermal->getPhoton_pweight(i);
             for (int j = 0; j < nphi; j++) {
-                double phi = dilepton_QGP_thermal->getPhotonphi(j);
+                double phi = dilepton_QGP_thermal->getPhotonphi(j); //phi
                 double phi_weight = dilepton_QGP_thermal->getPhoton_phiweight(j);
                 for (int k = 0; k < nrapidity; k++) {
-                    double y_weight = dilepton_QGP_thermal->getPhoton_yweight(k);
+                    double y_weight = dilepton_QGP_thermal->getPhoton_yweight(k); //y
                     // below dy/Dy to make everything rapidity density, Dy is the rapidity range
                     double weight = phi_weight*y_weight*dy/Dy;
                     // integrate over rapidity, azimuthal angle of momentum
+
+
                     dNd2pTd2M_eq[m][i]  += dNd2pTdphidy_eq[m][i][j][k]*weight;
                     dNd2pTd2M_eqT[m][i] += dNd2pTdphidy_eqT[m][i][j][k]*weight;
                     dNd2pTd2M_eqL[m][i] += dNd2pTdphidy_eqL[m][i][j][k]*weight;
