@@ -300,8 +300,6 @@ void ThermalPhoton::NLO_rate(struct ThermalPhoton::Table grid_T, struct ThermalP
   rateL = prefac * rhoL_app;
 
   rateTot = 2.*rateT + rateL;
-  if(isnan(rateT) || isnan(rateL) )
-  std::cout<< T <<" "<< muB<<" "<< rateT << " "<<rateL<<std::endl;
 
 }
 

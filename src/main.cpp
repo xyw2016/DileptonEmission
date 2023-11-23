@@ -65,8 +65,12 @@ int main(int argc, char** argv) {
 
     if (hydro_flag == 2 || hydro_flag == 22  ) {
         Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
-        int hydro_mode = 13;
-        int nskip_tau = 1;
+	int hydro_mode = 12;
+	if(hydro_flag == 22){
+	    hydro_mode = 13;
+	}
+        
+	int nskip_tau = 1;
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
         thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);

@@ -18,10 +18,6 @@ void QGP_LO_analytic::FiniteBaryonRates(double T, double muB, double inv_eplusp,
     double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, 
     double &diffrate_ptr, int include_visc_deltaf, int include_diff_deltaf) {
 
-    // M_ll = 0.1;
-    // T = 0.2;
-    // muB = 0.0;
-    // Eq = 0.102;
     const double aem = 1./137.;
     const double Qu  = 2./3.;
     const double Qd  = -1./3.;

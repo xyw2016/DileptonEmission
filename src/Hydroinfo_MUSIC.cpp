@@ -850,9 +850,9 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
                 newCell.qy = 0.;
                 newCell.qz = 0.;
             }
-            std::cout << newCell.muB<< " " <<newCell.temperature << " "<<newCell.ux<<" "<<newCell.uy<<" "<<newCell.ueta<<" "
-                      << newCell.pi11 << " "<<newCell.pi12 <<" "<<newCell.pi13 <<" "<<newCell.pi22 <<" "<<newCell.pi23  <<" "<< newCell.qx 
-                      << newCell.qy << " "<<newCell.qz <<" "<<newCell.ed<<" "<<newCell.pressure <<std::endl;
+            //std::cout << newCell.muB<< " " <<newCell.temperature << " "<<newCell.ux<<" "<<newCell.uy<<" "<<newCell.ueta<<" "
+            //          << newCell.pi11 << " "<<newCell.pi12 <<" "<<newCell.pi13 <<" "<<newCell.pi22 <<" "<<newCell.pi23  <<" "<< newCell.qx 
+            //          << newCell.qy << " "<<newCell.qz <<" "<<newCell.ed<<" "<<newCell.pressure <<std::endl;
             lattice_new_.push_back(newCell);
             ik++;
             if (ik%50000 == 0)
@@ -1387,7 +1387,6 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
 
 void Hydroinfo_MUSIC::get_hydro_cell_info_3d(int cell_id, fluidCell_3D_new &info) {
     info = lattice_new_[cell_id];
-    std::cout<< cell_id<< " www  "<< info.temperature<<std::endl;
 }
 
 
