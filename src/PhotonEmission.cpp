@@ -564,8 +564,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
             double cell_tau = tau_local; 
             spsfactor = suppression_factor(cell_tau);
-            
             // photon momentum loops
+            //std::cout<< suppression_factor(1.0) <<" test: "<<std::endl; 
             // #pragma omp parallel for collapse(4) private(p_lab_Min, p_lab_local)
             for (int k = 0; k < nrapidity; k++) {
                 for (int m = 0; m < nphi; m++) {
@@ -576,7 +576,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             // p_q is p_T magnitude array
                             double M_T = sqrt(p_q[l]*p_q[l]+M_ll[j]*M_ll[j]); // transverse mass
 
-                            y_q[k]=0.0;
+                            //y_q[k]=0.0;
                             //cos_phiq[m]=1.0;sin_phiq[m]=0.0;
                             double cosh_y = cosh(y_q[k]);
                             double sinh_y = sinh(y_q[k]);
