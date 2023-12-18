@@ -99,10 +99,11 @@ class PhotonEmission {
     void set_hydroGridinfo();
     void print_hydroGridinfo();
     void InitializePhotonEmissionRateTables();
-    void calPhotonemission_3d(void *hydroinfo_ptr_in);
+    void calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode=-1);
     void calPhoton_total_Spvn();
+    void calPhoton_total_Spvn_sum(const PhotonEmission& spvn_tem); 
     void calPhoton_SpvnpT_individualchannel();
-    void outputPhoton_total_SpMatrix_and_SpvnpT();
+    void outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode=-1);
     void outputPhotonSpvn_individualchannel();
     double suppression_factor(double tau);
 };

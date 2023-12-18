@@ -47,5 +47,8 @@ T_cutlow = 0.1
 nTcut = 50
 dTau = 0.1
 calHGIdFlag = 0
-sig_lambda = 1.0 
-suppress_order = 1.0 
+sig_lambda = 0.651
+suppress_order = 2.0 
+
+flag_prehydro = 1 
+flag_hydro = 0

@@ -872,7 +872,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             idx_map_[cell_idx] = i;
         }
         hydroTauMax = hydroTau0 + hydroDtau*itaumax;
-    }else if (whichHydro == 12) {
+    }else if (whichHydro == 12 || whichHydro == 22) {
         // new MUSIC hydro format (no grid)
         cout << "Using new MUSIC hydro format (no grid) reading data ..."
              << endl;
@@ -881,6 +881,9 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         // The name of the evolution file: evolution_name
         string evolution_name = "results/evolution_all_xyeta.dat";
         cout << "Evolution file name = " << evolution_name << endl;
+        if(whichHydro == 22){
+            evolution_name = "results/evolution_all_xyeta_kompost.dat";
+        }
         std::FILE *fin;
         fin = std::fopen(evolution_name.c_str(), "rb");
         if (fin == NULL) {

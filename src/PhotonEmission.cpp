@@ -273,7 +273,7 @@ double PhotonEmission::suppression_factor(double tau){
 }
 
 
-void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
+void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode) {
 
     // hydro data read in main.cpp
     Hydroinfo_MUSIC *hydroinfo_MUSIC_ptr;
@@ -563,9 +563,13 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             //}
 
             double cell_tau = tau_local; 
-            spsfactor = suppression_factor(cell_tau);
+        
+            if(hydro_mode == 22 ){
+                spsfactor = suppression_factor(cell_tau);
+            }
+          
             // photon momentum loops
-            //std::cout<< suppression_factor(1.0) <<" test: "<<std::endl; 
+            std::cout<< spsfactor <<" test: "<< cell_tau<<std::endl; 
             // #pragma omp parallel for collapse(4) private(p_lab_Min, p_lab_local)
             for (int k = 0; k < nrapidity; k++) {
                 for (int m = 0; m < nphi; m++) {
@@ -918,7 +922,71 @@ void PhotonEmission::calPhoton_total_Spvn() {
 }
 
 
-void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
+void PhotonEmission::calPhoton_total_Spvn_sum(const PhotonEmission& spvn_tem) {
+    // integrate over rapidity, azimuthal angle of momentum, and pT
+    // calculate dN/(2pi dydM)
+    
+     for (int m = 0; m < nm; m++) {
+
+        dNd2Mdy_eq[m]   = 0.0;
+        dNd2Mdy_eqT[m]  = 0.0;
+        dNd2Mdy_eqL[m]  = 0.0;
+        dNd2Mdy_visc[m] = 0.0;
+        dNd2Mdy_diff[m] = 0.0;
+        dNd2Mdy_tot[m]  = 0.0;
+
+        for (int order=0; order < norder; order++) {
+            vn_cos_eq[order][m]   = 0.0;
+            vn_sin_eq[order][m]   = 0.0;
+            vn_cos_visc[order][m] = 0.0;
+            vn_sin_visc[order][m] = 0.0;
+            vn_cos_diff[order][m] = 0.0;
+            vn_sin_diff[order][m] = 0.0;
+            vn_cos_tot[order][m]  = 0.0;
+            vn_sin_tot[order][m]  = 0.0;
+        }
+
+        for (int i = 0; i < np; i++) {
+            dNd2pTd2M_eq[m][i]   = 0.0;
+            dNd2pTd2M_eqT[m][i]  = 0.0;
+            dNd2pTd2M_eqL[m][i]  = 0.0;
+            dNd2pTd2M_visc[m][i] = 0.0;
+            dNd2pTd2M_diff[m][i] = 0.0;
+            dNd2pTd2M_tot[m][i]  = 0.0;
+
+            for (int order = 0; order < norder; order++) {
+                vnpT_cos_eq[order][m][i]    = 0.0;
+                vnpT_cos_visc[order][m][i]  = 0.0;
+                vnpT_cos_diff[order][m][i]  = 0.0;
+                vnpT_cos_tot[order][m][i]   = 0.0;
+                vnpT_sin_eq[order][m][i]    = 0.0;
+                vnpT_sin_visc[order][m][i]  = 0.0;
+                vnpT_sin_diff[order][m][i]  = 0.0;
+                vnpT_sin_tot[order][m][i]   = 0.0;
+            }
+
+            for (int j = 0; j < nphi; j++) {
+                for (int k = 0; k < nrapidity; k++) {
+                    dNd2pTdphidy_eq[m][i][j][k]  += spvn_tem.dNd2pTdphidy_eq[m][i][j][k];
+                    dNd2pTdphidy_eqT[m][i][j][k] += spvn_tem.dNd2pTdphidy_eqT[m][i][j][k];
+                    dNd2pTdphidy_eqL[m][i][j][k] += spvn_tem.dNd2pTdphidy_eqL[m][i][j][k];
+                    dNd2pTdphidy_visc[m][i][j][k]+= spvn_tem.dNd2pTdphidy_visc[m][i][j][k];
+                    dNd2pTdphidy_diff[m][i][j][k]+= spvn_tem.dNd2pTdphidy_diff[m][i][j][k];
+                    dNd2pTdphidy_tot[m][i][j][k] += spvn_tem.dNd2pTdphidy_tot[m][i][j][k];        
+                }
+            }
+        }
+    }
+
+    calPhoton_total_Spvn();
+
+  
+}
+
+
+
+
+void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     ostringstream filename_stream_eq_SpMatrix;
     ostringstream filename_stream_eq_Spvn;
     ostringstream filename_stream_eq_inte_Spvn;
@@ -940,6 +1008,16 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
     ostringstream filename_stream_tot_inte_Spvn;
 
     string filename = "Total_dilepton";
+    bool flag_hydro = paraRdr->getVal("flag_hydro");
+    bool flag_prehydro = paraRdr->getVal("flag_prehydro");
+
+    if(hydro_mode == 22 && flag_prehydro){
+        filename = "Pre_hydro_dilepton";
+    }
+    if(hydro_mode == 12 && flag_hydro){
+        filename = "Hydro_dilepton";
+    }
+   
 
     filename_stream_eq_SpMatrix << output_path << filename
                                 << "_eq_SpMatrix.dat";
