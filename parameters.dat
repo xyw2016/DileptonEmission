@@ -51,4 +51,4 @@ sig_lambda = 0.651
 suppress_order = 2.0 
 
 flag_prehydro = 1 
-flag_hydro = 0
+flag_hydro = 1 

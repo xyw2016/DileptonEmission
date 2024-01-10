@@ -569,7 +569,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
             }
           
             // photon momentum loops
-            std::cout<< spsfactor <<" test: "<< cell_tau<<std::endl; 
+            //std::cout<< spsfactor <<" test: "<< cell_tau<<std::endl; 
             // #pragma omp parallel for collapse(4) private(p_lab_Min, p_lab_local)
             for (int k = 0; k < nrapidity; k++) {
                 for (int m = 0; m < nphi; m++) {

@@ -880,10 +880,10 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         // read in temperature and flow velocity
         // The name of the evolution file: evolution_name
         string evolution_name = "results/evolution_all_xyeta.dat";
-        cout << "Evolution file name = " << evolution_name << endl;
         if(whichHydro == 22){
             evolution_name = "results/evolution_all_xyeta_kompost.dat";
         }
+        cout << "Evolution file name = " << evolution_name << endl;
         std::FILE *fin;
         fin = std::fopen(evolution_name.c_str(), "rb");
         if (fin == NULL) {
