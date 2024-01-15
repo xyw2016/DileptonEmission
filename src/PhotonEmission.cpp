@@ -882,24 +882,15 @@ void PhotonEmission::calPhoton_total_Spvn() {
                 vn_sin_tot[order][m] += vnpT_sin_tot[order][m][i]*p*pweight;
 
                 // // pT differential flow
-                // vnpT_cos_eq[order][m][i]  = vnpT_cos_eq[order][m][i]/dNd2pTd2M_eq[m][i];
-                // vnpT_cos_visc[order][m][i]  = vnpT_cos_visc[order][m][i]/dNd2pTd2M_visc[m][i];
-                // vnpT_cos_diff[order][m][i]  = vnpT_cos_diff[order][m][i]/dNd2pTd2M_diff[m][i];
-                // vnpT_cos_tot[order][m][i] = vnpT_cos_tot[order][m][i]/dNd2pTd2M_tot[m][i];
-                // vnpT_sin_eq[order][m][i]  = vnpT_sin_eq[order][m][i]/dNd2pTd2M_eq[m][i];
-                // vnpT_sin_visc[order][m][i]  = vnpT_sin_visc[order][m][i]/dNd2pTd2M_visc[m][i];
-                // vnpT_sin_diff[order][m][i]  = vnpT_sin_diff[order][m][i]/dNd2pTd2M_diff[m][i];
-                // vnpT_sin_tot[order][m][i] = vnpT_sin_tot[order][m][i]/dNd2pTd2M_tot[m][i];
+                vnpT_cos_eq[order][m][i]  = vnpT_cos_eq[order][m][i]/dNd2pTd2M_eq[m][i];
+                vnpT_cos_visc[order][m][i]  = vnpT_cos_visc[order][m][i]/dNd2pTd2M_visc[m][i];
+                vnpT_cos_diff[order][m][i]  = vnpT_cos_diff[order][m][i]/dNd2pTd2M_diff[m][i];
+                vnpT_cos_tot[order][m][i] = vnpT_cos_tot[order][m][i]/dNd2pTd2M_tot[m][i];
+                vnpT_sin_eq[order][m][i]  = vnpT_sin_eq[order][m][i]/dNd2pTd2M_eq[m][i];
+                vnpT_sin_visc[order][m][i]  = vnpT_sin_visc[order][m][i]/dNd2pTd2M_visc[m][i];
+                vnpT_sin_diff[order][m][i]  = vnpT_sin_diff[order][m][i]/dNd2pTd2M_diff[m][i];
+                vnpT_sin_tot[order][m][i] = vnpT_sin_tot[order][m][i]/dNd2pTd2M_tot[m][i];
 
-                // pT differential flow
-                vnpT_cos_eq[order][m][i]  = vnpT_cos_eq[order][m][i];
-                vnpT_cos_visc[order][m][i]  = vnpT_cos_visc[order][m][i];
-                vnpT_cos_diff[order][m][i]  = vnpT_cos_diff[order][m][i];
-                vnpT_cos_tot[order][m][i] = vnpT_cos_tot[order][m][i];
-                vnpT_sin_eq[order][m][i]  = vnpT_sin_eq[order][m][i];
-                vnpT_sin_visc[order][m][i]  = vnpT_sin_visc[order][m][i];
-                vnpT_sin_diff[order][m][i]  = vnpT_sin_diff[order][m][i];
-                vnpT_sin_tot[order][m][i] = vnpT_sin_tot[order][m][i];
             }
 
             // pT integrated spectra, dN/(MdMdy)
@@ -923,24 +914,14 @@ void PhotonEmission::calPhoton_total_Spvn() {
     // pT integrated flow
     for (int m = 0; m < nm; m++) {
         for (int order = 1; order < norder ; order++) {
-            // vn_cos_eq[order][m]  = vn_cos_eq[order][m]/dNd2Mdy_eq[m];
-            // vn_sin_eq[order][m]  = vn_sin_eq[order][m]/dNd2Mdy_eq[m];
-            // vn_cos_visc[order][m]  = vn_cos_visc[order][m]/dNd2Mdy_visc[m];
-            // vn_sin_visc[order][m]  = vn_sin_visc[order][m]/dNd2Mdy_visc[m];
-            // vn_cos_diff[order][m]  = vn_cos_diff[order][m]/dNd2Mdy_diff[m];
-            // vn_sin_diff[order][m]  = vn_sin_diff[order][m]/dNd2Mdy_diff[m];
-            // vn_cos_tot[order][m] = vn_cos_tot[order][m]/dNd2Mdy_tot[m];
-            // vn_sin_tot[order][m] = vn_sin_tot[order][m]/dNd2Mdy_tot[m];
-            
-            vn_cos_eq[order][m]  = vn_cos_eq[order][m];
-            vn_sin_eq[order][m]  = vn_sin_eq[order][m];
-            vn_cos_visc[order][m]  = vn_cos_visc[order][m];
-            vn_sin_visc[order][m]  = vn_sin_visc[order][m];
-            vn_cos_diff[order][m]  = vn_cos_diff[order][m];
-            vn_sin_diff[order][m]  = vn_sin_diff[order][m];
-            vn_cos_tot[order][m] = vn_cos_tot[order][m];
-            vn_sin_tot[order][m] = vn_sin_tot[order][m];
-
+            vn_cos_eq[order][m]  = vn_cos_eq[order][m]/dNd2Mdy_eq[m];
+            vn_sin_eq[order][m]  = vn_sin_eq[order][m]/dNd2Mdy_eq[m];
+            vn_cos_visc[order][m]  = vn_cos_visc[order][m]/dNd2Mdy_visc[m];
+            vn_sin_visc[order][m]  = vn_sin_visc[order][m]/dNd2Mdy_visc[m];
+            vn_cos_diff[order][m]  = vn_cos_diff[order][m]/dNd2Mdy_diff[m];
+            vn_sin_diff[order][m]  = vn_sin_diff[order][m]/dNd2Mdy_diff[m];
+            vn_cos_tot[order][m] = vn_cos_tot[order][m]/dNd2Mdy_tot[m];
+            vn_sin_tot[order][m] = vn_sin_tot[order][m]/dNd2Mdy_tot[m];
 
         }
     }
@@ -1196,15 +1177,15 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
         double M_ll = dilepton_QGP_thermal->getDileptonMass(m);
         // get dN/dMdy from dN/MdMdy
         fphoton_eq_inte_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_eq[m]*M_ll << "  "; 
+                        << M_ll << "  " << dNd2Mdy_eq[m] << "  "; 
         fphoton_eq_TL_inte_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_eqT[m]*M_ll << "  " << dNd2Mdy_eqL[m]*M_ll;
+                        << M_ll << "  " << dNd2Mdy_eqT[m] << "  " << dNd2Mdy_eqL[m]*M_ll;
         fphoton_visc_inte_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_visc[m]*M_ll << "  ";
+                        << M_ll << "  " << dNd2Mdy_visc[m] << "  ";
         fphoton_diff_inte_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_diff[m]*M_ll << "  ";
+                        << M_ll << "  " << dNd2Mdy_diff[m] << "  ";
         fphoton_tot_inte_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_tot[m]*M_ll << "  ";
+                        << M_ll << "  " << dNd2Mdy_tot[m] << "  ";
 
         for (int order = 0; order < norder; order++) {
             fphoton_eq_inte_Spvn << scientific << setprecision(6) << setw(16)
