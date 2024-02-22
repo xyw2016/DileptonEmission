@@ -267,13 +267,27 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
     }
 }
 
-double PhotonEmission::suppression_factor(double tau){
-    //double lambda= 0.651; //tau_chem = 1.5
-    //double lambda= 0.434; //tau_chem = 1.0
+double PhotonEmission::suppression_factor(double tau,double T){
+    //double lambda= 1.249; //tau_chem = 1.5
+    //double lambda= 0.833; //tau_chem = 1.0
     double sig_lambda = paraRdr->getVal("sig_lambda");
     double suppress_order = paraRdr->getVal("suppress_order");
+    int use_Tdependent_suppress=paraRdr->getVal("use_Tdependent_suppress");
+    double etaovers = paraRdr->getVal("etaovers");
+    double A = 1.91882;
+    double T_fm = T/0.19733;
+    double pi_tem=3.1415926;
+    if(use_Tdependent_suppress>0){
+       
+       double tauR = etaovers*4.*pi_tem/T_fm;
+       double factor0 =  1 - exp(-A*tau/tauR);
+       return pow(factor0,suppress_order);
+    }
+    else{
+        
 
-    return pow(1-exp(- tau/sig_lambda),suppress_order);
+	return pow(1-exp(- A*tau/sig_lambda),suppress_order);
+    }
 }
 
 
@@ -569,7 +583,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
             double cell_tau = tau_local; 
         
             if(hydro_mode == 22 ){
-                spsfactor = suppression_factor(cell_tau);
+                spsfactor = suppression_factor(cell_tau,temp_local);
             }
           
             // photon momentum loops

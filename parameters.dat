@@ -37,7 +37,7 @@ nrapidity = 7
 dilepton_mass_i = 0.1
 dilepton_mass_f = 3.0
 use_logarithmic_mass_grid = 1
-norder = 3
+norder = 7 
 differential_flag = 0 
 tau_start = 1.0
 tau_end = 13.0
@@ -47,6 +47,9 @@ T_cutlow = 0.1
 nTcut = 50
 dTau = 0.1
 calHGIdFlag = 0
+
+use_Tdependent_suppress=0
+etaovers=0.12
 sig_lambda = 0.651
 suppress_order = 2.0 
 
