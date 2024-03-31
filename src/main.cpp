@@ -62,7 +62,6 @@ int main(int argc, char** argv) {
     gauss_quadrature(neta, 1, 0.0, 0.0, eta_i, eta_f, eta_ptr, etaweight_ptr);
 
     PhotonEmission thermalPhotons(paraRdr);
-    PhotonEmission thermalPhotons_prehydro(paraRdr); 
     
 
     // initialize hydro medium
@@ -103,6 +102,16 @@ int main(int argc, char** argv) {
 
          int hydro_mode = 22;
          int nskip_tau = 1;
+	 double sig_lambda_array[3] = {1.249,0.833,0.0};
+	 //double sig_lambda_array[1] = {1.249};
+	 for(int isig = 0; isig < 3; isig++){
+         for(int isuppress_order = 0; isuppress_order < 3; isuppress_order++)
+	 {
+
+	  paraRdr->setVal("sig_lambda",sig_lambda_array[isig]);
+          paraRdr->setVal("suppress_order",isuppress_order);
+
+         PhotonEmission thermalPhotons_prehydro(paraRdr); 
          Hydroinfo_MUSIC* hydroinfo_ptr_prehydro = new Hydroinfo_MUSIC(); 
          hydroinfo_ptr_prehydro->readHydroData(hydro_mode, nskip_tau);
          thermalPhotons_prehydro.calPhotonemission_3d(hydroinfo_ptr_prehydro,hydro_mode);
@@ -124,6 +133,8 @@ int main(int argc, char** argv) {
 
 
         }
+        }
+	}
 
     }
 

@@ -272,12 +272,12 @@ double PhotonEmission::suppression_factor(double tau,double T){
     //double lambda= 0.833; //tau_chem = 1.0
     double sig_lambda = paraRdr->getVal("sig_lambda");
     double suppress_order = paraRdr->getVal("suppress_order");
-    int use_Tdependent_suppress=paraRdr->getVal("use_Tdependent_suppress");
     double etaovers = paraRdr->getVal("etaovers");
+    //cout<< sig_lambda<<" "<<suppress_order<<endl;
     double A = 1.91882;
     double T_fm = T/0.19733;
     double pi_tem=3.1415926;
-    if(use_Tdependent_suppress>0){
+    if( fabs(sig_lambda)< 0.0001){
        
        double tauR = etaovers*4.*pi_tem/T_fm;
        double factor0 =  1 - exp(-A*tau/tauR);
@@ -299,6 +299,13 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                 reinterpret_cast<Hydroinfo_MUSIC*>(hydroinfo_ptr_in);
     
     int hydro_flag = paraRdr->getVal("hydro_flag");
+
+    int Hydro_2D = paraRdr->getVal("Hydro_2D");
+    double Hydro_etas_i = paraRdr->getVal("Hydro_etas_i");
+    double Hydro_etas_f = paraRdr->getVal("Hydro_etas_f");
+    int Hydro_netas_n = paraRdr->getVal("Hydro_netas_n");
+    double d_Hydro_detas = (Hydro_etas_f - Hydro_etas_i)/((Hydro_netas_n-1)*1.0);
+
 
     // photon momentum in the lab frame
     double M_ll[nm]; // invariant mass array
@@ -333,6 +340,17 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
     
     double volume_base = Nskip_tau*dtau*Nskip_x*dx*Nskip_x*dx*Nskip_eta*deta;
 
+    if (Hydro_netas_n ==1 && Hydro_2D){
+        d_Hydro_detas = deta;
+    }
+    if(Hydro_2D){
+        cout<<" calculate dilepton with 2D Hydro "<<endl;
+        cout<<" Hydro_etas_i "<< Hydro_etas_i <<endl;
+        cout<<" Hydro_etas_f "<< Hydro_etas_f <<endl;
+        cout<<" Hydro_netas_n "<< Hydro_netas_n <<endl;
+        cout<<" d_Hydro_detas "<< d_Hydro_detas <<endl;
+        
+    }
 
     tau0 = hydroinfo_MUSIC_ptr->get_hydro_tau0();
     tau_max = hydroinfo_MUSIC_ptr->get_hydro_tau_max();
@@ -383,6 +401,35 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
     // subdivide bite size chunks of freezeout surface across cores
     int ncells = 0;
     double tau_now = 0.0;
+    
+    
+    if (Hydro_2D == 0){
+        Hydro_netas_n = 1;
+    }
+    
+    for(int ietas = 0; ietas < Hydro_netas_n ; ietas++){
+    
+        double ietas_local = Hydro_etas_i + ietas*d_Hydro_detas;
+
+        double volume_base0 = volume_base;
+        if(Hydro_2D)
+        {
+            volume_base0 = volume_base/(Nskip_eta*deta);
+            double vweight = 1;
+            if(Hydro_netas_n > 1 && (ietas ==0 || ietas == Hydro_netas_n -1)){
+            vweight = 0.5;
+            }
+            volume_base0 = volume_base0*vweight*d_Hydro_detas;
+        cout << "Updated Volume base = " << volume_base0 << endl;
+        cout << "eta_local = " << ietas_local << endl;
+        cout << "vweight = " << vweight << endl;
+        cout << "d_Hydro_detas = " << d_Hydro_detas << endl;
+        //cout << "Volume base = " << volume_base << endl;
+
+        }
+        
+        
+    
 
     #pragma omp parallel for reduction(+:ncells)
     for(long n = 0; n < CORES; n++)
@@ -412,6 +459,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
             double tau_local = tau0 + fluidCellptr.itau*dtau;
             double eta_local = -eta_max + fluidCellptr.ieta*deta;
 
+            if(Hydro_2D){
+                eta_local = ietas_local;
+            }
+
             #ifdef _OPENMP
             processedCells++;  // Increment the counter for processed cells
 
@@ -432,7 +483,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
 
             // wxy
             // volume element: tau*dtau*dx*dy*deta,
-            double volume = tau_local*volume_base;
+            double volume = tau_local*volume_base0;
             //if(hydro_flag == 22){
             //    volume = volume_base;
             //}
@@ -733,6 +784,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
             } // y
         } // fluid cell
     }// cores
+    }
 
     #pragma omp parallel for collapse(4)
     for (int k = 0; k < nrapidity; k++) {
@@ -1027,52 +1079,77 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     ostringstream filename_stream_tot_Spvn;
     ostringstream filename_stream_tot_inte_Spvn;
 
-    string filename = "Total_dilepton";
+    string filename = " ";
     bool flag_hydro = paraRdr->getVal("flag_hydro");
     bool flag_prehydro = paraRdr->getVal("flag_prehydro");
+    
+    double sig_lambda = 0.0;
+    double suppress_order = 0.0;
 
     if(hydro_mode == 22 && flag_prehydro){
         filename = "Pre_hydro_dilepton";
+        sig_lambda = paraRdr->getVal("sig_lambda");
+        suppress_order = paraRdr->getVal("suppress_order");
     }
     if(hydro_mode == 12 && flag_hydro){
         filename = "Hydro_dilepton";
     }
+    
+    if(hydro_mode == -1 && flag_hydro && flag_prehydro){
+        filename = "Total_dilepton";
+        sig_lambda = paraRdr->getVal("sig_lambda");
+        suppress_order = paraRdr->getVal("suppress_order");
+    }
+    
+
+
+    ostringstream stream_sig;
+    stream_sig << fixed << setprecision(3) << sig_lambda;
+    string str_sig = stream_sig.str();
    
+    string num_sf = to_string(static_cast<int>(round(suppress_order)));
+   
+    
+    string file_end = "_"+str_sig+"_"+num_sf+".dat";
+    if(filename == "Hydro_dilepton")
+    {
+    file_end = ".dat";
+    }
 
     filename_stream_eq_SpMatrix << output_path << filename
-                                << "_eq_SpMatrix.dat";
+                                << "_eq_SpMatrix"<<file_end;
     filename_stream_eq_Spvn << output_path << filename 
-                                << "_eq_Spvn.dat";
+                                << "_eq_Spvn"<<file_end;
     filename_stream_eq_inte_Spvn << output_path << filename 
-                                << "_eq_Spvn_inte.dat";
+                                << "_eq_Spvn_inte"<<file_end;
 
     filename_stream_eq_TL_SpMatrix << output_path << filename
-                                << "_eq_TL_SpMatrix.dat";
+                                << "_eq_TL_SpMatrix"<<file_end;
     filename_stream_eq_TL_Spvn << output_path << filename 
-                                << "_eq_TL_Sp.dat";
+                                << "_eq_TL_Sp"<<file_end;
     filename_stream_eq_TL_inte_Spvn << output_path << filename 
-                                << "_eq_TL_Sp_inte.dat";
+                                << "_eq_TL_Sp_inte"<<file_end;
     
     filename_stream_visc_SpMatrix << output_path << filename 
-                                << "_visc_SpMatrix.dat";
+                                << "_visc_SpMatrix"<<file_end;
     filename_stream_visc_Spvn << output_path << filename 
-                                << "_visc_Spvn.dat";
+                                << "_visc_Spvn"<<file_end;
     filename_stream_visc_inte_Spvn << output_path << filename 
-                                << "_visc_Spvn_inte.dat";
+                                << "_visc_Spvn_inte"<<file_end;
 
     filename_stream_diff_SpMatrix << output_path << filename 
-                                << "_diff_SpMatrix.dat";
+                                << "_diff_SpMatrix"<<file_end;
     filename_stream_diff_Spvn << output_path << filename 
-                                << "_diff_Spvn.dat";
+                                << "_diff_Spvn"<<file_end;
     filename_stream_diff_inte_Spvn << output_path << filename 
-                                << "_diff_Spvn_inte.dat";
+                                << "_diff_Spvn_inte"<<file_end;
 
     filename_stream_tot_SpMatrix << output_path << filename 
-                                << "_tot_SpMatrix.dat";
+                                << "_tot_SpMatrix"<<file_end;
     filename_stream_tot_Spvn << output_path << filename 
-                                << "_tot_Spvn.dat";
+                                << "_tot_Spvn"<<file_end;
     filename_stream_tot_inte_Spvn << output_path << filename 
-                                << "_tot_Spvn_inte.dat";
+                                << "_tot_Spvn_inte"<<file_end;
 
     ofstream fphoton_eq_SpMatrix(filename_stream_eq_SpMatrix.str().c_str());
     ofstream fphoton_eq_Spvn(filename_stream_eq_Spvn.str().c_str());
