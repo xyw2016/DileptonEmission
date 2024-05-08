@@ -1,6 +1,6 @@
 hydro_flag = 2
 hydro_nskip_tau = 1
-dilepton_emission_rate = 2 
+dilepton_emission_rate = 1 
 alpha_s = 0.3
 Xmin = -15.0
 dx = 0.3
@@ -15,10 +15,10 @@ T_sw_low = 0.103
 T_dec = 0.12
 HydroinfoVisflag = 1
 HydroinfoBuffersize = 500
-include_baryondiff_deltaf = 0 
-include_shearvisc_deltaf = 0
+include_baryondiff_deltaf = 1
+include_shearvisc_deltaf = 1
 turn_off_transverse_flow = 0
-turn_on_muB = 0 
+turn_on_muB = 1 
 test_code_flag = 0 
 T_test = 0.2
 muB_test = 0.0
@@ -49,12 +49,15 @@ dTau = 0.1
 calHGIdFlag = 0
 
 etaovers=0.12
-flag_prehydro = 1 
-flag_hydro = 1 
+flag_prehydro = 0 
+flag_hydro = 1
 
-Hydro_2D = 1
+Hydro_2D = 0
 Hydro_etas_i = -3.
 Hydro_etas_f =  3.
-Hydro_netas_n = 21;
+Hydro_netas_n = 21
 
 
+sigmael_over_T = 100
+eB_over_mpi2 = 1.
+include_EM_deltaf = 1

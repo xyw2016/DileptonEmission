@@ -3,6 +3,7 @@
 #include "data_struct.h"
 #include <gsl/gsl_sf_fermi_dirac.h>
 #include <cmath>
+#include <iostream>
 
 using PhysConsts::hbarC;
 using PhysConsts::alphaEM;
@@ -106,6 +107,30 @@ double QGP_LO::s2(double omega,double q,double qsq,double T,double muB,double m_
     return sigma*ps2;
 }
 
+double QGP_LO::b1(double omega,double q, double qsq,double T,double muB,double sigma){
+    // omega = q^0, 
+    // q = magnitude of 3-vec q, 
+    // qsq = Mll^2, 
+    // T = temperature
+    // muB = Baryon chemical potential,
+    
+    // return sigma/alpha_em*( 2q0*T* J0(omega/T,q/T,muq/T) - 2q0*T* J0(omega/T,q/T,-muq/T)
+    //               - q^2*( intJn(-1,omega/T,q/T,muq/T) - intJn(-1,omega/T,q/T,-muq/T) ) )
+
+    double muq = muB/3.;
+    double j0  = 2*omega*T * ( intJn(0,omega/T,q/T,muq/T) - intJn(0,omega/T,q/T,-muq/T) );
+    double jm1 = qsq* ( intJn(-1,omega/T,q/T,muq/T) - intJn(-1,omega/T,q/T,-muq/T) );
+    
+    
+
+    double ps2 = j0 - jm1;
+
+    
+    ps2 = ps2/alphaEM;
+    double factor_pi = 4.0 * pow(2*M_PI,6);
+    return sigma*ps2/factor_pi;
+}
+
 double QGP_LO::heaviside(double x) {
     if (x < 0.0) {
         return 0.0;
@@ -138,7 +163,8 @@ double QGP_LO::rhoV(double omega,double k,double ksq, double T,double muB){
     double ps1 = Nc*ksq/(4.*M_PI*k);
     //double ps2 = l1f((kplus - muq)/T) - l1f((abs(kminus) - muq)/T) + l1f((kplus + muq)/T) - l1f((abs(kminus) + muq)/T);
     //double ps3 = k*heaviside(kminus);
-    double ps2 = log((cosh(kplus/T) + cosh(muq/T))/(cosh(kminus/T) + cosh(muq/T)));
+    //double ps2 = log((cosh(kplus/T) + cosh(muq/T))/(cosh(kminus/T) + cosh(muq/T)));
+    double ps2 = k/T - log((1+exp(-(kminus + muq)/T))/(1+exp(-(kplus + muq)/T))) - log((1+exp(-(kminus - muq)/T))/(1+exp(-(kplus - muq)/T)));
     // return ps1*(T*ps2 + ps3);
     return ps1*(T*ps2);
 }
@@ -173,15 +199,22 @@ void QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,doub
     double prefacor = C_EM*pow(alphaEM,2)*nB(omega/T)*Bfun(m_ell2/qsq)/(3.*pow(M_PI,3)*qsq);
 
     rV = prefacor*rhoV(omega,q,qsq,T,muB);
-    rL = prefacor*rhoL(omega,q,qsq,T,muB);
-    rT = .5*(rV-rL);
+    //rL = prefacor*rhoL(omega,q,qsq,T,muB);    
+    //rT = .5*(rV-rL);
+
+    //todo: gsl: fermi_dirac.c:1325: ERROR: underflow
+    //Default GSL error handler invoked.
+    //wxy:20240508
+
+    rL = 0.0;    
+    rT = 0.0;
 
 }
 
 
 void QGP_LO::FiniteBaryonRates(double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double Eq, 
-    double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, double &diffrate_ptr,
-    int include_visc_deltaf, int include_diff_deltaf){
+    double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, double &diffrate_ptr,double &em_ptr,
+    int include_visc_deltaf, int include_diff_deltaf,int include_EM_deltaf){
 
     double m_ell2 = me * me;
     
@@ -200,7 +233,6 @@ void QGP_LO::FiniteBaryonRates(double T, double muB, double inv_eplusp, double r
     eqrateT_ptr= prefac*rT;
 
     double sigma = cross_sec(Eq,p,M2,m_ell2);
-
     // shear correction
     if(include_visc_deltaf==1)
         viscrate_ptr = s2(Eq, p, M2, T, muB, m_ell2, sigma);
@@ -212,5 +244,14 @@ void QGP_LO::FiniteBaryonRates(double T, double muB, double inv_eplusp, double r
         diffrate_ptr = a1(Eq, p, M2, T, muB, m_ell2, sigma, rhoB_over_eplusp);
     else
         diffrate_ptr = 0.0;
+
+    if(include_EM_deltaf == 1)
+       em_ptr = b1(Eq,p, M2, T, muB, sigma);
+    else
+       em_ptr = 0.0;
+
+    //     std::cout << include_visc_deltaf<<" "<<include_diff_deltaf<<" www "<< include_EM_deltaf<<std::endl;
+
+    //std::cout << viscrate_ptr <<" "<<diffrate_ptr<<" www "<< em_ptr<<std::endl;
 
 }
