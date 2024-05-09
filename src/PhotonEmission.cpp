@@ -599,9 +599,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
             double inv_eplusp = 1./(ed_local+pd_local);
             double rhoB_over_eplusp = rhoB_local*inv_eplusp;
 
-            double m_pi = 0.138; //the mass of pi meson
-            double eB = eB_over_mpi2*0.138*0.138;
-            double sigma_el = sigmael_over_T* temp_local;
+           
 
 
 
@@ -723,11 +721,19 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
             double eB_tem = 0.0;
             double eEx_tem = 0.0;
             double eEy_tem = 0.0;
+
+            double m_pi = 0.138; //the mass of pi meson
+            double eB = eB_over_mpi2*0.138*0.138;
+            double sigma_el = sigmael_over_T* temp_local;
+
             
             int EM_profile_flag = paraRdr->getVal("EM_profile");
             
             if (EM_profile_flag == 1 )
+
             {
+                sigma_el = paraRdr->getVal("sigmael");
+                sigmael_over_T = sigma_el*temp_inv;
                 EM_profile_0(sigma_el,local_tz_t,local_tz_x,local_tz_y,local_tz_z,eB_tem,eEx_tem,eEy_tem);
             }
             
@@ -736,7 +742,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                eB_tem = eB;
             }
 
-            //std::cout<<EM_profile_flag<<" "<<local_tz_t<<" "<<local_tz_x<<" "<<local_tz_y<<" "<<local_tz_z<<" "<<eB_tem<<" "<< eEx_tem<<" "<<eEy_tem<<std::endl;
+            //std::cout<<EM_profile_flag<<" "<<local_tz_t<<" "<<sigma_el<<" "<<local_tz_y<<" "<<local_tz_z<<" "<<eB_tem<<" "<< eEx_tem<<" "<<eEy_tem<<std::endl;
 
             
             

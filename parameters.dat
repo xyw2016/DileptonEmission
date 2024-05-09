@@ -59,8 +59,9 @@ Hydro_netas_n = 21
 
 include_EM_deltaf = 1
 
-EM_profile = 1 
 sigmael_over_T = 100
 eB_over_mpi2 = 1.
 
+EM_profile = 1
+sigmael = 0.006 
 
