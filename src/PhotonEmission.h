@@ -69,6 +69,8 @@ class PhotonEmission {
     double **dNd2pTd2M_visc;
     double **dNd2pTd2M_diff;
     double **dNd2pTd2M_em;
+    double **dNd2pTd2M_em_E;
+    
     double **dNd2pTd2M_tot;
     double ****dNd2pTdphidy_eq;
     double ****dNd2pTdphidy_eqT;
@@ -82,11 +84,14 @@ class PhotonEmission {
     double ****dNd2pTdphidy_em;
     double ***vnpT_cos_em, ***vnpT_sin_em;
     
+    double ****dNd2pTdphidy_em_E;
+    double ***vnpT_cos_em_E, ***vnpT_sin_em_E;
     
+
     double ****dNd2pTdphidy_tot;
     double ***vnpT_cos_tot, ***vnpT_sin_tot;
 
-    std::vector<double> dNd2Mdy_eq, dNd2Mdy_visc, dNd2Mdy_diff, dNd2Mdy_em,  dNd2Mdy_tot;
+    std::vector<double> dNd2Mdy_eq, dNd2Mdy_visc, dNd2Mdy_diff, dNd2Mdy_em, dNd2Mdy_em_E, dNd2Mdy_tot;
     std::vector<double> dNd2Mdy_eqT, dNd2Mdy_eqL;
     double **vn_sin_eq;
     double **vn_cos_eq;
@@ -97,6 +102,9 @@ class PhotonEmission {
 
     double **vn_sin_em;
     double **vn_cos_em;
+    
+    double **vn_sin_em_E;
+    double **vn_cos_em_E;
 
     double **vn_cos_tot;
     double **vn_sin_tot;
@@ -121,6 +129,7 @@ class PhotonEmission {
     void outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode=-1);
     void outputPhotonSpvn_individualchannel();
     double suppression_factor(double tau,double T);
+    void EM_profile_0(double sigma_el,double local_t, double local_x, double local_y, double local_z, double& eB, double& eEx, double& eEz);
 };
 
 #endif   // SRC_PHOTONEMISSION_H_

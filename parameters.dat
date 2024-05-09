@@ -57,7 +57,10 @@ Hydro_etas_i = -3.
 Hydro_etas_f =  3.
 Hydro_netas_n = 21
 
+include_EM_deltaf = 1
 
+EM_profile = 1 
 sigmael_over_T = 100
 eB_over_mpi2 = 1.
-include_EM_deltaf = 1
+
+

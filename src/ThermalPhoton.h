@@ -159,12 +159,12 @@ class ThermalPhoton {
     int include_visc_deltaf, int include_diff_deltaf,int include_EM_deltaf);
 
     void getPhotonemissionRate(double Eq, double M_ll, double pi_zz, double bulkPi,
-        double diff_factor, double EM_factor, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double &eqrate_ptr, double &eqrateT_ptr, 
-        double &eqrateL_ptr, double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr,double &em_ptr);
+        double diff_factor, double EM_factor,double EM_factor_E, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double &eqrate_ptr, double &eqrateT_ptr, 
+        double &eqrateL_ptr, double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr,double &em_ptr,double &em_ptr_E);
     void calThermalPhotonemission_3d(double Eq, double M_ll, double pi_zz, double bulkPi, 
-        double diff_factor, double EM_factor, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double volume, double fraction,
+        double diff_factor, double EM_factor,double EM_factor_E, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double volume, double fraction,
         double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_eqT, double &dNd2pTdphidy_cell_eqL, double &dNd2pTdphidy_cell_visc, 
-        double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_em, double &dNd2pTdphidy_cell_tot);
+        double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_em, double &dNd2pTdphidy_cell_em_E, double &dNd2pTdphidy_cell_tot);
 
     void calPhoton_SpvnpT(double ***dNd2pTdphipy,
                           double ***vnypT_cos, double *** vnypT_sin,
