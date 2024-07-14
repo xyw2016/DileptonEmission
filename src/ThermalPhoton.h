@@ -41,6 +41,8 @@ class ThermalPhoton {
     
 
     double sigmael_over_T_input;
+    double sigmael_input;
+
     double alpha_s;
 
     // photon emission rate
