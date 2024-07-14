@@ -218,9 +218,11 @@ double QGP_LO::finite_sigmael(double Eq,double p, double M_ll,double T, double m
     double mD_square = e_square*(T*T/3. + mu*mu/M_PI/M_PI);
     double sigmael_0 = sigmael_over_T_input*T;
 
-    double prefactor1 = alphaEM*mD_square*mD_square*mD_square/72./pow(M_PI,4)/sigmael_0;
+    double prefactor1 = alphaEM*mD_square*mD_square/72./pow(M_PI,4)/sigmael_0;
     double prefactor2 = nB(Eq/T)* Bfun(m_ell2/(M_ll*M_ll))/pow(M_ll,3);
     double prefactor3 = atanh((2*Eq*p)/(Eq*Eq + p*p + pow((mD_square/3./sigmael_0) ,2) ) );
+
+    //std::cout<< sigmael_0<<" "<<T<<" "<<prefactor1<<" "<<prefactor2<<" "<<prefactor3<<std::endl;
 
     return prefactor1*prefactor2*prefactor3;
 
