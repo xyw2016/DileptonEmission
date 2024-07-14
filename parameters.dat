@@ -65,3 +65,5 @@ eB_over_mpi2 = 1.
 EM_profile = 1
 sigmael = 0.006 
 
+include_finite_sigmael_deltaf = 1
+

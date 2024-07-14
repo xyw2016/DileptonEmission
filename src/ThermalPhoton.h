@@ -34,8 +34,11 @@ class ThermalPhoton {
     int include_diff_deltaf;
     int include_visc_deltaf;
     int include_EM_deltaf;
+    int include_finite_sigmael_deltaf;
     int turn_on_muB_;
+    
 
+    double sigmael_over_T_input;
     double alpha_s;
 
     // photon emission rate
@@ -155,16 +158,16 @@ class ThermalPhoton {
     virtual void analyticRatesBulkVis(double T, std::vector<double> &Eq,
         double *M_ll, std::vector<double> &eqrate_ptr);
     virtual void FiniteBaryonRates(double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double Eq, 
-    double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, double &diffrate_ptr, double &em_ptr,
-    int include_visc_deltaf, int include_diff_deltaf,int include_EM_deltaf);
+    double M_ll,double sigmael_over_T_input, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, double &diffrate_ptr, double &em_ptr, double & finite_sigmael_ptr, 
+    int include_visc_deltaf, int include_diff_deltaf,int include_EM_deltaf,int include_finite_sigmael_deltaf );
 
     void getPhotonemissionRate(double Eq, double M_ll, double pi_zz, double bulkPi,
         double diff_factor, double EM_factor,double EM_factor_E, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double &eqrate_ptr, double &eqrateT_ptr, 
-        double &eqrateL_ptr, double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr,double &em_ptr,double &em_ptr_E);
+        double &eqrateL_ptr, double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr,double &em_ptr,double &em_ptr_E,double& finite_sigmael_ptr);
     void calThermalPhotonemission_3d(double Eq, double M_ll, double pi_zz, double bulkPi, 
         double diff_factor, double EM_factor,double EM_factor_E, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double volume, double fraction,
         double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_eqT, double &dNd2pTdphidy_cell_eqL, double &dNd2pTdphidy_cell_visc, 
-        double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_em, double &dNd2pTdphidy_cell_em_E, double &dNd2pTdphidy_cell_tot);
+        double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_em, double &dNd2pTdphidy_cell_em_E,double &dNd2pTdphidy_cell_finite_sigmael, double &dNd2pTdphidy_cell_tot);
 
     void calPhoton_SpvnpT(double ***dNd2pTdphipy,
                           double ***vnypT_cos, double *** vnypT_sin,

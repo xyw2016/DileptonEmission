@@ -14,8 +14,8 @@ class QGP_LO : public ThermalPhoton {
     ~QGP_LO() {}
 
     void FiniteBaryonRates(double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double Eq, 
-        double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, 
-        double &diffrate_ptr,double &em_ptr, int include_visc_deltaf, int include_diff_deltaf,int include_EM_deltaf);
+        double M_ll, double sigmael_over_T_input, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, 
+        double &diffrate_ptr,double &em_ptr, double& finite_sigmael_ptr, int include_visc_deltaf, int include_diff_deltaf,int include_EM_deltaf,int include_finite_sigmael_deltaf);
 
     double integrand_J(double x,int n,double a,double z);
     double gaussLegendre(double* xs, double* ws, int m, int n, double a, double b, double z);
@@ -37,6 +37,8 @@ class QGP_LO : public ThermalPhoton {
     double rhoV(double omega,double k, double ksq,double T,double muB);
     double rhoL(double o, double k, double K2, double T, double mu);
     void fmuB_rate(double omega,double q, double qsq,double T,double muB,double m_ell2, double &rV, double &rL, double &rT);
+
+    double finite_sigmael(double Eq,double p, double M_ll,double T, double muB,double m_ell2,double sigmael_over_T_input);
 };
 
 #endif

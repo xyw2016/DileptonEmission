@@ -211,10 +211,26 @@ void QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,doub
 
 }
 
+// 20240714 xyw
+double QGP_LO::finite_sigmael(double Eq,double p, double M_ll,double T, double muB,double m_ell2,double sigmael_over_T_input){
+    double e_square = alphaEM*4*M_PI;
+    double mu = muB/3.0;
+    double mD_square = e_square*(T*T/3. + mu*mu/M_PI/M_PI);
+    double sigmael_0 = sigmael_over_T_input*T;
+
+    double prefactor1 = alphaEM*mD_square*mD_square*mD_square/72./pow(M_PI,4)/sigmael_0;
+    double prefactor2 = nB(Eq/T)* Bfun(m_ell2/(M_ll*M_ll))/pow(M_ll,3);
+    double prefactor3 = atanh((2*Eq*p)/(Eq*Eq + p*p + pow((mD_square/3./sigmael_0) ,2) ) );
+
+    return prefactor1*prefactor2*prefactor3;
+
+}
+
+
 
 void QGP_LO::FiniteBaryonRates(double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double Eq, 
-    double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, double &diffrate_ptr,double &em_ptr,
-    int include_visc_deltaf, int include_diff_deltaf,int include_EM_deltaf){
+    double M_ll, double sigmael_over_T_input, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, double &diffrate_ptr,double &em_ptr, double& finite_sigmael_ptr,
+    int include_visc_deltaf, int include_diff_deltaf,int include_EM_deltaf,int include_finite_sigmael_deltaf){
 
     double m_ell2 = me * me;
     
@@ -249,6 +265,14 @@ void QGP_LO::FiniteBaryonRates(double T, double muB, double inv_eplusp, double r
        em_ptr = b1(Eq,p, M2, T, muB, sigma);
     else
        em_ptr = 0.0;
+
+    if(include_finite_sigmael_deltaf == 1 ){
+        finite_sigmael_ptr = finite_sigmael(Eq,p,M_ll,T,muB,m_ell2,sigmael_over_T_input);
+        finite_sigmael_ptr = prefac*finite_sigmael_ptr;
+    }
+    else
+        finite_sigmael_ptr=0.0;
+       
 
 
 

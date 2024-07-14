@@ -13,8 +13,8 @@ class QGP_LO_analytic : public ThermalPhoton {
                         std::string emissionProcess);
     ~QGP_LO_analytic() {}
     void FiniteBaryonRates(double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double Eq, 
-        double M_ll, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, 
-        double &diffrate_ptr,double &em_ptr, int include_visc_deltaf, int include_diff_deltaf,int include_EM_deltaf);
+        double M_ll, double sigmael_over_T_input, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, double &viscrate_ptr, 
+        double &diffrate_ptr,double &em_ptr, double& finite_sigmael_ptr, int include_visc_deltaf, int include_diff_deltaf,int include_EM_deltaf,int include_finite_sigmael_deltaf);
 };
 
 #endif

@@ -59,6 +59,9 @@ class PhotonEmission {
     double  sigmael_over_T;
     double  eB_over_mpi2;
     int include_EM_deltaf;
+
+    int include_finite_sigmael_deltaf;
+
     
 
     double **lambda;  // Lorentz boost
@@ -70,6 +73,7 @@ class PhotonEmission {
     double **dNd2pTd2M_diff;
     double **dNd2pTd2M_em;
     double **dNd2pTd2M_em_E;
+    double **dNd2pTd2M_finite_sigmael;
     
     double **dNd2pTd2M_tot;
     double ****dNd2pTdphidy_eq;
@@ -86,12 +90,15 @@ class PhotonEmission {
     
     double ****dNd2pTdphidy_em_E;
     double ***vnpT_cos_em_E, ***vnpT_sin_em_E;
+ 
+    double ****dNd2pTdphidy_finite_sigmael;
+    double ***vnpT_cos_finite_sigmael, ***vnpT_sin_finite_sigmael;
     
 
     double ****dNd2pTdphidy_tot;
     double ***vnpT_cos_tot, ***vnpT_sin_tot;
 
-    std::vector<double> dNd2Mdy_eq, dNd2Mdy_visc, dNd2Mdy_diff, dNd2Mdy_em, dNd2Mdy_em_E, dNd2Mdy_tot;
+    std::vector<double> dNd2Mdy_eq, dNd2Mdy_visc, dNd2Mdy_diff, dNd2Mdy_em, dNd2Mdy_em_E,dNd2Mdy_finite_sigmael, dNd2Mdy_tot;
     std::vector<double> dNd2Mdy_eqT, dNd2Mdy_eqL;
     double **vn_sin_eq;
     double **vn_cos_eq;
@@ -105,6 +112,9 @@ class PhotonEmission {
     
     double **vn_sin_em_E;
     double **vn_cos_em_E;
+
+   double **vn_sin_finite_sigmael;
+    double **vn_cos_finite_sigmael;
 
     double **vn_cos_tot;
     double **vn_sin_tot;
