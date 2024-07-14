@@ -250,8 +250,6 @@ void QGP_LO::FiniteBaryonRates(double T, double muB, double inv_eplusp, double r
     else
        em_ptr = 0.0;
 
-    //     std::cout << include_visc_deltaf<<" "<<include_diff_deltaf<<" www "<< include_EM_deltaf<<std::endl;
 
-    //std::cout << viscrate_ptr <<" "<<diffrate_ptr<<" www "<< em_ptr<<std::endl;
 
 }

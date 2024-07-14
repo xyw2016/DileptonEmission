@@ -358,11 +358,12 @@ double PhotonEmission::suppression_factor(double tau,double T){
     }
 }
 
+
 void PhotonEmission::EM_profile_0(double sigma_el,double local_t, double local_x, double local_y, double local_z, double& eB, double& eEx, double& eEz){
     
     double sigma_el1 = sigma_el;
     double alpha_em = 1./137.;
-    double Z=79;
+    double Z=0; // by Han, augmented by hand
     double A = 197;
     double RA = 1.2*pow(A,1./3.); //fm
     double hbarc = 0.197322;
@@ -382,6 +383,24 @@ void PhotonEmission::EM_profile_0(double sigma_el,double local_t, double local_x
     
 }
 
+void PhotonEmission::EM_profile_1(double tauB,double eB0, double tau0, double local_t, double local_x, double local_y, double local_z, double& eB, double& eEx, double& eEz){
+    
+    eB = eB0*exp(-(local_t-tau0)/tauB); 
+
+    double dBdt= eB/tauB;
+
+    eEx = local_z/2.0* dBdt;
+    eEz = -local_x/2.0* dBdt; 
+
+
+    if (local_x*local_x + local_y*local_y + local_z*local_z > local_t*local_t || abs(local_x)>4 || abs(local_y)>8){
+        eB = 0.;
+        eEx = 0.;
+        eEz = 0.;
+    }
+
+      
+}
 
 void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode) {
 
@@ -729,6 +748,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
             
             int EM_profile_flag = paraRdr->getVal("EM_profile");
             
+            if (EM_profile_flag == 2){
+                double tauB = paraRdr->getVal("tauB");
+                EM_profile_1(tauB,eB,tau0,local_tz_t,local_tz_x,local_tz_y ,local_tz_z,eB_tem,eEx_tem,eEy_tem); //eB/m_pi^2 in this case is the value at t=0
+            }
             if (EM_profile_flag == 1 )
 
             {

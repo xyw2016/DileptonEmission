@@ -130,6 +130,7 @@ class PhotonEmission {
     void outputPhotonSpvn_individualchannel();
     double suppression_factor(double tau,double T);
     void EM_profile_0(double sigma_el,double local_t, double local_x, double local_y, double local_z, double& eB, double& eEx, double& eEz);
+    void EM_profile_1(double tauB,double eB0, double tau0, double local_t, double local_x, double local_y, double local_z, double& eB, double& eEx, double& eEz);
 };
 
 #endif   // SRC_PHOTONEMISSION_H_
