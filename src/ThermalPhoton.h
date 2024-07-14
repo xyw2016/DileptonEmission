@@ -36,6 +36,8 @@ class ThermalPhoton {
     int include_EM_deltaf;
     int include_finite_sigmael_deltaf;
     int turn_on_muB_;
+
+    int EM_profile_kind;
     
 
     double sigmael_over_T_input;
