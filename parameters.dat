@@ -25,10 +25,10 @@ muB_test = 0.0
 rhoB_eplusp_test = 2.0
 inv_eplusp_test = 1.0
 np = 20
-nphi = 20 
+nphi = 20
 nm = 20
-photon_q_i = 0.6
-photon_q_f = 2.0 
+photon_q_i = 0.0
+photon_q_f = 6.0
 photon_phi_q_i = 0.0
 photon_phi_q_f = 6.2831853
 photon_y_i = 0.
@@ -49,12 +49,12 @@ dTau = 0.1
 calHGIdFlag = 0
 
 etaovers=0.12
-flag_prehydro = 0 
+flag_prehydro = 1 
 flag_hydro = 1 
 
 Hydro_2D = 1
 Hydro_etas_i = -3.
-Hydro_etas_f =  3.
+Hydro_etas_f = 3.
 Hydro_netas_n = 21;
 
 

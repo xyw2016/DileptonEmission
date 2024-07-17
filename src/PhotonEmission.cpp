@@ -495,7 +495,6 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
              }
             #endif         
 
-            // wxy
             // volume element: tau*dtau*dx*dy*deta,
             double volume = tau_local*volume_base0;
             //if(hydro_flag == 22){

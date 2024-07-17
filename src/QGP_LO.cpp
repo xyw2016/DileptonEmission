@@ -2,7 +2,9 @@
 #include "QGP_LO.h"
 #include "data_struct.h"
 #include <gsl/gsl_sf_fermi_dirac.h>
+#include <gsl/gsl_errno.h>
 #include <cmath>
+#include <iostream>
 
 using PhysConsts::hbarC;
 using PhysConsts::alphaEM;
@@ -10,6 +12,12 @@ using PhysConsts::me;
 
 #define OOFP 0.0795774715459476678844418816863 //1/(4*pi)
 #define sgn(x) (double) ((x>0)-(x<0))
+
+void error_handler(const char *reason, const char *file, int line, int gsl_errno) {
+    //fprintf(stderr, "GSL ERROR: %s:%d: %s (error code: %d)\n", file, line, reason, gsl_errno);
+}
+
+
 
 QGP_LO::QGP_LO(
         std::shared_ptr<ParameterReader> paraRdr_in,
@@ -106,21 +114,67 @@ double QGP_LO::s2(double omega,double q,double qsq,double T,double muB,double m_
     return sigma*ps2;
 }
 
-double QGP_LO::heaviside(double x) {
-    if (x < 0.0) {
+//double QGP_LO::heaviside(double x) {
+//    if (x < 0.0) {
+//        return 0.0;
+//    } else {
+//        return 1.0;
+//    }
+//}
+
+double QGP_LO::heaviside(double x, double epsilon) {
+    if (x < -epsilon) {
         return 0.0;
     } else {
         return 1.0;
     }
 }
 
+
 // double QGP_LO::l1f(double x){
 //     return log(1. + exp(-x));
 // }
 
-double QGP_LO::l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
-double QGP_LO::l2f(double x) { return -gsl_sf_fermi_dirac_1(-x); }
-double QGP_LO::l3f(double x) { return -gsl_sf_fermi_dirac_2(-x); }
+//double QGP_LO::l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
+//double QGP_LO::l2f(double x) { return -gsl_sf_fermi_dirac_1(-x); }
+//double QGP_LO::l3f(double x) { return -gsl_sf_fermi_dirac_2(-x); }
+double QGP_LO::l1f(double x) { 
+    
+    gsl_set_error_handler(&error_handler);
+    gsl_sf_result result; 
+    int status = gsl_sf_fermi_dirac_0_e(-x, &result);
+
+    if (status != GSL_SUCCESS) {
+        //printf("An error occurred: %f\n", result.val);
+    }
+    return result.val;
+
+}
+double QGP_LO::l2f(double x) { 
+    
+    gsl_set_error_handler(&error_handler);
+    gsl_sf_result result; 
+    int status = gsl_sf_fermi_dirac_1_e(-x, &result);
+
+    if (status != GSL_SUCCESS) {
+        //printf("An error occurred: %f\n", result.val);
+    }
+    return -result.val;
+
+}
+double QGP_LO::l3f(double x) { 
+    
+    gsl_set_error_handler(&error_handler);
+    gsl_sf_result result; 
+    int status = -gsl_sf_fermi_dirac_2_e(-x, &result);
+    if (status != GSL_SUCCESS) {
+        //printf("An error occurred: %f\n", result.val);
+    }
+
+
+    return -result.val;
+
+}
 
 double QGP_LO::nB(double x){
     return 1./(exp(x) - 1.);
@@ -135,14 +189,46 @@ double QGP_LO::rhoV(double omega,double k,double ksq, double T,double muB){
     double kminus = (omega - k)*0.5;
     double muq = muB/3.;
     double Nc = 3.;
+    double somk = sgn(kminus);
+
+    //double ps1 = Nc*ksq/(4.*M_PI*k);
+    double ksq1 = omega*omega - k*k;
+    double ps1 = Nc*ksq1/(4.*M_PI*k);
+    double ps2 = l1f((kplus - muq)/T) - l1f((fabs(kminus) - muq)/T) + l1f((kplus + muq)/T) - l1f((fabs(kminus) + muq)/T);
+    double ps3 = k*.5*(somk+1.);//heaviside(kminus);
+
+    return ps1*(T*ps2 + ps3);
+}
+
+double QGP_LO::rhoV1(double omega,double k,double ksq, double T,double muB){
+    double o = omega/T;
+    k = k/T;
+    double mu = muB/T/3.0;
+    double rV, r00;
+    double K2 = o*o - k*k; // note: omega, k are in units of T!
+     double kp = .5*(o+k), km = .5*fabs(o-k), somk = sgn(o-k);
+
+     rV = l1f(kp+mu)+l1f(kp-mu)-l1f(km+mu)-l1f(km-mu);
+     rV = rV/k + .5*(somk+1.);
+     rV *= K2*3.*OOFP;
+     return rV*T*T;
+
+
+}
+double QGP_LO::rhoV2(double omega,double k,double ksq, double T,double muB){
+    // k is the magnitude of 3-vec k
+    
+    double kplus = (omega + k)*0.5;
+    double kminus = (omega - k)*0.5;
+    double muq = muB/3.;
+    double Nc = 3.;
     double ps1 = Nc*ksq/(4.*M_PI*k);
     //double ps2 = l1f((kplus - muq)/T) - l1f((abs(kminus) - muq)/T) + l1f((kplus + muq)/T) - l1f((abs(kminus) + muq)/T);
     //double ps3 = k*heaviside(kminus);
     double ps2 = log((cosh(kplus/T) + cosh(muq/T))/(cosh(kminus/T) + cosh(muq/T)));
-    // return ps1*(T*ps2 + ps3);
+    //return ps1*(T*ps2 + ps3);
     return ps1*(T*ps2);
 }
-
 
 double QGP_LO::rhoL(double o, double k, double K2, double T, double muB) { 
       // leading order result, see (2.4) of 1910.09567
@@ -160,7 +246,6 @@ double QGP_LO::rhoL(double o, double k, double K2, double T, double muB) {
     double ps2 = l2f(kp+mu) + l2f(kp-mu) + somk*( l2f(km+mu) + l2f(km-mu) );
     double ps3 = .5*k*k*(somk+1.);
     r00 = -OOFP * ((ps1*2./k + ps2)*6. + ps3);
-
     rL =  - K2*r00/(k*k);
 
     return rL*T2;// put back the unit
@@ -175,6 +260,8 @@ void QGP_LO::fmuB_rate(double omega,double q,double qsq,double T,double muB,doub
     rV = prefacor*rhoV(omega,q,qsq,T,muB);
     rL = prefacor*rhoL(omega,q,qsq,T,muB);
     rT = .5*(rV-rL);
+
+
 
 }
 
@@ -198,7 +285,7 @@ void QGP_LO::FiniteBaryonRates(double T, double muB, double inv_eplusp, double r
     eqrate_ptr = prefac*rV;
     eqrateL_ptr= prefac*rL;
     eqrateT_ptr= prefac*rT;
-
+    //std::cout << rV <<" "<< rL<<" "<< rT<<" wxy 1 "<<std::endl;
     double sigma = cross_sec(Eq,p,M2,m_ell2);
 
     // shear correction

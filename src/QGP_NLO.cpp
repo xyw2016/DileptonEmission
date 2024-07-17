@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <math.h>
 #include <gsl/gsl_sf_fermi_dirac.h>
+#include <gsl/gsl_errno.h>
 #include "data_struct.h"
 #include "ThermalPhoton.h"
 #include "QGP_NLO.h"
@@ -15,6 +16,9 @@ using PhysConsts::hbarC;
 using PhysConsts::alphaEM;
 
 
+void error_handler_nlo(const char *reason, const char *file, int line, int gsl_errno) {
+    //fprintf(stderr, "GSL ERROR: %s:%d: %s (error code: %d)\n", file, line, reason, gsl_errno);
+}
 QGP_NLO::QGP_NLO(
         std::shared_ptr<ParameterReader> paraRdr_in,
         std::string emissionProcess
@@ -36,9 +40,47 @@ double Cf=((Nc)*(Nc)-1)/(2.*Nc);
 
 double nF(double x)  { double e=exp(-x); return e/(1.+e); };
 double nB(double x)  { double e=exp(-x); return e/(1.-e); };
-double l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
-double l2f(double x) { return -gsl_sf_fermi_dirac_1(-x); }
-double l3f(double x) { return -gsl_sf_fermi_dirac_2(-x); }
+//double l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
+//double l2f(double x) { return -gsl_sf_fermi_dirac_1(-x); }
+//double l3f(double x) { return -gsl_sf_fermi_dirac_2(-x); }
+
+double l1f(double x) { 
+    
+    gsl_set_error_handler(&error_handler_nlo);
+    gsl_sf_result result; 
+    int status = gsl_sf_fermi_dirac_0_e(-x, &result);
+
+    if (status != GSL_SUCCESS) {
+        //printf("An error occurred: %f\n", result.val);
+    }
+    return result.val;
+
+}
+double l2f(double x) { 
+    
+    gsl_set_error_handler(&error_handler_nlo);
+    gsl_sf_result result; 
+    int status = gsl_sf_fermi_dirac_1_e(-x, &result);
+
+    if (status != GSL_SUCCESS) {
+        //printf("An error occurred: %f\n", result.val);
+    }
+    return -result.val;
+
+}
+double l3f(double x) { 
+    
+    gsl_set_error_handler(&error_handler_nlo);
+    gsl_sf_result result; 
+    int status = -gsl_sf_fermi_dirac_2_e(-x, &result);
+    if (status != GSL_SUCCESS) {
+        //printf("An error occurred: %f\n", result.val);
+    }
+
+
+    return -result.val;
+
+}
 
 void rho_LO(double o, double k, double mu, double &rT, double &rL) { 
   // leading order result, see (2.4) of 1910.09567

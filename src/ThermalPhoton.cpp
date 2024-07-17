@@ -422,6 +422,7 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     getPhotonemissionRate(Eq, M_ll, pi_zz, bulkPi, diff_factor, T, muB, inv_eplusp, rhoB_over_eplusp,
                           em_eqrate, em_eqrateT, em_eqrateL, em_visrate, em_bulkvis, em_diffrate);
 
+    //    std::cout<<" wxy3 "<< em_eqrate<<" "<<em_eqrateT<<" "<<em_eqrateL<<std::endl;
     double temp_eq_sum   = em_eqrate*volfrac;
     double temp_eqT_sum  = em_eqrateT*volfrac;
     double temp_eqL_sum  = em_eqrateL*volfrac;
@@ -488,7 +489,8 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     
     if(std::isnan(dNd2pTdphidy_cell_lambda_theta))
     { 
-        std::cout<< rho_delta << " "<< rho_V <<" "<<lambda_theta1<<" "<<factor_pol_0<<" "<<lambda_theta2<< " "<<dNd2pTdphidy_cell_lambda_theta<<std::endl;
+        std::cout<< "ERROR: lambda_theta is NAN !!!!!! "<<std::endl;
+        std::cout<< temp_eqT_sum << " "<< temp_eqL_sum <<" "<<lambda_theta1<<" "<<factor_pol_0<<" "<<lambda_theta2<< " "<<dNd2pTdphidy_cell_lambda_theta<<std::endl;
     }
 
 
