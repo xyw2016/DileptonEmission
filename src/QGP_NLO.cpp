@@ -10,6 +10,7 @@
 #include "ThermalPhoton.h"
 #include "QGP_NLO.h"
 
+namespace Dilepton{
 using namespace std;
 using PhysConsts::hbarC;
 using PhysConsts::alphaEM;
@@ -302,5 +303,5 @@ void ThermalPhoton::NLO_rate(struct ThermalPhoton::Table grid_T, struct ThermalP
   rateTot = 2.*rateT + rateL;
 
 }
-
+}
 

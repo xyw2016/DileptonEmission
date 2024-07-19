@@ -36,7 +36,9 @@
 
 using namespace std;
 
+using namespace Dilepton;
 int main(int argc, char** argv) {
+
     Stopwatch sw;
 
     sw.tic();
@@ -100,7 +102,5 @@ int main(int argc, char** argv) {
     // clean up
     delete [] eta_ptr;
     delete [] etaweight_ptr;
-
     return(0);
 }
-

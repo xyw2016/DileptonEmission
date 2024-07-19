@@ -5,6 +5,7 @@
 #include <iostream>
 
 
+namespace Dilepton{
 using PhysConsts::hbarC;
 
 QGP_LO_analytic::QGP_LO_analytic(
@@ -38,4 +39,4 @@ void QGP_LO_analytic::FiniteBaryonRates(double T, double muB, double inv_eplusp,
     //std::cout<<  eqrate_ptr<<" " <<prefac << " "<<y<<" "<<fq<<" "<<log_r<< std::endl;
 
 }
-
+}

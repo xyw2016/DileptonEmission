@@ -10,6 +10,7 @@
 #include "Table2D.h"
 #include "ParameterReader.h"
 
+namespace Dilepton{
 class ThermalPhoton {
  private:
     std::shared_ptr<ParameterReader> paraRdr;
@@ -203,4 +204,5 @@ private:
     Table grid_T;
     Table grid_L;
 };
+}
 #endif  // SRC_THERMALPHOTON_H_

@@ -26,6 +26,7 @@
 #include "data_struct.h"
 #include "QGP_NLO.h"
 
+namespace Dilepton{
 using namespace std;
 using ARSENAL::createA2DMatrix;
 using ARSENAL::createA3DMatrix;
@@ -1007,7 +1008,7 @@ void ThermalPhoton::outputPhoton_Spvn_dTdtau(string path, double Tcut_high, doub
     fphotonvn_diff.close();
     fphotonvn_tot.close();
 }
-
+}
 
 // pT-integrated and pT-differential spectra and flows for individual channels
 

@@ -9,6 +9,7 @@
 #include "hdf5.h"
 #include "Hydroinfo_h5.h"
 
+namespace Dilepton{
 using namespace std;
 
 HydroinfoH5::HydroinfoH5() {
@@ -662,4 +663,5 @@ double HydroinfoH5::cubeInterp(double x, double y, double z, double A000, double
                  + A101*x*(1-y)*z + A011*(1-x)*y*z + A110*x*y*(1-z) 
                  + A111*x*y*z;
    return(Axyz);
+}
 }

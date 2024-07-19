@@ -1,6 +1,7 @@
 #ifndef DATA_STRUCT_H_
 #define DATA_STRUCT_H_
 
+namespace Dilepton{
 namespace PhysConsts {
     const double hbarC = 0.19733;
     const double alphaEM = 1./137.035999;
@@ -245,6 +246,6 @@ class fluidCell_3D_new {
         return(res);
     }
 };
-
+}
 
 #endif  // DATA_STRUCT_H_

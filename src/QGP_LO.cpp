@@ -4,6 +4,7 @@
 #include <gsl/gsl_sf_fermi_dirac.h>
 #include <cmath>
 
+namespace Dilepton{
 using PhysConsts::hbarC;
 using PhysConsts::alphaEM;
 using PhysConsts::me;
@@ -213,4 +214,5 @@ void QGP_LO::FiniteBaryonRates(double T, double muB, double inv_eplusp, double r
     else
         diffrate_ptr = 0.0;
 
+}
 }

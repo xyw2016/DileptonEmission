@@ -7,6 +7,7 @@
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 
+namespace Dilepton{
 class QGP_NLO : public ThermalPhoton {
  public:
     QGP_NLO(std::shared_ptr<ParameterReader> paraRdr_in,
@@ -33,5 +34,5 @@ class QGP_NLO : public ThermalPhoton {
     // double rhoV(double omega,double k, double ksq,double T,double muB);
     // double fmuB_rate(double omega,double q, double qsq,double T,double muB,double m_ell2);
 };
-
+}
 #endif

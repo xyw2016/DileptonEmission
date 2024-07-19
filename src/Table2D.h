@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+namespace Dilepton{
 class Table2D {
   private:
     std::vector< std::vector<double>* >* data;
@@ -31,6 +32,6 @@ class Table2D {
     void setTbdata(int idx, int idy, double value) {(*(*data)[idy])[idx]=value;}
     void outputTabletoFile(std::string filename);
 };
-
+}
 #endif
 

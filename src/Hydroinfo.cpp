@@ -19,6 +19,7 @@
 #include "data_struct.h"
 #include "Hydroinfo.h"
 
+namespace Dilepton{
 using namespace std;
 
 
@@ -1434,4 +1435,5 @@ void Hydroinfo::update_grid_info(
         ixmax = static_cast<int>(2*x_max/dx+0.001);
         ietamax = static_cast<int>(2*eta_max/deta+0.001);
     }
+}
 }

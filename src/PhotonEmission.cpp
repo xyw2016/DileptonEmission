@@ -25,6 +25,7 @@
 #include "ParameterReader.h"
 #include "Arsenal.h"
 
+namespace Dilepton{
 using namespace std;
 using ARSENAL::createA2DMatrix;
 using ARSENAL::createA3DMatrix;
@@ -1131,4 +1132,5 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
         fphoton_diff_inte_Spvn << endl;
         fphoton_tot_inte_Spvn << endl;
     }
+}
 }

@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+namespace Dilepton{
 namespace ARSENAL {
 
 std::vector<double> logarithmic_mass_grid(double m_min, double m_max, int num_points);
@@ -55,5 +56,5 @@ double****** createA6DMatrix(const int n1, const int n2, const int n3, const int
 void deleteA6DMatrix(double ******mat, const int n1, const int n2, const int n3, const int n4, const int n5);
 
 };
-
+}
 #endif

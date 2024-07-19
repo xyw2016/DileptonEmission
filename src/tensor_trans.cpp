@@ -7,6 +7,7 @@
 #include "tensor_trans.h"
 using namespace std;
 
+namespace Dilepton{
 namespace TENSORTRANSFORM {
 
 //lorentz matrix to first boost along longitudinal direction and then transverse
@@ -207,4 +208,5 @@ double Rotation_Tensor_zz(double** M, double* R_z_i) {
     return(pi_zz);
 }
 
+}
 }

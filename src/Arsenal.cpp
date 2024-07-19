@@ -10,6 +10,7 @@ using std::string;
 using std::vector;
 using std::cout;
 using std::endl;
+namespace Dilepton{
 
 namespace ARSENAL {
 
@@ -699,4 +700,5 @@ void deleteA2DMatrix(double **mat, const int n1) {
     delete[] mat;
 }
 
+}
 }

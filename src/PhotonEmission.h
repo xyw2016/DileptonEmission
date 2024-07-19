@@ -16,6 +16,7 @@
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 
+namespace Dilepton{
 
 class PhotonEmission {
  private:
@@ -106,6 +107,6 @@ class PhotonEmission {
     void outputPhotonSpvn_individualchannel();
     double suppression_factor(double tau);
 };
-
+}
 #endif   // SRC_PHOTONEMISSION_H_
 
