@@ -7,7 +7,7 @@ set (SOURCES
      ParameterReader.cpp
      tensor_trans.cpp
      gauss_quadrature.cpp
-     Hydroinfo_MUSIC.cpp
+     Hydroinfo.cpp
      QGP_LO_analytic.cpp
      QGP_NLO.cpp
      QGP_LO.cpp

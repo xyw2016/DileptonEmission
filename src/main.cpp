@@ -28,7 +28,7 @@
 
 #include "./PhotonEmission.h"
 #include "./Hydroinfo_h5.h"
-#include "./Hydroinfo_MUSIC.h"
+#include "./Hydroinfo.h"
 #include "./Stopwatch.h"
 #include "./Arsenal.h"
 #include "./ParameterReader.h"
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
     int hydro_flag = paraRdr->getVal("hydro_flag");
 
     if (hydro_flag == 2 || hydro_flag == 22  ) {
-        Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
+        Hydroinfo* hydroinfo_ptr = new Hydroinfo();
 	int hydro_mode = 12;
 	//if(hydro_flag == 22){
 	//    hydro_mode = 13;

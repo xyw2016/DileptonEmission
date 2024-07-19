@@ -276,9 +276,9 @@ double PhotonEmission::suppression_factor(double tau){
 void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
     // hydro data read in main.cpp
-    Hydroinfo_MUSIC *hydroinfo_MUSIC_ptr;
-    hydroinfo_MUSIC_ptr =
-                reinterpret_cast<Hydroinfo_MUSIC*>(hydroinfo_ptr_in);
+    Hydroinfo *hydroinfo_ptr;
+    hydroinfo_ptr =
+                reinterpret_cast<Hydroinfo*>(hydroinfo_ptr_in);
     
     int hydro_flag = paraRdr->getVal("hydro_flag");
 
@@ -305,23 +305,23 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     }
 
     // get hydro grid information
-    double dtau = hydroinfo_MUSIC_ptr->get_hydro_dtau();
-    double dx = hydroinfo_MUSIC_ptr->get_hydro_dx();
-    double deta = hydroinfo_MUSIC_ptr->get_hydro_deta();
-    double eta_max = hydroinfo_MUSIC_ptr->get_hydro_eta_max();
-    double Nskip_x = hydroinfo_MUSIC_ptr->get_hydro_Nskip_x();
-    double Nskip_eta = hydroinfo_MUSIC_ptr->get_hydro_Nskip_eta();
-    double Nskip_tau = hydroinfo_MUSIC_ptr->get_hydro_Nskip_tau();
+    double dtau = hydroinfo_ptr->get_hydro_dtau();
+    double dx = hydroinfo_ptr->get_hydro_dx();
+    double deta = hydroinfo_ptr->get_hydro_deta();
+    double eta_max = hydroinfo_ptr->get_hydro_eta_max();
+    double Nskip_x = hydroinfo_ptr->get_hydro_Nskip_x();
+    double Nskip_eta = hydroinfo_ptr->get_hydro_Nskip_eta();
+    double Nskip_tau = hydroinfo_ptr->get_hydro_Nskip_tau();
     
     double volume_base = Nskip_tau*dtau*Nskip_x*dx*Nskip_x*dx*Nskip_eta*deta;
 
 
-    tau0 = hydroinfo_MUSIC_ptr->get_hydro_tau0();
-    tau_max = hydroinfo_MUSIC_ptr->get_hydro_tau_max();
+    tau0 = hydroinfo_ptr->get_hydro_tau0();
+    tau_max = hydroinfo_ptr->get_hydro_tau_max();
     tau_cut_low = tau0 - dtau;
     tau_cut_high = tau_max + dtau;
-    T_cutlow = hydroinfo_MUSIC_ptr->get_hydro_T_min();
-    T_cuthigh =hydroinfo_MUSIC_ptr->get_hydro_T_max();
+    T_cutlow = hydroinfo_ptr->get_hydro_T_min();
+    T_cuthigh =hydroinfo_ptr->get_hydro_T_max();
 
     // output results in (T, tau)
     double dT_cut = (T_cuthigh - T_cutlow)/(nTcut - 1);
@@ -336,7 +336,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     
     // number of fluid cells
     long int number_of_cells =(
-                hydroinfo_MUSIC_ptr->get_number_of_fluid_cells_3d());
+                hydroinfo_ptr->get_number_of_fluid_cells_3d());
     cout << "number of cells:" << number_of_cells << endl;
 
     // multi-threads setup
@@ -389,7 +389,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
             fluidCell_3D_new fluidCellptr;
 
-            hydroinfo_MUSIC_ptr->get_hydro_cell_info_3d(cell_id, fluidCellptr);
+            hydroinfo_ptr->get_hydro_cell_info_3d(cell_id, fluidCellptr);
 
             double tau_local = tau0 + fluidCellptr.itau*dtau;
             double eta_local = -eta_max + fluidCellptr.ieta*deta;

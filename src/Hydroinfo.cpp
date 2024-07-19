@@ -1,4 +1,4 @@
-// Hydroinfo_MUSIC.cpp is a part of the MARTINI event generator.
+// Hydroinfo.cpp is a part of the MARTINI event generator.
 // Copyright (C) 2009-2010 Bjoern Schenke.
 // MARTINI is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -17,12 +17,12 @@
 #include <limits>  // Needed for std::numeric_limits
 
 #include "data_struct.h"
-#include "Hydroinfo_MUSIC.h"
+#include "Hydroinfo.h"
 
 using namespace std;
 
 
-Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
+Hydroinfo::Hydroinfo() {
     boost_invariant_ = false;
     nskip_tau = 1;
     nskip_x = 1;
@@ -30,7 +30,7 @@ Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
 }
 
 
-Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
+Hydroinfo::~Hydroinfo() {
     if (boost_invariant_) {
         lattice_2D.clear();
     } else {
@@ -41,7 +41,7 @@ Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
 }
 
 
-void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
+void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
     // all hydro data is stored in tau steps (not t)
     // evolution is converted to tau when accessing the hydro data
     lattice_2D.clear();
@@ -61,7 +61,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         ifstream configuration;
         configuration.open(config_file.str().c_str(), ios::in);
         if (!configuration) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << config_file.str() << endl;
             exit(1);
         }
@@ -115,7 +115,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
 
     use_tau_eta_coordinate = 1;
     if (use_tau_eta_coordinate == 0) {
-        cout << "Hydroinfo_MUSIC:: Warning hydro grid is set to "
+        cout << "Hydroinfo:: Warning hydro grid is set to "
              << "cartesian coordinates, please make sure this is correct!"
              << endl;
     }
@@ -149,7 +149,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::FILE *fin;
         fin = std::fopen(evolution_name.c_str(), "rb");
         if (fin == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name << endl;
             exit(1);
         }
@@ -157,7 +157,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::FILE *fin1;
         fin1 = std::fopen(evolution_name_Wmunu.c_str(), "rb");
         if (fin1 == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name_Wmunu << endl;
             exit(1);
         }
@@ -165,7 +165,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::FILE *fin2;
         fin2 = std::fopen(evolution_name_Pi.c_str(), "rb");
         if (fin2 == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name_Pi << endl;
             exit(1);
         }
@@ -202,7 +202,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_pi += std::fread(&pi33, size, 1, fin1);
 
             if (status_pi != 10) {
-                cout << "Error:Hydroinfo_MUSIC::readHydroData: "
+                cout << "Error:Hydroinfo::readHydroData: "
                      << "Wmunu file does not have the same number of "
                      << "fluid cells as the ideal file!" << endl;
                 exit(1);
@@ -214,7 +214,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_bulkPi += std::fread(&cs2, size, 1, fin2);
 
             if (status_bulkPi != 3) {
-                cout << "Error:Hydroinfo_MUSIC::readHydroData: "
+                cout << "Error:Hydroinfo::readHydroData: "
                      << "bulkPi file does not have the same number of "
                      << "fluid cells as the ideal file!" << endl;
                 exit(1);
@@ -238,7 +238,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             float v2 = vx*vx + vy*vy + vz*vz;
             if (v2 > 1.0) {
                 if (T > 0.01) {
-                    cerr << "[Hydroinfo_MUSIC::readHydroData:] Warning: "
+                    cerr << "[Hydroinfo::readHydroData:] Warning: "
                          << "v > 1! vx = " << vx << ", vy = " << vy
                          << ", vz = " << vz << ", T = " << T << endl;
                     exit(1);
@@ -316,7 +316,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         fin = std::fopen(evolution_file_name.c_str(), "rb");
 
         if (fin == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_file_name << endl;
             exit(1);
         }
@@ -324,7 +324,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::FILE *fin1;
         fin1 = std::fopen(evolution_name_Wmunu.c_str(), "rb");
         if (fin1 == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name_Wmunu << endl;
             exit(1);
         }
@@ -332,7 +332,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::FILE *fin2;
         fin2 = std::fopen(evolution_name_Pi.c_str(), "rb");
         if (fin2 == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name_Pi << endl;
             exit(1);
         }
@@ -369,7 +369,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_pi += std::fread(&pi33, size, 1, fin1);
 
             if (status_pi != 10) {
-                cout << "Error:Hydroinfo_MUSIC::readHydroData: "
+                cout << "Error:Hydroinfo::readHydroData: "
                      << "Wmunu file does not have the same number of "
                      << "fluid cells as the ideal file!" << endl;
                 exit(1);
@@ -381,7 +381,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_bulkPi += std::fread(&cs2, size, 1, fin2);
 
             if (status_bulkPi != 3) {
-                cout << "Error:Hydroinfo_MUSIC::readHydroData: "
+                cout << "Error:Hydroinfo::readHydroData: "
                      << "bulkPi file does not have the same number of "
                      << "fluid cells as the ideal file!" << endl;
                 exit(1);
@@ -405,7 +405,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
                 // store the hydro medium at eta_s = 0.0
                 float v2 = vx*vx + vy*vy + vz*vz;
                 if (v2 > 1.0) {
-                    cerr << "[Hydroinfo_MUSIC::readHydroData:] Error: "
+                    cerr << "[Hydroinfo::readHydroData:] Error: "
                          << "v > 1! vx = " << vx << ", vy = " << vy
                          << ", vz = " << vz << ", T = " << T << endl;
                     if (T > 0.01) {
@@ -481,7 +481,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         fin = std::fopen(evolution_file_name.c_str(), "rb");
 
         if (fin == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_file_name << endl;
             exit(1);
         }
@@ -489,7 +489,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::FILE *fin1;
         fin1 = std::fopen(evolution_name_Wmunu.c_str(), "rb");
         if (fin1 == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name_Wmunu << endl;
             exit(1);
         }
@@ -497,7 +497,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::FILE *fin2;
         fin2 = std::fopen(evolution_name_Pi.c_str(), "rb");
         if (fin2 == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name_Pi << endl;
             exit(1);
         }
@@ -522,7 +522,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
 
             float v2 = vx*vx + vy*vy + vz*vz;
             if (v2 > 1.) {
-                cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                cerr << "[Hydroinfo::readHydroData]: ERROR: "
                      << "v > 1! vx = " << vx << ", vy = " << vy
                      << ", vz = " << vz << endl;
                 exit(1);
@@ -545,7 +545,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_pi += std::fread(&pi33, size, 1, fin1);
 
             if (status_pi != 10) {
-                cout << "Error:Hydroinfo_MUSIC::readHydroData: "
+                cout << "Error:Hydroinfo::readHydroData: "
                      << "Wmunu file does not have the same number of "
                      << "fluid cells as the ideal file!" << endl;
                 exit(1);
@@ -557,7 +557,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_bulkPi += std::fread(&cs2, size, 1, fin2);
 
             if (status_bulkPi != 3) {
-                cout << "Error:Hydroinfo_MUSIC::readHydroData: "
+                cout << "Error:Hydroinfo::readHydroData: "
                      << "bulkPi file does not have the same number of "
                      << "fluid cells as the ideal file!" << endl;
                 exit(1);
@@ -624,7 +624,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::FILE *fin;
         fin = std::fopen(evolution_name.c_str(), "rb");
         if (fin == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name << endl;
             exit(1);
         }
@@ -632,7 +632,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         float header[16];
         int status = std::fread(&header, sizeof(float), 16, fin);
         if (status == 0) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Can not read the evolution file header" << endl;
             exit(1);
         }
@@ -672,7 +672,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status = std::fread(&cell_info, sizeof(float), nVar_per_cell, fin);
             if (status == 0) break;
             if (status != nVar_per_cell) {
-                cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                cerr << "[Hydroinfo::readHydroData]: ERROR: "
                      << "the evolution file format is not correct" << endl;
                 exit(1);
             }
@@ -791,7 +791,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status = std::fread(&cell_info, sizeof(float), nVar_per_cell, fin);
             if (status == 0) break;
             if (status != nVar_per_cell) {
-                cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                cerr << "[Hydroinfo::readHydroData]: ERROR: "
                      << "the evolution file format is not correct" <<" " <<status<<endl;
                 exit(1);
             }
@@ -884,7 +884,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::FILE *fin;
         fin = std::fopen(evolution_name.c_str(), "rb");
         if (fin == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name << endl;
             exit(1);
         }
@@ -892,7 +892,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         float header[16];
         int status = std::fread(&header, sizeof(float), 16, fin);
         if (status == 0) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+            cerr << "[Hydroinfo::readHydroData]: ERROR: "
                  << "Can not read the evolution file header" << endl;
             exit(1);
         }
@@ -953,7 +953,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status = std::fread(&cell_info, sizeof(float), nVar_per_cell, fin);
             if (status == 0) break;
             if (status != nVar_per_cell) {
-                cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                cerr << "[Hydroinfo::readHydroData]: ERROR: "
                      << "the evolution file format is not correct " << status <<endl;
                 exit(1);
             }
@@ -1033,7 +1033,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         hydroTauMax = hydroTau0 + hydroDtau*itaumax;
     }  
     else {
-        cout << "Hydroinfo_MUSIC:: This option is obsolete! whichHydro = "
+        cout << "Hydroinfo:: This option is obsolete! whichHydro = "
              << whichHydro << endl;
         exit(1);
     }
@@ -1069,7 +1069,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
 }
 
 
-void Hydroinfo_MUSIC::getHydroValues(float x, float y,
+void Hydroinfo::getHydroValues(float x, float y,
                                      float z, float t, fluidCell* info) {
 // For interpolation of evolution files in tau-eta coordinates. Only the
 // reading of MUSIC's evolution_xyeta.dat file is implemented here.
@@ -1109,7 +1109,7 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
     }
 
     if (ix < 0 || ix >= ixmax) {
-        cout << "[Hydroinfo_MUSIC::getHydroValues]: "
+        cout << "[Hydroinfo::getHydroValues]: "
              << "WARNING - x out of range x=" << x
              << ", ix=" << ix << ", ixmax=" << ixmax << endl;
         cout << "x=" << x << " y=" << y << " eta=" << eta
@@ -1124,7 +1124,7 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         return;
     }
     if (iy < 0 || iy >= ixmax) {
-        cout << "[Hydroinfo_MUSIC::getHydroValues]: "
+        cout << "[Hydroinfo::getHydroValues]: "
              << "WARNING - y out of range, y=" << y << ", iy="  << iy
              << ", iymax=" << ixmax << endl;
         cout << "x=" << x << " y=" << y << " eta=" << eta
@@ -1139,10 +1139,10 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         return;
     }
     if (itau < 0 || itau > itaumax) {
-        cout << "[Hydroinfo_MUSIC::getHydroValues]: WARNING - "
+        cout << "[Hydroinfo::getHydroValues]: WARNING - "
              << "tau out of range, itau=" << itau << ", itaumax=" << itaumax
              << endl;
-        cout << "[Hydroinfo_MUSIC::getHydroValues]: tau= " << tau
+        cout << "[Hydroinfo::getHydroValues]: tau= " << tau
              << ", hydroTauMax = " << hydroTauMax
              << ", hydroDtau = " << hydroDtau << endl;
 
@@ -1153,7 +1153,7 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         return;
     }
     if (ieta < 0 || ieta >= ietamax) {
-        cout << "[Hydroinfo_MUSIC::getHydroValues]: WARNING - "
+        cout << "[Hydroinfo::getHydroValues]: WARNING - "
              << "eta out of range, ieta=" << ieta << ", ietamax=" << ietamax
              << endl;
         info->temperature = 0.0;
@@ -1385,12 +1385,12 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
 }
 
 
-void Hydroinfo_MUSIC::get_hydro_cell_info_3d(int cell_id, fluidCell_3D_new &info) {
+void Hydroinfo::get_hydro_cell_info_3d(int cell_id, fluidCell_3D_new &info) {
     info = lattice_new_[cell_id];
 }
 
 
-void Hydroinfo_MUSIC::output_temperature_evolution(string filename_base) {
+void Hydroinfo::output_temperature_evolution(string filename_base) {
     fluidCell *hydroInfo = new fluidCell;
     for (int i = 0; i < itaumax; i++) {
         float tau = hydroTau0 + i*hydroDtau;
@@ -1414,7 +1414,7 @@ void Hydroinfo_MUSIC::output_temperature_evolution(string filename_base) {
 }
 
 
-void Hydroinfo_MUSIC::update_grid_info(
+void Hydroinfo::update_grid_info(
     float tau0, float tau_max, float dtau,
     float x_max, float dx, float eta_max, float deta) {
     hydroTau0 = tau0;

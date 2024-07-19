@@ -1,4 +1,4 @@
-// Hydroinfo_MUSIC.h is a part of the MARTINI event generator.
+// Hydroinfo.h is a part of the MARTINI event generator.
 // Copyright (C) 2009 Bjoern Schenke.
 // MARTINI is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -14,7 +14,7 @@
 #include "data_struct.h"
 
 
-class Hydroinfo_MUSIC {
+class Hydroinfo {
  private:
     float hydroTau0;       // tau_0 in the hydro data files
     float hydroTauMax;     // tau_max in the hydro data files
@@ -51,8 +51,8 @@ class Hydroinfo_MUSIC {
     std::vector<int> idx_map_;
 
  public:
-    Hydroinfo_MUSIC();       // constructor
-    ~Hydroinfo_MUSIC();      // destructor
+    Hydroinfo();       // constructor
+    ~Hydroinfo();      // destructor
 
     float get_hydro_tau_max() {return(hydroTauMax);}
     float get_hydro_tau0() {return(hydroTau0);}
