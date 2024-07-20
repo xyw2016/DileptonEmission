@@ -400,10 +400,10 @@ void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_fact
 
 
 // this function calculates the spectra for a specific Eq and M at a fluid cell
-void ThermalPhoton::calThermalPhotonemission_3d(double Eq, double M_ll, double pi_zz, double bulkPi, 
+void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (&flow_u_mu_Min)[4], double Eq, double M_ll, double pi_zz, double bulkPi, 
 	double diff_factor, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double volume, double fraction,
 	double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_eqT, double &dNd2pTdphidy_cell_eqL, double &dNd2pTdphidy_cell_visc, 
-    double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot) {
+    double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot, double &dNd2pTdphidy_cell_lambda_theta) {
 
     const double volfrac = volume*fraction;
 
@@ -420,10 +420,10 @@ void ThermalPhoton::calThermalPhotonemission_3d(double Eq, double M_ll, double p
     double em_bulkvis = 0.;
     // dilepton emission diffusion correction at local rest cell
     double em_diffrate = 0.;
-
     getPhotonemissionRate(Eq, M_ll, pi_zz, bulkPi, diff_factor, T, muB, inv_eplusp, rhoB_over_eplusp,
                           em_eqrate, em_eqrateT, em_eqrateL, em_visrate, em_bulkvis, em_diffrate);
 
+    //    std::cout<<" wxy3 "<< em_eqrate<<" "<<em_eqrateT<<" "<<em_eqrateL<<std::endl;
     double temp_eq_sum   = em_eqrate*volfrac;
     double temp_eqT_sum  = em_eqrateT*volfrac;
     double temp_eqL_sum  = em_eqrateL*volfrac;
@@ -433,11 +433,69 @@ void ThermalPhoton::calThermalPhotonemission_3d(double Eq, double M_ll, double p
 
     // spectra
     dNd2pTdphidy_cell_eq   = temp_eq_sum;
+    
+    //dNd2pTdphidy_cell_eq   = 1.0;
+
     dNd2pTdphidy_cell_eqT  = temp_eqT_sum;
     dNd2pTdphidy_cell_eqL  = temp_eqL_sum;
     dNd2pTdphidy_cell_visc = temp_eq_sum  + temp_visc_sum;
     dNd2pTdphidy_cell_diff = temp_eq_sum  + temp_diff_sum;
     dNd2pTdphidy_cell_tot  = (temp_eq_sum + temp_visc_sum + temp_diff_sum);
+
+
+    // dilepton polarization
+    double p_lab_Min_norm[3]; 
+    double p_lab_min_vec_square = sqrt( p_lab_Min[1]*p_lab_Min[1]
+                                        + p_lab_Min[2]*p_lab_Min[2]
+                                        + p_lab_Min[3]*p_lab_Min[3]);
+
+    p_lab_Min_norm[0]=p_lab_Min[1]/p_lab_min_vec_square;
+    p_lab_Min_norm[1]=p_lab_Min[2]/p_lab_min_vec_square;
+    p_lab_Min_norm[2]=p_lab_Min[3]/p_lab_min_vec_square;
+
+   
+    double u_dot_kvec_norm = flow_u_mu_Min[1]*p_lab_Min_norm[0]
+                            +flow_u_mu_Min[2]*p_lab_Min_norm[1]
+                            +flow_u_mu_Min[3]*p_lab_Min_norm[2];
+
+    
+
+    double u_dot_kvec = flow_u_mu_Min[1]*p_lab_Min[1]
+                        +flow_u_mu_Min[2]*p_lab_Min[2]
+                        +flow_u_mu_Min[3]*p_lab_Min[3];
+    
+    double factor_pol_0 = pow((p_lab_Min[0]*u_dot_kvec_norm - p_lab_min_vec_square*flow_u_mu_Min[0]),2)/
+                          (pow((p_lab_Min[0]*flow_u_mu_Min[0]-u_dot_kvec),2)-M_ll*M_ll);
+    factor_pol_0 = factor_pol_0 - 1./3.0;
+
+    double factor_pol_1 = me*me/(p_lab_min_vec_square*p_lab_min_vec_square);
+    factor_pol_1 = 0.0;
+    double rho_delta= temp_eqT_sum - temp_eqL_sum;
+    double rho_V = temp_eqT_sum*2 + temp_eqL_sum;
+
+
+    double lambda_theta1 = factor_pol_0*(1.0 - 4.0*factor_pol_1)*rho_delta;
+    double lambda_theta2 = ( 4.0*(1+2.0*factor_pol_1)*rho_V/3.0 - lambda_theta1 );
+    
+
+    double lambda_theta = 3.0*lambda_theta1/lambda_theta2;
+
+    if ( fabs(lambda_theta2) < 1e-18){
+        lambda_theta = 0.0;
+    }
+
+
+    dNd2pTdphidy_cell_lambda_theta = lambda_theta*dNd2pTdphidy_cell_eq;
+    //dNd2pTdphidy_cell_lambda_theta = lambda_theta;
+    
+    if(std::isnan(dNd2pTdphidy_cell_lambda_theta))
+    { 
+        std::cout<< "ERROR: lambda_theta is NAN !!!!!! "<<std::endl;
+        std::cout<< temp_eqT_sum << " "<< temp_eqL_sum <<" "<<lambda_theta1<<" "<<factor_pol_0<<" "<<lambda_theta2<< " "<<dNd2pTdphidy_cell_lambda_theta<<std::endl;
+    }
+
+
+    
 
 }
 

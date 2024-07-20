@@ -24,7 +24,8 @@ class QGP_LO : public ThermalPhoton {
 
     // for diffusion rate
     double Bfun(double x);
-    double heaviside(double x) ;
+    //double heaviside(double x) ;
+    double heaviside(double x, double epsilon=1e-20) ;
     double cross_sec(double omega, double q, double qsq, double m_ell2);
     double a1(double omega,double q, double qsq,double T,double muB,double m_ell2,double sigma,double nB_o_epp);
     double s2(double omega,double q,double qsq,double T,double muB,double m_ell2,double sigma);
@@ -35,6 +36,8 @@ class QGP_LO : public ThermalPhoton {
 
     // for finite muB rate
     double rhoV(double omega,double k, double ksq,double T,double muB);
+    double rhoV1(double omega,double k, double ksq,double T,double muB);
+    double rhoV2(double omega,double k, double ksq,double T,double muB);
     double rhoL(double o, double k, double K2, double T, double mu);
     void fmuB_rate(double omega,double q, double qsq,double T,double muB,double m_ell2, double &rV, double &rL, double &rT);
 };

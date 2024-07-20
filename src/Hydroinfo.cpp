@@ -836,6 +836,7 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
             newCell.uy = cell_info[9];
             newCell.uz = cell_info[10];
             lattice_3D_ideal.push_back(newCell);
+           
             ik++;
             if (ik%50000 == 0)
                 cout << "o" << flush;
@@ -1017,7 +1018,7 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
             idx_map_[cell_idx] = i;
         }
         hydroTauMax = hydroTau0 + hydroDtau*itaumax;
-    }else if (whichHydro == 12) {
+    }else if (whichHydro == 12 || whichHydro == 22) {
         // new MUSIC hydro format (no grid)
         cout << "Using new MUSIC hydro format (no grid) reading data ..."
              << endl;
@@ -1025,6 +1026,9 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
         // read in temperature and flow velocity
         // The name of the evolution file: evolution_name
         string evolution_name = "results/evolution_all_xyeta.dat";
+        if(whichHydro == 22){
+            evolution_name = "results/evolution_all_xyeta_kompost.dat";
+        }
         cout << "Evolution file name = " << evolution_name << endl;
         std::FILE *fin;
         fin = std::fopen(evolution_name.c_str(), "rb");
@@ -1158,6 +1162,7 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
                 newCell.qz = 0.;
             }
             lattice_new_.push_back(newCell);
+             
             ik++;
             if (ik%50000 == 0)
                 cout << "o" << flush;

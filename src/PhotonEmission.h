@@ -65,6 +65,8 @@ class PhotonEmission {
     double **dNd2pTd2M_visc;
     double **dNd2pTd2M_diff;
     double **dNd2pTd2M_tot;
+    double **dNd2pTd2M_pol_lambda_theta;
+
     double ****dNd2pTdphidy_eq;
     double ****dNd2pTdphidy_eqT;
     double ****dNd2pTdphidy_eqL;
@@ -74,9 +76,11 @@ class PhotonEmission {
     double ****dNd2pTdphidy_diff;
     double ***vnpT_cos_diff, ***vnpT_sin_diff;
     double ****dNd2pTdphidy_tot;
+    double ****dNd2pTdphidy_pol_lambda_theta;
+    
     double ***vnpT_cos_tot, ***vnpT_sin_tot;
 
-    std::vector<double> dNd2Mdy_eq, dNd2Mdy_visc, dNd2Mdy_diff, dNd2Mdy_tot;
+    std::vector<double> dNd2Mdy_eq, dNd2Mdy_visc, dNd2Mdy_diff, dNd2Mdy_tot, dNd2Mdy_pol_lambda_theta;
     std::vector<double> dNd2Mdy_eqT, dNd2Mdy_eqL;
     double **vn_sin_eq;
     double **vn_cos_eq;
@@ -100,12 +104,13 @@ class PhotonEmission {
     void set_hydroGridinfo();
     void print_hydroGridinfo();
     void InitializePhotonEmissionRateTables();
-    void calPhotonemission_3d(void *hydroinfo_ptr_in);
+    void calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode=-1);
     void calPhoton_total_Spvn();
+    void calPhoton_total_Spvn_sum(const PhotonEmission& spvn_tem); 
     void calPhoton_SpvnpT_individualchannel();
-    void outputPhoton_total_SpMatrix_and_SpvnpT();
+    void outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode=-1);
     void outputPhotonSpvn_individualchannel();
-    double suppression_factor(double tau);
+    double suppression_factor(double tau,double T);
 };
 }
 #endif   // SRC_PHOTONEMISSION_H_

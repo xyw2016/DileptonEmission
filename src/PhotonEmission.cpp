@@ -67,25 +67,34 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
 
     // read the photon emission rate tables
     InitializePhotonEmissionRateTables();
-
+    
+    // dN/MdMdPT2dphidy
     dNd2pTdphidy_eq = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_eqT = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_eqL = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_visc = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_diff = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_tot = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_pol_lambda_theta = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
+
+    
+    // dN/dMdPT2dphidy
     dNd2pTd2M_eq = createA2DMatrix(nm, np, 0);
     dNd2pTd2M_eqT = createA2DMatrix(nm, np, 0);
     dNd2pTd2M_eqL = createA2DMatrix(nm, np, 0);
     dNd2pTd2M_visc = createA2DMatrix(nm, np, 0);
     dNd2pTd2M_diff = createA2DMatrix(nm, np, 0);
     dNd2pTd2M_tot = createA2DMatrix(nm, np, 0);
+    dNd2pTd2M_pol_lambda_theta = createA2DMatrix(nm, np, 0);
+
+
     dNd2Mdy_eq.resize(nm, 0);
     dNd2Mdy_eqT.resize(nm, 0);
     dNd2Mdy_eqL.resize(nm, 0);
     dNd2Mdy_visc.resize(nm, 0);
     dNd2Mdy_diff.resize(nm, 0);
     dNd2Mdy_tot.resize(nm, 0);
+    dNd2Mdy_pol_lambda_theta.resize(nm, 0);
 
     vnpT_cos_eq = createA3DMatrix(norder, nm, np, 0.);
     vnpT_sin_eq = createA3DMatrix(norder, nm, np, 0.);
@@ -128,12 +137,16 @@ PhotonEmission::~PhotonEmission() {
     deleteA4DMatrix(dNd2pTdphidy_visc, nm, np, nphi);
     deleteA4DMatrix(dNd2pTdphidy_diff, nm, np, nphi);
     deleteA4DMatrix(dNd2pTdphidy_tot, nm, np, nphi);
+    deleteA4DMatrix(dNd2pTdphidy_pol_lambda_theta, nm, np, nphi);
+
     deleteA2DMatrix(dNd2pTd2M_eq, nm);
     deleteA2DMatrix(dNd2pTd2M_eqT, nm);
     deleteA2DMatrix(dNd2pTd2M_eqL, nm);
     deleteA2DMatrix(dNd2pTd2M_visc, nm);
     deleteA2DMatrix(dNd2pTd2M_diff, nm);
     deleteA2DMatrix(dNd2pTd2M_tot, nm);
+    deleteA2DMatrix(dNd2pTd2M_pol_lambda_theta, nm);
+
 
     deleteA3DMatrix(vnpT_cos_eq, norder, nm);
     deleteA3DMatrix(vnpT_sin_eq, norder, nm);
@@ -264,17 +277,31 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
     }
 }
 
-double PhotonEmission::suppression_factor(double tau){
-    //double lambda= 0.651; //tau_chem = 1.5
-    //double lambda= 0.434; //tau_chem = 1.0
+double PhotonEmission::suppression_factor(double tau,double T){
+    //double lambda= 1.249; //tau_chem = 1.5
+    //double lambda= 0.833; //tau_chem = 1.0
     double sig_lambda = paraRdr->getVal("sig_lambda");
     double suppress_order = paraRdr->getVal("suppress_order");
+    double etaovers = paraRdr->getVal("etaovers");
+    //cout<< sig_lambda<<" "<<suppress_order<<endl;
+    double A = 1.91882;
+    double T_fm = T/0.19733;
+    double pi_tem=3.1415926;
+    if( fabs(sig_lambda)< 0.0001){
+       
+       double tauR = etaovers*4.*pi_tem/T_fm;
+       double factor0 =  1 - exp(-A*tau/tauR);
+       return pow(factor0,suppress_order);
+    }
+    else{
+        
 
-    return pow(1-exp(- tau/sig_lambda),suppress_order);
+	return pow(1-exp(- A*tau/sig_lambda),suppress_order);
+    }
 }
 
 
-void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
+void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode) {
 
     // hydro data read in main.cpp
     Hydroinfo *hydroinfo_ptr;
@@ -282,6 +309,13 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                 reinterpret_cast<Hydroinfo*>(hydroinfo_ptr_in);
     
     int hydro_flag = paraRdr->getVal("hydro_flag");
+
+    int Hydro_2D = paraRdr->getVal("Hydro_2D");
+    double Hydro_etas_i = paraRdr->getVal("Hydro_etas_i");
+    double Hydro_etas_f = paraRdr->getVal("Hydro_etas_f");
+    int Hydro_netas_n = paraRdr->getVal("Hydro_netas_n");
+    double d_Hydro_detas = (Hydro_etas_f - Hydro_etas_i)/((Hydro_netas_n-1)*1.0);
+
 
     // photon momentum in the lab frame
     double M_ll[nm]; // invariant mass array
@@ -316,6 +350,17 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     
     double volume_base = Nskip_tau*dtau*Nskip_x*dx*Nskip_x*dx*Nskip_eta*deta;
 
+    if (Hydro_netas_n ==1 && Hydro_2D){
+        d_Hydro_detas = deta;
+    }
+    if(Hydro_2D){
+        cout<<" calculate dilepton with 2D Hydro "<<endl;
+        cout<<" Hydro_etas_i "<< Hydro_etas_i <<endl;
+        cout<<" Hydro_etas_f "<< Hydro_etas_f <<endl;
+        cout<<" Hydro_netas_n "<< Hydro_netas_n <<endl;
+        cout<<" d_Hydro_detas "<< d_Hydro_detas <<endl;
+        
+    }
 
     tau0 = hydroinfo_ptr->get_hydro_tau0();
     tau_max = hydroinfo_ptr->get_hydro_tau_max();
@@ -360,12 +405,43 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double *dNd2pTdphidy_visc_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
     double *dNd2pTdphidy_diff_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
     double *dNd2pTdphidy_tot_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
+    double *dNd2pTdphidy_pol_lambda_theta_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
+
 
     // main loop begins ...
     // loop over all fluid cells
     // subdivide bite size chunks of freezeout surface across cores
     int ncells = 0;
     double tau_now = 0.0;
+    
+    
+    if (Hydro_2D == 0){
+        Hydro_netas_n = 1;
+    }
+    
+    for(int ietas = 0; ietas < Hydro_netas_n ; ietas++){
+    
+        double ietas_local = Hydro_etas_i + ietas*d_Hydro_detas;
+
+        double volume_base0 = volume_base;
+        if(Hydro_2D)
+        {
+            volume_base0 = volume_base/(Nskip_eta*deta);
+            double vweight = 1;
+            if(Hydro_netas_n > 1 && (ietas ==0 || ietas == Hydro_netas_n -1)){
+            vweight = 0.5;
+            }
+            volume_base0 = volume_base0*vweight*d_Hydro_detas;
+        cout << "Updated Volume base = " << volume_base0 << endl;
+        cout << "eta_local = " << ietas_local << endl;
+        cout << "vweight = " << vweight << endl;
+        cout << "d_Hydro_detas = " << d_Hydro_detas << endl;
+        //cout << "Volume base = " << volume_base << endl;
+
+        }
+        
+        
+    
 
     #pragma omp parallel for reduction(+:ncells)
     for(long n = 0; n < CORES; n++)
@@ -384,9 +460,12 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             // fluid velocity in Minkowski
             double flow_u_mu_low[4];
             double flow_u_mu_Min[4]; 
+            
             // dilepton 4-momentum in Minkowski coordinates
             double p_lab_local[4];
             double p_lab_Min[4]; 
+
+            
 
             fluidCell_3D_new fluidCellptr;
 
@@ -394,6 +473,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
             double tau_local = tau0 + fluidCellptr.itau*dtau;
             double eta_local = -eta_max + fluidCellptr.ieta*deta;
+
+            if(Hydro_2D){
+                eta_local = ietas_local;
+            }
 
             #ifdef _OPENMP
             processedCells++;  // Increment the counter for processed cells
@@ -413,9 +496,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
              }
             #endif         
 
-            // wxy
             // volume element: tau*dtau*dx*dy*deta,
-            double volume = tau_local*volume_base;
+            double volume = tau_local*volume_base0;
             //if(hydro_flag == 22){
             //    volume = volume_base;
             //}
@@ -434,7 +516,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double rhoB_over_eplusp = rhoB_local*inv_eplusp;
 
             double T_sw = 0.166 - 0.139 * pow(muB_local, 2) - 0.053 * pow(muB_local, 4); // Cleymans et al
-
+            
             // validation setup, using some constant values to test the code
             if(test_code_flag==1){
                 temp_local = T_test;
@@ -446,6 +528,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                 eta_local = 0.0;
                 turn_off_transverse_flow = 1;
             }
+
+
 
             // fluid cell is out of interest, temperature below T_dec or eta larger than ETAmax
             if (hydro_flag==2 && (temp_local < T_dec || eta_local > ETAmax))
@@ -491,8 +575,6 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             flow_u_mu_low[3] = -ueta;
             
 
-            //if( hydro_flag == 2)
-            {
             double cosh_eta = cosh(eta_local);
             double sinh_eta = sinh(eta_local);
 
@@ -501,19 +583,12 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             flow_u_mu_Min[1] = ux;
             flow_u_mu_Min[2] = uy;
             flow_u_mu_Min[3] = sinh_eta*utau + cosh_eta*ueta;
+
+
             
             
-            }
- 
-            //if( hydro_flag == 22)
-            //{
-            // //wxy    
-            //// 4 velocity in Minkowski in lab frame
-            //flow_u_mu_Min[0] = utau ;
-            //flow_u_mu_Min[1] = ux;
-            //flow_u_mu_Min[2] = uy;
-            //flow_u_mu_Min[3] = ueta;  
-            //}
+             
+            
 
             
 
@@ -551,22 +626,13 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             double prefactor_visc = Cq*prefactor_diff;
 
             double spsfactor = 1.0;
-            //if(hydro_flag ==22 && test_code_flag != 1  ){
-            //    //wxy
-            //    double cell_t = tau0 + fluidCellptr.itau*dtau;
-            //    double cell_z = -eta_max + fluidCellptr.ieta*deta;
-            //    double cell_tau = 0.0;
-            //    if( fabs(cell_t) >= fabs(cell_z))
-            //    {
-            //        cell_tau = sqrt(cell_t*cell_t - cell_z*cell_z);
-            //    }
-
-            //}
-
             double cell_tau = tau_local; 
-            spsfactor = suppression_factor(cell_tau);
+        
+            if(hydro_mode == 22 ){
+                spsfactor = suppression_factor(cell_tau,temp_local);
+            }
+          
             // photon momentum loops
-            //std::cout<< suppression_factor(1.0) <<" test: "<<std::endl; 
             // #pragma omp parallel for collapse(4) private(p_lab_Min, p_lab_local)
             for (int k = 0; k < nrapidity; k++) {
                 for (int m = 0; m < nphi; m++) {
@@ -592,15 +658,6 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             p_lab_local[3] = M_T * sinh_y_minus_eta; // tau*p^eta
                            
 
-                            //if(hydro_flag == 22)
-                            //{
-
-                            //    p_lab_local[0] = M_T * cosh_y;
-                            //    p_lab_local[1] = p_q[l]*cos_phiq[m];
-                            //    p_lab_local[2] = p_q[l]*sin_phiq[m];
-                            //    p_lab_local[3] = M_T * sinh_y; // tau*p^eta
-
-                            //}
 
                             
 
@@ -665,6 +722,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             double dNd2pTdphidy_cell_visc = 0.;
                             double dNd2pTdphidy_cell_diff = 0.;
                             double dNd2pTdphidy_cell_tot = 0.;
+                            double dNd2pTdphidy_cell_lambda_theta = 0.;
 
                             // begin to calculate thermal photon emission
                             if (hydro_flag==2 && temp_local > T_sw) {
@@ -672,11 +730,13 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                 double QGP_fraction = 1.0;
                                 muB_local = turn_on_muB_*muB_local;
                                 rhoB_over_eplusp = turn_on_muB_*rhoB_over_eplusp;
-                                dilepton_QGP_thermal->calThermalPhotonemission_3d(
+                                dilepton_QGP_thermal->calThermalPhotonemission_3d(p_lab_Min,flow_u_mu_Min,
                                     Eq_localrest_Tb, M_ll[j], visc_fac, bulkPi_fac, diff_fac,
                                     temp_local, muB_local, inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,
                                     dNd2pTdphidy_cell_eq, dNd2pTdphidy_cell_eqT, dNd2pTdphidy_cell_eqL, dNd2pTdphidy_cell_visc,
-                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot);
+                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot,dNd2pTdphidy_cell_lambda_theta);
+                                
+                                
                             }
                             //if (hydro_flag == 22 && temp_local > T_sw ){
                             //    double QGP_fraction = 1.0;
@@ -698,6 +758,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                             dNd2pTdphidy_visc_all[n + CORES * i3] += dNd2pTdphidy_cell_visc*spsfactor;
                             dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff*spsfactor;
                             dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot*spsfactor;
+                            dNd2pTdphidy_pol_lambda_theta_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_theta;
+
+                            
 
                             if (differential_flag == 1) {
                                 dNd2pTdphidydTdtau_eq_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_eq*spsfactor;
@@ -712,6 +775,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             } // y
         } // fluid cell
     }// cores
+    }
 
     #pragma omp parallel for collapse(4)
     for (int k = 0; k < nrapidity; k++) {
@@ -727,9 +791,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                     double dN_pTdpTdphidy_visc_tmp = 0.0;
                     double dN_pTdpTdphidy_diff_tmp = 0.0;
                     double dN_pTdpTdphidy_tot_tmp = 0.0;
+                    double dN_pTdpTdphidy_pol_lambda_theta_tmp = 0.0;
 
                     #pragma omp simd reduction(+:dN_pTdpTdphidy_eq_tmp,dN_pTdpTdphidy_eqT_tmp,dN_pTdpTdphidy_eqL_tmp,\
-                            dN_pTdpTdphidy_visc_tmp,dN_pTdpTdphidy_diff_tmp,dN_pTdpTdphidy_tot_tmp)
+                            dN_pTdpTdphidy_visc_tmp,dN_pTdpTdphidy_diff_tmp,dN_pTdpTdphidy_tot_tmp,dN_pTdpTdphidy_pol_lambda_theta_tmp)
                     for(long n = 0; n < CORES; n++)
                     {
                         dN_pTdpTdphidy_eq_tmp += dNd2pTdphidy_eq_all[n+CORES*i3];
@@ -738,6 +803,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                         dN_pTdpTdphidy_visc_tmp += dNd2pTdphidy_visc_all[n+CORES*i3];
                         dN_pTdpTdphidy_diff_tmp += dNd2pTdphidy_diff_all[n+CORES*i3];
                         dN_pTdpTdphidy_tot_tmp += dNd2pTdphidy_tot_all[n+CORES*i3];
+                        dN_pTdpTdphidy_pol_lambda_theta_tmp += dNd2pTdphidy_pol_lambda_theta_all[n+CORES*i3];
+                                              
                     } // sum over the cores
 
                     dNd2pTdphidy_eq[j][l][m][k] = dN_pTdpTdphidy_eq_tmp;
@@ -746,6 +813,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                     dNd2pTdphidy_visc[j][l][m][k] = dN_pTdpTdphidy_visc_tmp;
                     dNd2pTdphidy_diff[j][l][m][k] = dN_pTdpTdphidy_diff_tmp;
                     dNd2pTdphidy_tot[j][l][m][k] = dN_pTdpTdphidy_tot_tmp;
+
+                    dNd2pTdphidy_pol_lambda_theta[j][l][m][k] = dN_pTdpTdphidy_pol_lambda_theta_tmp;
 
                     // distribution in (T, tau)
                     if (differential_flag == 1) {
@@ -794,6 +863,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     free(dNd2pTdphidy_visc_all);
     free(dNd2pTdphidy_diff_all);
     free(dNd2pTdphidy_tot_all);
+    free(dNd2pTdphidy_pol_lambda_theta_all);
 }
 
 
@@ -842,6 +912,7 @@ void PhotonEmission::calPhoton_total_Spvn() {
                     dNd2pTd2M_visc[m][i] += dNd2pTdphidy_visc[m][i][j][k]*weight;
                     dNd2pTd2M_diff[m][i] += dNd2pTdphidy_diff[m][i][j][k]*weight;
                     dNd2pTd2M_tot[m][i] += dNd2pTdphidy_tot[m][i][j][k]*weight;
+                    dNd2pTd2M_pol_lambda_theta[m][i] += dNd2pTdphidy_pol_lambda_theta[m][i][j][k]*weight;
                     for (int order = 0; order < norder; order++) {
                         vnpT_cos_eq[order][m][i]  += (
                                 dNd2pTdphidy_eq[m][i][j][k]*weight*cos(order*phi));
@@ -864,7 +935,7 @@ void PhotonEmission::calPhoton_total_Spvn() {
             }
 
             for (int order=0; order < norder; order++) {
-                // pT integrated flow, numerator
+                // m integrated flow, numerator
                 vn_cos_eq[order][m]  += vnpT_cos_eq[order][m][i]*p*pweight;
                 vn_sin_eq[order][m]  += vnpT_sin_eq[order][m][i]*p*pweight;
                 vn_cos_visc[order][m]  += vnpT_cos_visc[order][m][i]*p*pweight;
@@ -874,7 +945,7 @@ void PhotonEmission::calPhoton_total_Spvn() {
                 vn_cos_tot[order][m] += vnpT_cos_tot[order][m][i]*p*pweight;
                 vn_sin_tot[order][m] += vnpT_sin_tot[order][m][i]*p*pweight;
 
-                // pT differential flow
+                // // pT differential flow
                 vnpT_cos_eq[order][m][i]  = vnpT_cos_eq[order][m][i]/dNd2pTd2M_eq[m][i];
                 vnpT_cos_visc[order][m][i]  = vnpT_cos_visc[order][m][i]/dNd2pTd2M_visc[m][i];
                 vnpT_cos_diff[order][m][i]  = vnpT_cos_diff[order][m][i]/dNd2pTd2M_diff[m][i];
@@ -883,6 +954,7 @@ void PhotonEmission::calPhoton_total_Spvn() {
                 vnpT_sin_visc[order][m][i]  = vnpT_sin_visc[order][m][i]/dNd2pTd2M_visc[m][i];
                 vnpT_sin_diff[order][m][i]  = vnpT_sin_diff[order][m][i]/dNd2pTd2M_diff[m][i];
                 vnpT_sin_tot[order][m][i] = vnpT_sin_tot[order][m][i]/dNd2pTd2M_tot[m][i];
+
             }
 
             // pT integrated spectra, dN/(MdMdy)
@@ -892,6 +964,7 @@ void PhotonEmission::calPhoton_total_Spvn() {
             dNd2Mdy_visc[m] += dNd2pTd2M_visc[m][i]*p*pweight;
             dNd2Mdy_diff[m] += dNd2pTd2M_diff[m][i]*p*pweight;
             dNd2Mdy_tot[m] += dNd2pTd2M_tot[m][i]*p*pweight;
+            dNd2Mdy_pol_lambda_theta[m] += dNd2pTd2M_pol_lambda_theta[m][i]*p*pweight;
 
             // pT differential spectra, dN/(2pi pTdpT MdM dy)
             dNd2pTd2M_eq[m][i]  = dNd2pTd2M_eq[m][i]/(2*M_PI); 
@@ -914,12 +987,80 @@ void PhotonEmission::calPhoton_total_Spvn() {
             vn_sin_diff[order][m]  = vn_sin_diff[order][m]/dNd2Mdy_diff[m];
             vn_cos_tot[order][m] = vn_cos_tot[order][m]/dNd2Mdy_tot[m];
             vn_sin_tot[order][m] = vn_sin_tot[order][m]/dNd2Mdy_tot[m];
+
         }
     }
 }
 
 
-void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
+void PhotonEmission::calPhoton_total_Spvn_sum(const PhotonEmission& spvn_tem) {
+    // integrate over rapidity, azimuthal angle of momentum, and pT
+    // calculate dN/(2pi dydM)
+    
+     for (int m = 0; m < nm; m++) {
+
+        dNd2Mdy_eq[m]   = 0.0;
+        dNd2Mdy_eqT[m]  = 0.0;
+        dNd2Mdy_eqL[m]  = 0.0;
+        dNd2Mdy_visc[m] = 0.0;
+        dNd2Mdy_diff[m] = 0.0;
+        dNd2Mdy_tot[m]  = 0.0;
+        dNd2Mdy_pol_lambda_theta[m] = 0.0;
+
+        for (int order=0; order < norder; order++) {
+            vn_cos_eq[order][m]   = 0.0;
+            vn_sin_eq[order][m]   = 0.0;
+            vn_cos_visc[order][m] = 0.0;
+            vn_sin_visc[order][m] = 0.0;
+            vn_cos_diff[order][m] = 0.0;
+            vn_sin_diff[order][m] = 0.0;
+            vn_cos_tot[order][m]  = 0.0;
+            vn_sin_tot[order][m]  = 0.0;
+        }
+
+        for (int i = 0; i < np; i++) {
+            dNd2pTd2M_eq[m][i]   = 0.0;
+            dNd2pTd2M_eqT[m][i]  = 0.0;
+            dNd2pTd2M_eqL[m][i]  = 0.0;
+            dNd2pTd2M_visc[m][i] = 0.0;
+            dNd2pTd2M_diff[m][i] = 0.0;
+            dNd2pTd2M_tot[m][i]  = 0.0;
+            dNd2pTd2M_pol_lambda_theta[m][i]  = 0.0;
+
+            for (int order = 0; order < norder; order++) {
+                vnpT_cos_eq[order][m][i]    = 0.0;
+                vnpT_cos_visc[order][m][i]  = 0.0;
+                vnpT_cos_diff[order][m][i]  = 0.0;
+                vnpT_cos_tot[order][m][i]   = 0.0;
+                vnpT_sin_eq[order][m][i]    = 0.0;
+                vnpT_sin_visc[order][m][i]  = 0.0;
+                vnpT_sin_diff[order][m][i]  = 0.0;
+                vnpT_sin_tot[order][m][i]   = 0.0;
+            }
+
+            for (int j = 0; j < nphi; j++) {
+                for (int k = 0; k < nrapidity; k++) {
+                    dNd2pTdphidy_eq[m][i][j][k]  += spvn_tem.dNd2pTdphidy_eq[m][i][j][k];
+                    dNd2pTdphidy_eqT[m][i][j][k] += spvn_tem.dNd2pTdphidy_eqT[m][i][j][k];
+                    dNd2pTdphidy_eqL[m][i][j][k] += spvn_tem.dNd2pTdphidy_eqL[m][i][j][k];
+                    dNd2pTdphidy_visc[m][i][j][k]+= spvn_tem.dNd2pTdphidy_visc[m][i][j][k];
+                    dNd2pTdphidy_diff[m][i][j][k]+= spvn_tem.dNd2pTdphidy_diff[m][i][j][k];
+                    dNd2pTdphidy_tot[m][i][j][k] += spvn_tem.dNd2pTdphidy_tot[m][i][j][k]; 
+                    dNd2pTdphidy_pol_lambda_theta[m][i][j][k] += spvn_tem.dNd2pTdphidy_pol_lambda_theta[m][i][j][k];         
+                }
+            }
+        }
+    }
+
+    calPhoton_total_Spvn();
+
+  
+}
+
+
+
+
+void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     ostringstream filename_stream_eq_SpMatrix;
     ostringstream filename_stream_eq_Spvn;
     ostringstream filename_stream_eq_inte_Spvn;
@@ -940,42 +1081,89 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
     ostringstream filename_stream_tot_Spvn;
     ostringstream filename_stream_tot_inte_Spvn;
 
-    string filename = "Total_dilepton";
+    ostringstream filename_stream_pol_lambda_theta_SpMatrix;
+    ostringstream filename_stream_pol_lambda_theta_Spvn;
+    ostringstream filename_stream_pol_lambda_theta_inte_Spvn;
+
+
+    string filename = " ";
+    bool flag_hydro = paraRdr->getVal("flag_hydro");
+    bool flag_prehydro = paraRdr->getVal("flag_prehydro");
+    
+    double sig_lambda = 0.0;
+    double suppress_order = 0.0;
+
+    if(hydro_mode == 22 && flag_prehydro){
+        filename = "Pre_hydro_dilepton";
+        sig_lambda = paraRdr->getVal("sig_lambda");
+        suppress_order = paraRdr->getVal("suppress_order");
+    }
+    if(hydro_mode == 12 && flag_hydro){
+        filename = "Hydro_dilepton";
+    }
+    
+    if(hydro_mode == -1 && flag_hydro && flag_prehydro){
+        filename = "Total_dilepton";
+        sig_lambda = paraRdr->getVal("sig_lambda");
+        suppress_order = paraRdr->getVal("suppress_order");
+    }
+    
+
+
+    ostringstream stream_sig;
+    stream_sig << fixed << setprecision(3) << sig_lambda;
+    string str_sig = stream_sig.str();
+   
+    string num_sf = to_string(static_cast<int>(round(suppress_order)));
+   
+    
+    string file_end = "_"+str_sig+"_"+num_sf+".dat";
+    if(filename == "Hydro_dilepton")
+    {
+    file_end = ".dat";
+    }
 
     filename_stream_eq_SpMatrix << output_path << filename
-                                << "_eq_SpMatrix.dat";
+                                << "_eq_SpMatrix"<<file_end;
     filename_stream_eq_Spvn << output_path << filename 
-                                << "_eq_Spvn.dat";
+                                << "_eq_Spvn"<<file_end;
     filename_stream_eq_inte_Spvn << output_path << filename 
-                                << "_eq_Spvn_inte.dat";
+                                << "_eq_Spvn_inte"<<file_end;
 
     filename_stream_eq_TL_SpMatrix << output_path << filename
-                                << "_eq_TL_SpMatrix.dat";
+                                << "_eq_TL_SpMatrix"<<file_end;
     filename_stream_eq_TL_Spvn << output_path << filename 
-                                << "_eq_TL_Sp.dat";
+                                << "_eq_TL_Sp"<<file_end;
     filename_stream_eq_TL_inte_Spvn << output_path << filename 
-                                << "_eq_TL_Sp_inte.dat";
+                                << "_eq_TL_Sp_inte"<<file_end;
     
     filename_stream_visc_SpMatrix << output_path << filename 
-                                << "_visc_SpMatrix.dat";
+                                << "_visc_SpMatrix"<<file_end;
     filename_stream_visc_Spvn << output_path << filename 
-                                << "_visc_Spvn.dat";
+                                << "_visc_Spvn"<<file_end;
     filename_stream_visc_inte_Spvn << output_path << filename 
-                                << "_visc_Spvn_inte.dat";
+                                << "_visc_Spvn_inte"<<file_end;
 
     filename_stream_diff_SpMatrix << output_path << filename 
-                                << "_diff_SpMatrix.dat";
+                                << "_diff_SpMatrix"<<file_end;
     filename_stream_diff_Spvn << output_path << filename 
-                                << "_diff_Spvn.dat";
+                                << "_diff_Spvn"<<file_end;
     filename_stream_diff_inte_Spvn << output_path << filename 
-                                << "_diff_Spvn_inte.dat";
+                                << "_diff_Spvn_inte"<<file_end;
 
     filename_stream_tot_SpMatrix << output_path << filename 
-                                << "_tot_SpMatrix.dat";
+                                << "_tot_SpMatrix"<<file_end;
     filename_stream_tot_Spvn << output_path << filename 
-                                << "_tot_Spvn.dat";
+                                << "_tot_Spvn"<<file_end;
     filename_stream_tot_inte_Spvn << output_path << filename 
-                                << "_tot_Spvn_inte.dat";
+                                << "_tot_Spvn_inte"<<file_end;
+
+    filename_stream_pol_lambda_theta_SpMatrix<< output_path << filename 
+                                << "_pol_lambda_theta_SpMatrix"<<file_end;
+    filename_stream_pol_lambda_theta_Spvn << output_path << filename 
+                                << "_pol_lambda_theta_Spvn"<<file_end;
+    filename_stream_pol_lambda_theta_inte_Spvn << output_path << filename 
+                                << "_pol_lambda_theta_Spvn_inte"<<file_end;
 
     ofstream fphoton_eq_SpMatrix(filename_stream_eq_SpMatrix.str().c_str());
     ofstream fphoton_eq_Spvn(filename_stream_eq_Spvn.str().c_str());
@@ -997,6 +1185,10 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
     ofstream fphoton_tot_Spvn(filename_stream_tot_Spvn.str().c_str());
     ofstream fphoton_tot_inte_Spvn(filename_stream_tot_inte_Spvn.str().c_str());
 
+    ofstream fphoton_pol_lambda_theta_SpMatrix(filename_stream_pol_lambda_theta_SpMatrix.str().c_str());
+    ofstream fphoton_pol_lambda_theta_Spvn(filename_stream_pol_lambda_theta_Spvn.str().c_str());
+    ofstream fphoton_pol_lambda_theta_inte_Spvn(filename_stream_pol_lambda_theta_inte_Spvn.str().c_str());
+
     double dy = dilepton_QGP_thermal->get_dy();
     for (int m = 0; m < nm; m++) {
         for (int i=0; i < nphi; i++) {
@@ -1006,6 +1198,7 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
             fphoton_visc_SpMatrix << phi << "  ";
             fphoton_diff_SpMatrix << phi << "  ";
             fphoton_tot_SpMatrix << phi << "  ";
+            fphoton_pol_lambda_theta_SpMatrix << phi << "  ";
             for (int j = 0; j < np; j++) {
                 double temp_eq  = 0.0;
                 double temp_eqT = 0.0;
@@ -1013,6 +1206,7 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
                 double temp_visc = 0.0;
                 double temp_diff = 0.0;
                 double temp_tot = 0.0;
+                double temp_pol_lambda_theta = 0.0;
                 for (int k = 0; k < nrapidity; k++) {
                     double y_weight = dilepton_QGP_thermal->getPhoton_yweight(k);
                     // below dy/Dy to make everything rapidity density, Dy is the rapidity range
@@ -1023,6 +1217,7 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
                     temp_visc += dNd2pTdphidy_visc[m][j][i][k]*weight;
                     temp_diff += dNd2pTdphidy_diff[m][j][i][k]*weight;
                     temp_tot += dNd2pTdphidy_tot[m][j][i][k]*weight;
+                    temp_pol_lambda_theta += dNd2pTdphidy_pol_lambda_theta[m][j][i][k]*weight;
                 }
                 fphoton_eq_SpMatrix << scientific << setprecision(6) << setw(16)
                                     << temp_eq << "  ";
@@ -1034,12 +1229,15 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
                                     << temp_diff << "  ";
                 fphoton_tot_SpMatrix << scientific << setprecision(6) << setw(16)
                                     << temp_tot << "  ";
+                fphoton_pol_lambda_theta_SpMatrix << scientific << setprecision(6) << setw(16)
+                                    << temp_pol_lambda_theta << "  ";
             }
             fphoton_eq_SpMatrix << endl;
             fphoton_eq_TL_SpMatrix << endl;
             fphoton_visc_SpMatrix << endl;
             fphoton_diff_SpMatrix << endl;
             fphoton_tot_SpMatrix << endl;
+            fphoton_pol_lambda_theta_SpMatrix << endl;
         }
     }
 
@@ -1058,6 +1256,9 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
                             << M_ll << "  "<< pT << "  " << dNd2pTd2M_diff[m][i] << "  ";
             fphoton_tot_Spvn << scientific << setprecision(6) << setw(16)
                             << M_ll << "  "<< pT << "  " << dNd2pTd2M_tot[m][i] << "  ";
+            
+            fphoton_pol_lambda_theta_Spvn << scientific << setprecision(6) << setw(16)
+                            << M_ll << "  "<< pT << "  " << dNd2pTd2M_pol_lambda_theta[m][i] << "  ";
 
             for (int order=1; order < norder; order++) {
                 fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
@@ -1086,6 +1287,8 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
             fphoton_visc_Spvn << endl;
             fphoton_diff_Spvn << endl;
             fphoton_tot_Spvn << endl;
+            fphoton_pol_lambda_theta_Spvn << endl;
+            
         }
     }
 
@@ -1094,15 +1297,18 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
         double M_ll = dilepton_QGP_thermal->getDileptonMass(m);
         // get dN/dMdy from dN/MdMdy
         fphoton_eq_inte_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_eq[m]*M_ll << "  "; 
+                        << M_ll << "  " << dNd2Mdy_eq[m] << "  "; 
         fphoton_eq_TL_inte_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_eqT[m]*M_ll << "  " << dNd2Mdy_eqL[m]*M_ll;
+                        << M_ll << "  " << dNd2Mdy_eqT[m] << "  " << dNd2Mdy_eqL[m];
         fphoton_visc_inte_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_visc[m]*M_ll << "  ";
+                        << M_ll << "  " << dNd2Mdy_visc[m] << "  ";
         fphoton_diff_inte_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_diff[m]*M_ll << "  ";
+                        << M_ll << "  " << dNd2Mdy_diff[m] << "  ";
         fphoton_tot_inte_Spvn << scientific << setprecision(6) << setw(16)
-                        << M_ll << "  " << dNd2Mdy_tot[m]*M_ll << "  ";
+                        << M_ll << "  " << dNd2Mdy_tot[m] << "  ";
+
+        fphoton_pol_lambda_theta_inte_Spvn << scientific << setprecision(6) << setw(16)
+                        << M_ll << "  " << dNd2Mdy_pol_lambda_theta[m]/dNd2Mdy_eq[m] << "  ";
 
         for (int order = 0; order < norder; order++) {
             fphoton_eq_inte_Spvn << scientific << setprecision(6) << setw(16)
@@ -1131,6 +1337,7 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT() {
         fphoton_visc_inte_Spvn << endl;
         fphoton_diff_inte_Spvn << endl;
         fphoton_tot_inte_Spvn << endl;
+        fphoton_pol_lambda_theta_inte_Spvn << endl;
     }
 }
 }
