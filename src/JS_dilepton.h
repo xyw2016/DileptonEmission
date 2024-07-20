@@ -29,10 +29,10 @@ namespace Dilepton{
 class JS_dilepton{
    private:
       const std::string inputfile_;
-      const std::string table_path_;
+      
    
    public:
-      JS_dilepton(std::string inputfile, std::string table_path);
+      JS_dilepton(std::string inputfile);
       ~JS_dilepton();
 
       std::shared_ptr<ParameterReader> paraRdr;

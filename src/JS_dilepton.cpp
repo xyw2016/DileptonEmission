@@ -4,8 +4,8 @@
 
 namespace Dilepton{
 
-    JS_dilepton::JS_dilepton(std::string inputfile,std::string table_path):
-        inputfile_(inputfile), table_path_(table_path){
+    JS_dilepton::JS_dilepton(std::string inputfile):
+        inputfile_(inputfile){
 
             paraRdr = std::make_shared<ParameterReader>();
             paraRdr->readFromFile(inputfile_);
