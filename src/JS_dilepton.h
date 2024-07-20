@@ -40,7 +40,7 @@ class JS_dilepton{
 
 
 
-      void run();
+      void run(const std::vector<float>& bulkdata);
 
 };
 

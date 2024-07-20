@@ -14,7 +14,7 @@ namespace Dilepton{
     JS_dilepton::~JS_dilepton() {
     }
 
-    void JS_dilepton::run()
+    void JS_dilepton::run(const std::vector<float>& bulkdata)
     {
         //PhotonEmission thermalPhotons(paraRdr);
         PhotonEmission thermalPhotons(paraRdr);
@@ -23,7 +23,7 @@ namespace Dilepton{
 
         int nskip_tau = 1;
         // to_do, input_hydro_info_from_js
-        //hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
+        hydroinfo_ptr->readHydroDatafromJS(bulkdata);
         thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
         
         delete hydroinfo_ptr;

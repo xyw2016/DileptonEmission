@@ -70,7 +70,7 @@ class Hydroinfo {
     int get_number_of_fluid_cells_3d() {return(lattice_new_.size());}
 
     bool isBoostInvariant() const {return(boost_invariant_);}
-
+    void readHydroDatafromJS(const std::vector<float> bulkdata);
     void readHydroData(int whichHydro, int nskip_tau_in);
 
     void getHydroValues(float x, float y, float z, float t,
