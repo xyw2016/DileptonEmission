@@ -1340,4 +1340,45 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
         fphoton_pol_lambda_theta_inte_Spvn << endl;
     }
 }
+
+std::vector<float> PhotonEmission::PassdileptonspectratoJS() {
+
+  
+
+    std::vector<float> passQnvector;
+    passQnvector.clear();
+    for (int m = 0; m < nm; m++) {
+        double M_ll = dilepton_QGP_thermal->getDileptonMass(m);
+        double M_ll_weight = dilepton_QGP_thermal->getDileptonMass(m);
+        for (int i=0; i < nphi; i++) {
+            double phi = dilepton_QGP_thermal->getPhotonphi(i);
+            double phi_weight = dilepton_QGP_thermal->getPhoton_phiweight(i);
+
+            for (int j = 0; j < np; j++) {
+                double pT = dilepton_QGP_thermal->getPhotonp(j);
+                double pweight = dilepton_QGP_thermal->getPhoton_pweight(j);
+                for (int k = 0; k < nrapidity; k++) {
+                    double rap = dilepton_QGP_thermal->getPhotonrapidity(k);
+                    double y_weight = dilepton_QGP_thermal->getPhoton_yweight(k)*dilepton_QGP_thermal->get_dy();
+
+                    passQnvector.push_back(M_ll);
+                    passQnvector.push_back(M_ll_weight);
+                    passQnvector.push_back(phi);
+                    passQnvector.push_back(phi_weight);
+                    passQnvector.push_back(pT);
+                    passQnvector.push_back(pweight);
+                    passQnvector.push_back(rap);
+                    passQnvector.push_back(y_weight);
+                    passQnvector.push_back(dNd2pTdphidy_tot[m][j][i][k]);
+
+                }
+            }
+        }
+    }
+    return passQnvector;
+ 
+}
+
+
+
 }

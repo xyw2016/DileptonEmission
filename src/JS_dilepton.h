@@ -37,10 +37,12 @@ class JS_dilepton{
 
       std::shared_ptr<ParameterReader> paraRdr;
       Hydroinfo* hydroinfo_ptr;
+      std::vector<float> dilepton_sp;
 
 
 
-      void run(const std::vector<float>& bulkdata);
+
+      std::vector<float> run(const std::vector<float>& bulkdata);
 
 };
 
