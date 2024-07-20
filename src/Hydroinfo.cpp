@@ -113,32 +113,32 @@ void Hydroinfo::readHydroDatafromJS(const std::vector<float>& bulkdata){
                 itau_max = static_cast<int>(bulkdata[indx]);
 
         fluidCell_3D_new newCell;
-        newCell.itau = static_cast<int>(cell_info[indx]);
-            newCell.ix   = static_cast<int>(cell_info[indx+1]);
-            newCell.iy   = static_cast<int>(cell_info[indx+2]);
-            newCell.ieta = static_cast<int>(cell_info[indx+3]);
-            newCell.ed = cell_info[indx+4];
-            newCell.pressure = cell_info[indx+5];
-            newCell.temperature = cell_info[indx+6];
+        newCell.itau = static_cast<int>(bulkdata[indx]);
+            newCell.ix   = static_cast<int>(bulkdata[indx+1]);
+            newCell.iy   = static_cast<int>(bulkdata[indx+2]);
+            newCell.ieta = static_cast<int>(bulkdata[indx+3]);
+            newCell.ed = bulkdata[indx+4];
+            newCell.pressure = bulkdata[indx+5];
+            newCell.temperature = bulkdata[indx+6];
             if (newCell.temperature > hydroTmax) hydroTmax = newCell.temperature;
             if (newCell.temperature < hydroTmin) hydroTmin = newCell.temperature;
-            newCell.cs2 = cell_info[indx+7];
-            newCell.ux = cell_info[indx+8];
-            newCell.uy = cell_info[indx+9];
-            newCell.ueta = cell_info[indx+10];
+            newCell.cs2 = bulkdata[indx+7];
+            newCell.ux = bulkdata[indx+8];
+            newCell.uy = bulkdata[indx+9];
+            newCell.ueta = bulkdata[indx+10];
             if (turn_on_rhob == 1) {
-                newCell.rhoB = cell_info[indx+11];
-                newCell.muB = cell_info[indx+12];
+                newCell.rhoB = bulkdata[indx+11];
+                newCell.muB = bulkdata[indx+12];
             } else {
                 newCell.rhoB = 0.;
                 newCell.muB = 0.;
             }
             if (turn_on_shear == 1) {
-                newCell.pi11 = cell_info[indx+11 + turn_on_rhob*2];
-                newCell.pi12 = cell_info[indx+12 + turn_on_rhob*2];
-                newCell.pi13 = cell_info[indx+13 + turn_on_rhob*2];
-                newCell.pi22 = cell_info[indx+14 + turn_on_rhob*2];
-                newCell.pi23 = cell_info[indx+15 + turn_on_rhob*2];
+                newCell.pi11 = bulkdata[indx+11 + turn_on_rhob*2];
+                newCell.pi12 = bulkdata[indx+12 + turn_on_rhob*2];
+                newCell.pi13 = bulkdata[indx+13 + turn_on_rhob*2];
+                newCell.pi22 = bulkdata[indx+14 + turn_on_rhob*2];
+                newCell.pi23 = bulkdata[indx+15 + turn_on_rhob*2];
             } else {
                 newCell.pi11 = 0.;
                 newCell.pi12 = 0.;
@@ -148,17 +148,17 @@ void Hydroinfo::readHydroDatafromJS(const std::vector<float>& bulkdata){
             }
             if (turn_on_bulk == 1) {
                 newCell.bulkPi = (
-                    cell_info[indx+11 + turn_on_rhob*2 + turn_on_shear*5]);
+                    bulkdata[indx+11 + turn_on_rhob*2 + turn_on_shear*5]);
             } else {
                 newCell.bulkPi = 0.;
             }
             if (turn_on_diff == 1) {
                 newCell.qx = (
-                    cell_info[indx+11 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+                    bulkdata[indx+11 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
                 newCell.qy = (
-                    cell_info[indx+12 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+                    bulkdata[indx+12 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
                 newCell.qz = (
-                    cell_info[indx+13 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+                    bulkdata[indx+13 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
             } else {
                 newCell.qx = 0.;
                 newCell.qy = 0.;
