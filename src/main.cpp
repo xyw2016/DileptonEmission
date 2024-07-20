@@ -27,7 +27,7 @@
 #endif
 
 #include "./PhotonEmission.h"
-#include "./Hydroinfo_h5.h"
+#include "./Hydroinfo_h5_dilepton.h"
 #include "./Hydroinfo.h"
 #include "./Stopwatch.h"
 #include "./Arsenal.h"

@@ -15,7 +15,7 @@
     #include <omp.h>
 #endif
 
-#include "Hydroinfo_h5.h"
+#include "Hydroinfo_h5_dilepton.h"
 #include "ThermalPhoton.h"
 #include "QGP_LO_analytic.h"
 #include "QGP_LO.h"

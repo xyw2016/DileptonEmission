@@ -1,5 +1,5 @@
 set (SOURCES
-     Hydroinfo_h5.cpp
+     Hydroinfo_h5_dilepton.cpp
      Arsenal.cpp
      ThermalPhoton.cpp
      Table2D.cpp
@@ -11,6 +11,7 @@ set (SOURCES
      QGP_LO_analytic.cpp
      QGP_NLO.cpp
      QGP_LO.cpp
+     JS_dilepton.cpp
     )
 
 add_library(${libname} SHARED ${SOURCES})
