@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 
     if (hydro_flag == 2 ) {
         
-        Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
+        Hydroinfo* hydroinfo_ptr = new Hydroinfo();
 	    int hydro_mode = 12;
 	    int nskip_tau = 1;
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
           paraRdr->setVal("suppress_order",isuppress_order);
 
          PhotonEmission thermalPhotons_prehydro(paraRdr); 
-         Hydroinfo_MUSIC* hydroinfo_ptr_prehydro = new Hydroinfo_MUSIC(); 
+         Hydroinfo* hydroinfo_ptr_prehydro = new Hydroinfo(); 
          hydroinfo_ptr_prehydro->readHydroData(hydro_mode, nskip_tau);
          thermalPhotons_prehydro.calPhotonemission_3d(hydroinfo_ptr_prehydro,hydro_mode);
          delete hydroinfo_ptr_prehydro;
