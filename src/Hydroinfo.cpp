@@ -41,7 +41,7 @@ Hydroinfo::~Hydroinfo() {
     lattice_new_.clear();
 }
 
-void Hydroinfo::readHydroDatafromJS(const std::vector<float> bulkdata){
+void Hydroinfo::readHydroDatafromJS(const std::vector<float>& bulkdata){
     lattice_2D.clear();
     lattice_3D.clear();
     lattice_3D_ideal.clear();
