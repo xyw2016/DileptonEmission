@@ -25,6 +25,7 @@ namespace Dilepton{
         // to_do, input_hydro_info_from_js
         hydroinfo_ptr->readHydroDatafromJS(bulkdata);
         thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
+        thermalPhotons.calPhoton_total_Spvn();
         dilepton_sp = thermalPhotons.PassdileptonspectratoJS();
          
         

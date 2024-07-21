@@ -181,6 +181,17 @@ void Hydroinfo::readHydroDatafromJS(const std::vector<float>& bulkdata){
     }
     hydroTauMax = hydroTau0 + hydroDtau*itaumax;
 
+
+     cout << "hydro_tau0 = " << hydroTau0 << " fm"<< endl;
+      cout << "hydro_tau_max = " << hydroTauMax << " fm" << endl;
+      cout << "hydro_dtau = " << hydroDtau << " fm" << endl;
+      cout << "hydro_Xmax = " << hydroXmax << " fm" << endl;
+      cout << "hydro_dx = " << hydroDx << " fm" << endl;
+      cout << "hydro_eta_max = " << hydro_eta_max << endl;
+      cout << "hydro_deta = " << hydroDeta << endl;
+      cout << "hydro_T_max = " << hydroTmax << endl;
+      cout << "hydro_T_min = " << hydroTmin << endl;
+
       
 
 }
