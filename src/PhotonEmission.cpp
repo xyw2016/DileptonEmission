@@ -785,8 +785,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
             if (EM_profile_flag == 1 )
 
             {
-                sigma_el = paraRdr->getVal("sigmael");
-                sigmael_over_T = sigma_el*temp_inv;
+                //sigma_el = paraRdr->getVal("sigmael");
+                //sigmael_over_T = sigma_el*temp_inv;
                 EM_profile_0(sigma_el,local_tz_t,local_tz_x,local_tz_y,local_tz_z,eB_tem,eEx_tem,eEy_tem);
             }
             
