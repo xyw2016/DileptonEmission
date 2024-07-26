@@ -795,8 +795,6 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                eB_tem = eB;
             }
 
-            //std::cout<<EM_profile_flag<<" "<<local_tz_t<<" "<<sigma_el<<" "<<local_tz_y<<" "<<local_tz_z<<" "<<eB_tem<<" "<< eEx_tem<<" "<<eEy_tem<<std::endl;
-
             
             
             double prefactor_em = 3.0*sigmael_over_T/pow(hbarC, 4)*temp_inv*temp_inv*eB_tem;

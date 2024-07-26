@@ -399,9 +399,9 @@ void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_fact
     } else {
     	// use LO analytical form
 
-        if (EM_profile_kind>0){
-            sigmael_over_T_input = sigmael_input/T;
-        }
+        //if (EM_profile_kind>0){
+        //    sigmael_over_T_input = sigmael_input/T;
+        //}
 
     	FiniteBaryonRates(T, muB, inv_eplusp, rhoB_over_eplusp, Eq, M_ll, sigmael_over_T_input, eqrate_ptr, eqrateT_ptr, eqrateL_ptr, viscrate_ptr, diffrate_ptr, em_ptr, finite_sigmael_ptr, include_visc_deltaf, include_diff_deltaf,include_EM_deltaf, include_finite_sigmael_deltaf);
     }
