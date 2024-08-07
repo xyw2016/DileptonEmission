@@ -163,7 +163,7 @@ class ThermalPhoton {
     void calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (&flow_u_mu_Min)[4],double Eq, double M_ll, double pi_zz, double bulkPi, 
         double diff_factor, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double volume, double fraction,
         double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_eqT, double &dNd2pTdphidy_cell_eqL, double &dNd2pTdphidy_cell_visc, 
-        double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot, double &dNd2pTdphidy_cell_lambda_theta);
+        double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot, double &dNd2pTdphidy_cell_lambda_theta, double &dNd2pTdphidy_cell_lambda_phi);
 
     void calPhoton_SpvnpT(double ***dNd2pTdphipy,
                           double ***vnypT_cos, double *** vnypT_sin,

@@ -66,6 +66,8 @@ int main(int argc, char** argv) {
 
     // initialize hydro medium
     int hydro_flag = paraRdr->getVal("hydro_flag");
+    bool USE_2D_mode = paraRdr->getVal("USE_2D_mode");
+    
     if(flag_hydro){
 
     
@@ -76,7 +78,12 @@ int main(int argc, char** argv) {
 	    int nskip_tau = 1;
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
-        thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
+	if(USE_2D_mode){
+            thermalPhotons.calPhotonemission_2d(hydroinfo_ptr);
+	}
+	else{
+            thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
+	}
         delete hydroinfo_ptr;
 
          // sum up all channels and compute thermal photon spectra and vn
@@ -105,18 +112,26 @@ int main(int argc, char** argv) {
 	 //double sig_lambda_array[3] = {1.249,0.833,0.0};
 	 double sig_lambda_array[1] = {0.0};
 	 //double sig_lambda_array[1] = {1.249};
-	 for(int isig = 0; isig < 3; isig++){
+	 for(int isig = 0; isig < 1; isig++){
          for(int isuppress_order = 0; isuppress_order < 3; isuppress_order++)
 	 {
 
 	  paraRdr->setVal("sig_lambda",sig_lambda_array[isig]);
           paraRdr->setVal("suppress_order",isuppress_order);
-
+          std::cout<<" ============================= " <<std::endl;
+          std::cout<<" sig_lambda " << sig_lambda_array[isig]<<std::endl;
+          std::cout<<" suppress_order " << isuppress_order<<std::endl;
+          std::cout<<" ============================= " <<std::endl;
          PhotonEmission thermalPhotons_prehydro(paraRdr); 
          Hydroinfo_MUSIC* hydroinfo_ptr_prehydro = new Hydroinfo_MUSIC(); 
          hydroinfo_ptr_prehydro->readHydroData(hydro_mode, nskip_tau);
-         thermalPhotons_prehydro.calPhotonemission_3d(hydroinfo_ptr_prehydro,hydro_mode);
-         delete hydroinfo_ptr_prehydro;
+	if(USE_2D_mode){
+            thermalPhotons_prehydro.calPhotonemission_2d(hydroinfo_ptr_prehydro);
+	}
+	else{
+            thermalPhotons_prehydro.calPhotonemission_3d(hydroinfo_ptr_prehydro);
+	}
+        delete hydroinfo_ptr_prehydro;
 
         // sum up all channels and compute thermal photon spectra and vn
         thermalPhotons_prehydro.calPhoton_SpvnpT_individualchannel();

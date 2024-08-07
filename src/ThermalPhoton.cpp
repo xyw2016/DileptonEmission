@@ -402,7 +402,7 @@ void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_fact
 void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (&flow_u_mu_Min)[4], double Eq, double M_ll, double pi_zz, double bulkPi, 
 	double diff_factor, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double volume, double fraction,
 	double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_eqT, double &dNd2pTdphidy_cell_eqL, double &dNd2pTdphidy_cell_visc, 
-    double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot, double &dNd2pTdphidy_cell_lambda_theta) {
+    double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot, double &dNd2pTdphidy_cell_lambda_theta, double &dNd2pTdphidy_cell_lambda_phi) {
 
     const double volfrac = volume*fraction;
 
@@ -442,20 +442,20 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     dNd2pTdphidy_cell_tot  = (temp_eq_sum + temp_visc_sum + temp_diff_sum);
 
 
-    // dilepton polarization
-    double p_lab_Min_norm[3]; 
+    // dilepton polarization lambda_theta
+    double p_lab_Min_norm[4]; 
     double p_lab_min_vec_square = sqrt( p_lab_Min[1]*p_lab_Min[1]
                                         + p_lab_Min[2]*p_lab_Min[2]
                                         + p_lab_Min[3]*p_lab_Min[3]);
 
-    p_lab_Min_norm[0]=p_lab_Min[1]/p_lab_min_vec_square;
-    p_lab_Min_norm[1]=p_lab_Min[2]/p_lab_min_vec_square;
-    p_lab_Min_norm[2]=p_lab_Min[3]/p_lab_min_vec_square;
+    p_lab_Min_norm[1]=p_lab_Min[1]/p_lab_min_vec_square;
+    p_lab_Min_norm[2]=p_lab_Min[2]/p_lab_min_vec_square;
+    p_lab_Min_norm[3]=p_lab_Min[3]/p_lab_min_vec_square;
 
    
-    double u_dot_kvec_norm = flow_u_mu_Min[1]*p_lab_Min_norm[0]
-                            +flow_u_mu_Min[2]*p_lab_Min_norm[1]
-                            +flow_u_mu_Min[3]*p_lab_Min_norm[2];
+    double u_dot_kvec_norm = flow_u_mu_Min[1]*p_lab_Min_norm[1]
+                            +flow_u_mu_Min[2]*p_lab_Min_norm[2]
+                            +flow_u_mu_Min[3]*p_lab_Min_norm[3];
 
     
 
@@ -468,7 +468,6 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     factor_pol_0 = factor_pol_0 - 1./3.0;
 
     double factor_pol_1 = me*me/(p_lab_min_vec_square*p_lab_min_vec_square);
-    factor_pol_1 = 0.0;
     double rho_delta= temp_eqT_sum - temp_eqL_sum;
     double rho_V = temp_eqT_sum*2 + temp_eqL_sum;
 
@@ -492,6 +491,54 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
         std::cout<< "ERROR: lambda_theta is NAN !!!!!! "<<std::endl;
         std::cout<< temp_eqT_sum << " "<< temp_eqL_sum <<" "<<lambda_theta1<<" "<<factor_pol_0<<" "<<lambda_theta2<< " "<<dNd2pTdphidy_cell_lambda_theta<<std::endl;
     }
+
+    // lambda_phi
+    
+    double p_beam[4] = {0,0,0,1};
+    double phat_dot_khat = p_beam[3]*p_lab_Min_norm[3];
+    double uflow_dot_khat = u_dot_kvec_norm;
+    double phat_dot_uflow = p_beam[3]*flow_u_mu_Min[3];
+
+    double phat_cross_khat_dot_uflow = p_lab_Min_norm[1]*flow_u_mu_Min[2]
+                           - p_lab_Min_norm[2]*flow_u_mu_Min[1];
+
+    
+    double lambda_phi_ux_sq = pow(phat_dot_khat,2)*pow(uflow_dot_khat,2)+pow(phat_dot_uflow,2)
+                            - 2*phat_dot_uflow*phat_dot_khat*uflow_dot_khat;
+   
+    lambda_phi_ux_sq = lambda_phi_ux_sq/(1- phat_dot_khat* phat_dot_khat);
+
+    double lambda_phi_uy_sq = phat_cross_khat_dot_uflow*phat_cross_khat_dot_uflow/(1- phat_dot_khat* phat_dot_khat);
+
+    double uflow_lrf_sq = pow((p_lab_Min[0]*flow_u_mu_Min[0]-u_dot_kvec)/M_ll,2) - 1.0;
+
+    double uxsq_m_uysq_usq = (lambda_phi_ux_sq-lambda_phi_uy_sq)/uflow_lrf_sq;
+
+    double lambda_phi = (1.0 - 4.0*factor_pol_1)*rho_delta/lambda_theta2;
+    
+    if ( fabs(lambda_theta2) < 1e-18){
+        lambda_phi = 0.0;
+    }
+
+    lambda_phi = uxsq_m_uysq_usq*lambda_phi;
+    //lambda_phi = lambda_phi;
+
+
+    dNd2pTdphidy_cell_lambda_phi = lambda_phi*dNd2pTdphidy_cell_eq;
+
+    if(std::isnan(dNd2pTdphidy_cell_lambda_phi))
+    { 
+        std::cout<< "ERROR: lambda_theta is NAN !!!!!! "<<std::endl;
+        std::cout<< lambda_phi << " "<< lambda_theta2 <<" "<<dNd2pTdphidy_cell_eq<<" "<<factor_pol_1<<" "<<rho_V <<" "<<lambda_theta1<<std::endl;
+    }
+
+
+
+
+    
+
+    
+    
 
 
     

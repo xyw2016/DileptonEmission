@@ -1254,7 +1254,7 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
                     HydroCell3DIdealInterp = (HydroCell3DIdealInterp +
                         ( (*HydroCell_3D_ideal_ptr1)*(1. - xfrac)
                         + (*HydroCell_3D_ideal_ptr2)*xfrac)*prefrac);
-                } else if (hydroWhichHydro == 12) {
+                } else if (hydroWhichHydro == 12 || hydroWhichHydro == 22) {
                     HydroCell_3D_new_ptr1 = (
                         &lattice_new_[idx_map_[position[0][ipy][ipeta][iptau]]]);
                     HydroCell_3D_new_ptr2 = (
@@ -1354,7 +1354,7 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         info->ed = HydroCell3DIdealInterp.ed;
         info->pressure = HydroCell3DIdealInterp.pressure;
         info->sd = (info->ed + info->pressure)/(info->temperature + 1e-16);
-    } else if (hydroWhichHydro == 12) {
+    } else if (hydroWhichHydro == 12 || hydroWhichHydro == 22) {
         float ux = HydroCell3DnewInterp.ux;
         float uy = HydroCell3DnewInterp.uy;
         float ueta = HydroCell3DnewInterp.ueta;
@@ -1365,9 +1365,16 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         info->vy = uy/ut;
         info->vz = uz/ut;
         info->temperature = HydroCell3DnewInterp.temperature;
-        info->ed = 1.0;
+        info->ed = HydroCell3DnewInterp.ed;
         info->sd = 0.0;
-        info->pressure = 0.0;
+        info->rhoB = HydroCell3DnewInterp.rhoB;
+        info->muB = HydroCell3DnewInterp.muB;
+        
+        info->ux = HydroCell3DnewInterp.ux;
+        info->uy = HydroCell3DnewInterp.uy;
+        info->ueta = HydroCell3DnewInterp.ueta;
+
+        info->pressure = HydroCell3DnewInterp.pressure;
         info->pi[0][0] = 0.;
         info->pi[0][1] = 0.;
         info->pi[0][2] = 0.;
@@ -1385,6 +1392,9 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         info->pi[3][2] = HydroCell3DnewInterp.pi23;
         info->pi[3][3] = - info->pi[1][1] - info->pi[2][2];
         info->bulkPi = HydroCell3DnewInterp.bulkPi;
+        info->qmu[1] = HydroCell3DnewInterp.qx;
+        info->qmu[2] = HydroCell3DnewInterp.qy;
+        info->qmu[3] = HydroCell3DnewInterp.qz;
     }
     return;
 }
