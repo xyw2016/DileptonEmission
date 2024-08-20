@@ -7,6 +7,7 @@
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 
+namespace Photon{
 class HadronGasPipiBremsstrahlung : public ThermalPhoton {
  public:
     HadronGasPipiBremsstrahlung(std::shared_ptr<ParameterReader> paraRdr_in,
@@ -15,5 +16,5 @@ class HadronGasPipiBremsstrahlung : public ThermalPhoton {
     void analyticRates(double T, std::vector<double> &Eq,
                         std::vector<double> &eqrate_ptr);
 };
-
+}
 #endif

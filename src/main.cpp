@@ -20,13 +20,14 @@
 #include <memory>
 
 #include "./PhotonEmission.h"
-#include "./Hydroinfo_h5_photon.h"
+#include "./Hydroinfo_h5.h"
 #include "./Hydroinfo_MUSIC.h"
 #include "./Stopwatch.h"
 #include "./Arsenal.h"
 #include "./ParameterReader.h"
 #include "./gauss_quadrature.h"
 
+using namespace Photon;
 using namespace std;
 
 int main(int argc, char** argv) {
@@ -112,4 +113,3 @@ int main(int argc, char** argv) {
 
     return(0);
 }
-

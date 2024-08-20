@@ -3,6 +3,7 @@
 #include "data_struct.h"
 #include <cmath>
 
+namespace Photon{
 using PhysConsts::hbarC;
 
 QGPAMYCollinear::QGPAMYCollinear(
@@ -55,4 +56,5 @@ void QGPAMYCollinear::NetBaryonCorrection(
                                + 0.20423253055206605*x*x)));
         eqrate_ptr[i] *= famy;
     }
+}
 }

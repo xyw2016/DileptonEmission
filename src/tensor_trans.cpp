@@ -4,8 +4,10 @@
 #include<cmath>
 #include<iomanip>
 #include "tensor_trans.h"
+
 using namespace std;
 
+namespace Photon{
 namespace TENSORTRANSFORM {
 
 //lorentz matrix to first boost along longitudinal direction and then transverse
@@ -142,6 +144,8 @@ double Rotation_Tensor_zz(double** M, double* R_z_i) {
                    + 2*R_z_i[2]*R_z_i[3]*M[2][3] + R_z_i[1]*R_z_i[1]*M[1][1]
                    + R_z_i[2]*R_z_i[2]*M[2][2] + R_z_i[3]*R_z_i[3]*M[3][3];
     return(pi_zz);
+}
+
 }
 
 }

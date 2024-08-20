@@ -11,6 +11,7 @@ using std::vector;
 using std::cout;
 using std::endl;
 
+namespace Photon{
 namespace ARSENAL {
 
 double Simpson_sum(double* array, int num, double h_step)
@@ -614,4 +615,5 @@ void deleteA2DMatrix(double **mat, const int n1) {
     delete[] mat;
 }
 
+}
 }

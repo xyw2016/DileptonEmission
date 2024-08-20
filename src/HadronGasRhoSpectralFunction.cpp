@@ -1,6 +1,7 @@
 #include "HadronGasRhoSpectralFunction.h"
 #include <cmath>
 
+namespace Photon{
 HadronGasRhoSpectralFunction::HadronGasRhoSpectralFunction(
         std::shared_ptr<ParameterReader> paraRdr_in,
         std::string emissionProcess
@@ -63,4 +64,5 @@ void HadronGasRhoSpectralFunction::NetBaryonCorrection(
         double logFrho = dmT - kmT/(Eq_local*Eq_local) - mmT/Eq_local;
         eqrate_ptr[i] *= exp(logFrho);
     }
+}
 }

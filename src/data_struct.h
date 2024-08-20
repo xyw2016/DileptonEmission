@@ -1,6 +1,7 @@
 #ifndef DATA_STRUCT_H_
 #define DATA_STRUCT_H_
 
+namespace Photon{
 namespace PhysConsts {
     const double hbarC = 0.19733;
 }
@@ -218,6 +219,6 @@ class fluidCell_3D_new {
         return(res);
     }
 };
-
+}
 
 #endif  // DATA_STRUCT_H_

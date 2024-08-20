@@ -2,6 +2,9 @@
 #include "HadronGasPiRhoOmega.h"
 #include <cmath>
 
+
+
+namespace Photon{
 HadronGasPiRhoOmega::HadronGasPiRhoOmega(
         std::shared_ptr<ParameterReader> paraRdr_in,
         std::string emissionProcess
@@ -49,4 +52,5 @@ void HadronGasPiRhoOmega::analyticRates(
 
         eqrate_ptr[i] = FFpiro + FFompi + FFomro;
     }
+}
 }

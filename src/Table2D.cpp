@@ -8,6 +8,7 @@
 #include "Arsenal.h"
 #include "Table2D.h"
 
+namespace Photon{
 Table2D::Table2D() {};
 
 Table2D::Table2D(std::string filename) { loadTableFromFile(filename); };
@@ -41,4 +42,5 @@ void Table2D::outputTabletoFile(std::string filename) {
         }
         output << std::endl;
     }
+}
 }

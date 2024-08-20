@@ -6,7 +6,7 @@
 
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
-
+namespace Photon{
 class HadronGasPiRhoOmega : public ThermalPhoton {
  public:
     HadronGasPiRhoOmega(std::shared_ptr<ParameterReader> paraRdr_in,
@@ -15,5 +15,5 @@ class HadronGasPiRhoOmega : public ThermalPhoton {
     void analyticRates(double T, std::vector<double> &Eq,
                        std::vector<double> &eqrate_ptr);
 };
-
+}
 #endif

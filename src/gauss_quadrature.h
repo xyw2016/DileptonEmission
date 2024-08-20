@@ -1,6 +1,7 @@
 #ifndef GAUSS_QUADRATURE_H
 #define GAUSS_QUADRATURE_H
 
+namespace Photon{
 int gauss_quadrature(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]);
 int gauss_quadrature_standard(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]);
 int scale_gausspoints(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]);
@@ -23,5 +24,5 @@ void scqf ( int nt, double t[], int mlt[], double wts[], int nwts, int ndx[],
   double b );
 void sgqf ( int nt, double aj[], double bj[], double zemu, double t[], 
   double wts[] );
-
+}
 #endif

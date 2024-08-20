@@ -18,6 +18,7 @@
 #include "data_struct.h"
 #include "Hydroinfo_MUSIC.h"
 
+namespace Photon{
 using namespace std;
 
 
@@ -1235,4 +1236,5 @@ void Hydroinfo_MUSIC::update_grid_info(
         ixmax = static_cast<int>(2*x_max/dx+0.001);
         ietamax = static_cast<int>(2*eta_max/deta+0.001);
     }
+}
 }

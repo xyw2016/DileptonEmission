@@ -2,6 +2,7 @@
 #include "HadronGasPipiBremsstrahlung.h"
 #include <cmath>
 
+namespace Photon{
 HadronGasPipiBremsstrahlung::HadronGasPipiBremsstrahlung(
         std::shared_ptr<ParameterReader> paraRdr_in,
         std::string emissionProcess
@@ -29,4 +30,5 @@ void HadronGasPipiBremsstrahlung::analyticRates(
             eqrate_ptr[i] = 0.;
         }
     }
+}
 }

@@ -11,12 +11,13 @@
 #include <memory>
 #include <vector>
 
-#include "Hydroinfo_h5_photon.h"
+#include "Hydroinfo_h5.h"
 #include "Hydroinfo_MUSIC.h"
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 
 
+namespace Photon{
 class PhotonEmission {
  private:
     std::shared_ptr<ParameterReader> paraRdr;
@@ -91,6 +92,6 @@ class PhotonEmission {
     void outputPhoton_total_SpvnpT(std::string );
     void outputPhotonSpvn();
 };
-
+}
 #endif   // SRC_PHOTONEMISSION_H_
 

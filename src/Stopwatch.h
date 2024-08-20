@@ -3,6 +3,7 @@
 
 #include <ctime>
 
+namespace Photon{
 class Stopwatch
 {
   private:
@@ -13,7 +14,7 @@ class Stopwatch
     void toc() {end=clock();}
     double takeTime() {return ((double)(end - start)) / CLOCKS_PER_SEC;}
 };
-
+}
 #endif
 
 /*-----------------------------------------------------------------------

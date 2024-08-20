@@ -17,6 +17,7 @@
 #include "gauss_quadrature.h"
 #include "Arsenal.h"
 
+namespace Photon{
 using namespace std;
 using ARSENAL::createA2DMatrix;
 using ARSENAL::createA3DMatrix;
@@ -1496,4 +1497,5 @@ double ThermalPhoton::get_polyakov_suppression_factor(double T_in_GeV) {
     double Qratio=a*pow(T_in_MeV,3) + b*T_in_MeV*T_in_MeV + c*T_in_MeV + d;
     double f_suppression=10./3.*Qratio*Qratio-4*Qratio+1;
     return(f_suppression);
+}
 }

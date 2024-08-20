@@ -14,6 +14,7 @@
 #include "data_struct.h"
 
 
+namespace Photon{
 class Hydroinfo_MUSIC {
  private:
     float hydroTau0;       // tau_0 in the hydro data files
@@ -74,6 +75,6 @@ class Hydroinfo_MUSIC {
     void update_grid_info(float tau0, float tau_max, float dtau,
                           float x_max, float dx, float z_max, float dz);
 };
-
+}
 #endif  // SRC_HYDROINFO_MUSIC_H_
 

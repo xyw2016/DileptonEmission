@@ -8,6 +8,7 @@
 
 #include "gauss_quadrature.h"
 
+namespace Photon{
 using namespace std;
 
 int gauss_quadrature(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]) 
@@ -1496,4 +1497,6 @@ void sgqf ( int nt, double aj[], double bj[], double zemu, double t[],
   }
 
   return;
+}
+
 }

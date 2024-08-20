@@ -7,6 +7,7 @@
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 
+namespace Photon{
 class HadronGasRhoSpectralFunction : public ThermalPhoton {
  public:
     HadronGasRhoSpectralFunction(std::shared_ptr<ParameterReader> paraRdr_in,
@@ -17,5 +18,5 @@ class HadronGasRhoSpectralFunction : public ThermalPhoton {
     void NetBaryonCorrection(double T, double muB, std::vector<double> &Eq,
                              std::vector<double> &eqrate_ptr);
 };
-
+}
 #endif

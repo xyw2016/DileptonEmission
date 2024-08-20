@@ -9,6 +9,7 @@ Version 1.02 (03-14-2012) Zhi Qiu
 #include <vector>
 #include <string>
 
+namespace Photon{
 class ParameterReader {
  private:
     std::vector<std::string>* names;
@@ -52,7 +53,7 @@ class ParameterReader {
     // print out all parameters to the screen
     void echo();
 };
-
+}
 #endif
 
 /***********************************************************************

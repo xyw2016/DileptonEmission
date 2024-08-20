@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <string>
 
-#include "Hydroinfo_h5_photon.h"
+#include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
 #include "QGP2to2Total.h"
 #include "QGPAMYCollinear.h"
@@ -18,6 +18,7 @@
 #include "ParameterReader.h"
 #include "Arsenal.h"
 
+namespace Photon{
 using namespace std;
 using ARSENAL::createA2DMatrix;
 using ARSENAL::createA3DMatrix;
@@ -1177,4 +1178,5 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename) {
                         << sqrt(pow(vn_cos_tot[order], 2)
                                 + pow(vn_sin_tot[order], 2)) << endl;
     }
+}
 }

@@ -3,6 +3,7 @@
 #include "data_struct.h"
 #include <cmath>
 
+namespace Photon{
 using PhysConsts::hbarC;
 
 QGP2to2Total::QGP2to2Total(
@@ -45,4 +46,5 @@ void QGP2to2Total::NetBaryonCorrection(
     for (unsigned int i = 0; i < Eq.size(); i++) {
         eqrate_ptr[i] *= kmuB;
     }
+}
 }

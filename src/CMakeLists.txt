@@ -1,5 +1,5 @@
 set (SOURCES
-     Hydroinfo_h5_photon.cpp
+     Hydroinfo_h5.cpp
      Arsenal.cpp
      ThermalPhoton.cpp
      Table2D.cpp
@@ -13,6 +13,7 @@ set (SOURCES
      HadronGasRhoSpectralFunction.cpp
      HadronGasPipiBremsstrahlung.cpp
      HadronGasPiRhoOmega.cpp
+     JS_photon.cpp
     )
 
 add_library(${libname} SHARED ${SOURCES})
