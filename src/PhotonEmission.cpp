@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <string>
 
-#include "Hydroinfo_h5.h"
+#include "Hydroinfo_h5_photon.h"
 #include "ThermalPhoton.h"
 #include "QGP2to2Total.h"
 #include "QGPAMYCollinear.h"

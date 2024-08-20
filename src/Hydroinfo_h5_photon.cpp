@@ -7,7 +7,7 @@
 #include<stdlib.h>
 
 #include "hdf5.h"
-#include "Hydroinfo_h5.h"
+#include "Hydroinfo_h5_photon.h"
 
 namespace Photon{
 using namespace std;
