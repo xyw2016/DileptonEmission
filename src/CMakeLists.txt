@@ -7,7 +7,7 @@ set (SOURCES
      ParameterReader.cpp
      tensor_trans.cpp
      gauss_quadrature.cpp
-     Hydroinfo_MUSIC.cpp
+     Hydroinfo_MUSIC_photon.cpp
      QGP2to2Total.cpp
      QGPAMYCollinear.cpp
      HadronGasRhoSpectralFunction.cpp

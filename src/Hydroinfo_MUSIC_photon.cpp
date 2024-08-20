@@ -16,7 +16,7 @@
 #include <string>
 
 #include "data_struct.h"
-#include "Hydroinfo_MUSIC.h"
+#include "Hydroinfo_MUSIC_photon.h"
 
 namespace Photon{
 using namespace std;

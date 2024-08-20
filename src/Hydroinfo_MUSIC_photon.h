@@ -6,8 +6,8 @@
 // This file contains routines to read in hydro data from files and functions
 // that return interpolated data at a given space-time point
 
-#ifndef SRC_HYDROINFO_MUSIC_H_
-#define SRC_HYDROINFO_MUSIC_H_
+#ifndef SRC_HYDROINFO_MUSIC_PHOTON_H_
+#define SRC_HYDROINFO_MUSIC_PHOTON_H_
 
 #include <vector>
 #include <string>

@@ -21,7 +21,7 @@
 
 #include "./PhotonEmission.h"
 #include "./Hydroinfo_h5_photon.h"
-#include "./Hydroinfo_MUSIC.h"
+#include "./Hydroinfo_MUSIC_photon.h"
 #include "./Stopwatch.h"
 #include "./Arsenal.h"
 #include "./ParameterReader.h"

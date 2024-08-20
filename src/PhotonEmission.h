@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "Hydroinfo_h5_photon.h"
-#include "Hydroinfo_MUSIC.h"
+#include "Hydroinfo_MUSIC_photon.h"
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 
