@@ -1,5 +1,5 @@
-#ifndef Hydroinfo_h5_H
-#define Hydroinfo_h5_H
+#ifndef Hydroinfo_h5_photon_H
+#define Hydroinfo_h5_photon_H
 
 #include<fstream>
 #include<sstream>

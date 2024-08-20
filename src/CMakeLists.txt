@@ -1,5 +1,5 @@
 set (SOURCES
-     Hydroinfo_h5.cpp
+     Hydroinfo_h5_photon.cpp
      Arsenal.cpp
      ThermalPhoton.cpp
      Table2D.cpp
