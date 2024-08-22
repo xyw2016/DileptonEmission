@@ -40,7 +40,144 @@ Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
     lattice_new_.clear();
 }
 
+void Hydroinfo_MUSIC::readHydroDatafromJS(const std::vector<float>& bulkdata){
+    lattice_2D.clear();
+    lattice_3D.clear();
+    lattice_3D_ideal.clear();
+    lattice_new_.clear();
+    // new MUSIC hydro format (no grid)
+    cout << "Using new MUSIC hydro format (no grid) reading data ..."
+         << endl;
 
+
+    float header[16];
+    hydroTau0 = bulkdata[0];
+    hydroDtau = bulkdata[1];
+    ixmax = static_cast<int>(bulkdata[2]);
+    hydroDx = bulkdata[3];
+    hydroXmax = std::abs(bulkdata[4]);
+    ietamax = static_cast<int>(bulkdata[8]);
+    if (ietamax == 1) {
+        boost_invariant_ = true;
+    } else {
+        boost_invariant_ = false;
+    }
+    hydroDeta = bulkdata[9];
+    hydro_eta_max = std::abs(bulkdata[10]);
+    turn_on_rhob = static_cast<int>(bulkdata[11]);
+    turn_on_shear = static_cast<int>(bulkdata[12]);
+    turn_on_bulk = static_cast<int>(bulkdata[13]);
+    turn_on_diff = static_cast<int>(bulkdata[14]);
+    const int nVar_per_cell = static_cast<int>(bulkdata[15]);
+
+    float cell_info[nVar_per_cell];
+
+    int itau_max = 0;
+    fluidCell_3D_new zeroCell;
+    zeroCell.itau = 0;
+    zeroCell.ix = 0;
+    zeroCell.iy = 0;
+    zeroCell.ieta = 0;
+    zeroCell.temperature = 0.;
+    zeroCell.cs2 = 0.;
+    zeroCell.muB = 0.;
+    zeroCell.ux = 0.;
+    zeroCell.uy = 0.;
+    zeroCell.ueta = 0.;
+    zeroCell.pi11 = 0.;
+    zeroCell.pi12 = 0.;
+    zeroCell.pi13 = 0.;
+    zeroCell.pi22 = 0.;
+    zeroCell.pi23 = 0.;
+    zeroCell.bulkPi = 0.;
+    lattice_new_.push_back(zeroCell);
+    int ik = 0;
+    int ncell = static_cast<int>( (bulkdata.size()-16)/nVar_per_cell);
+    for (int icell=0;icell<ncell;icell++)
+    {
+        int indx = 16+ icell*nVar_per_cell;
+
+        if (itau_max < static_cast<int>(bulkdata[indx]))
+                itau_max = static_cast<int>(bulkdata[indx]);
+            fluidCell_3D_new newCell;
+            newCell.itau = static_cast<int>(bulkdata[indx]);
+            newCell.ix   = static_cast<int>(bulkdata[indx+1]);
+            newCell.iy   = static_cast<int>(bulkdata[indx+2]);
+            newCell.ieta = static_cast<int>(bulkdata[indx+3]);
+            newCell.ed = bulkdata[indx+4];
+            newCell.pressure = bulkdata[indx+5];
+            newCell.temperature = bulkdata[indx+6];
+            if (newCell.temperature > hydroTmax) hydroTmax = newCell.temperature;
+            if (newCell.temperature < hydroTmin) hydroTmin = newCell.temperature;
+            newCell.cs2 = bulkdata[indx+7];
+            newCell.ux = bulkdata[indx+8];
+            newCell.uy = bulkdata[indx+9];
+            newCell.ueta = bulkdata[indx+10];
+            if (turn_on_rhob == 1) {
+                newCell.rhoB = bulkdata[indx+11];
+                newCell.muB = bulkdata[indx+12];
+            } else {
+                newCell.rhoB = 0.;
+                newCell.muB = 0.;
+            }
+            if (turn_on_shear == 1) {
+                newCell.pi11 = bulkdata[indx+11 + turn_on_rhob*2];
+                newCell.pi12 = bulkdata[indx+12 + turn_on_rhob*2];
+                newCell.pi13 = bulkdata[indx+13 + turn_on_rhob*2];
+                newCell.pi22 = bulkdata[indx+14 + turn_on_rhob*2];
+                newCell.pi23 = bulkdata[indx+15 + turn_on_rhob*2];
+            } else {
+                newCell.pi11 = 0.;
+                newCell.pi12 = 0.;
+                newCell.pi13 = 0.;
+                newCell.pi22 = 0.;
+                newCell.pi23 = 0.;
+            }
+            if (turn_on_bulk == 1) {
+                newCell.bulkPi = (
+                    bulkdata[indx+11 + turn_on_rhob*2 + turn_on_shear*5]);
+            } else {
+                newCell.bulkPi = 0.;
+            }
+            if (turn_on_diff == 1) {
+                newCell.qx = (
+                    bulkdata[indx+11 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+                newCell.qy = (
+                    bulkdata[indx+12 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+                newCell.qz = (
+                    bulkdata[indx+13 + turn_on_rhob*2 + turn_on_shear*5 + turn_on_bulk]);
+            } else {
+                newCell.qx = 0.;
+                newCell.qy = 0.;
+                newCell.qz = 0.;
+            }
+            lattice_new_.push_back(newCell);
+            ik++;
+            if (ik%50000 == 0)
+                cout << "o" << flush;
+        }
+        cout << endl;
+        itaumax = itau_max;
+        // create the index map
+        long long ncells = (itaumax + 1)*ixmax*ixmax*ietamax;
+        idx_map_.resize(ncells, 0);
+        for (unsigned int i = 0; i < lattice_new_.size(); i++) {
+            const auto cell_i = lattice_new_[i];
+            int cell_idx = (
+                (  (cell_i.itau*ietamax + cell_i.ieta)*ixmax
+                 + cell_i.iy)*ixmax + cell_i.ix);
+            idx_map_[cell_idx] = i;
+        }
+        hydroTauMax = hydroTau0 + hydroDtau*itaumax;
+        cout << "hydro_tau0 = " << hydroTau0 << " fm"<< endl;
+        cout << "hydro_tau_max = " << hydroTauMax << " fm" << endl;
+        cout << "hydry_dtau = " << hydroDtau << " fm" << endl;
+        cout << "hydro_Xmax = " << hydroXmax << " fm" << endl;
+        cout << "hydro_dx = " << hydroDx << " fm" << endl;
+        cout << "hydro_eta_max = " << hydro_eta_max << endl;
+        cout << "hydro_deta = " << hydroDeta << endl;
+
+}
 void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
     // all hydro data is stored in tau steps (not t)
     // evolution is converted to tau when accessing the hydro data

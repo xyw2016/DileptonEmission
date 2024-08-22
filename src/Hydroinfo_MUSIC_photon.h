@@ -28,6 +28,9 @@ class Hydroinfo_MUSIC {
     float hydroDeta;         // step dz in fm in the hydro data files in
                             // the z-direction for 3D hydro
 
+    float hydroTmax;       // max temperature
+    float hydroTmin;       // min temperature
+    
     int nskip_tau, nskip_x, nskip_eta;
 
     int hydroWhichHydro;    // choose a hydro evolution model to use
@@ -66,6 +69,7 @@ class Hydroinfo_MUSIC {
 
     bool isBoostInvariant() const {return(boost_invariant_);}
 
+    void readHydroDatafromJS(const std::vector<float>& bulkdata);
     void readHydroData(int whichHydro, int nskip_tau_in);
 
     void getHydroValues(float x, float y, float z, float t,
