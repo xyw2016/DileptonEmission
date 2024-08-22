@@ -272,6 +272,7 @@ void PhotonEmission::calPhotonemission(
     if (gridTauf > hydro_tau_max) {
         gridTauf = hydro_tau_max;
     }
+    gridTau0 = hydroinfo_MUSIC_ptr->get_hydro_tau0();
     int nFrame = static_cast<int>((gridTauf - gridTau0)/gridDtau + 1e-15) + 1;
     for (int frameId = 0; frameId < nFrame; frameId++) {
         tau_local = gridTau0 + frameId*gridDtau;
