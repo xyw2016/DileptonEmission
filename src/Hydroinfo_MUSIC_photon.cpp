@@ -17,6 +17,7 @@
 
 #include "data_struct.h"
 #include "Hydroinfo_MUSIC_photon.h"
+#include <limits>       // std::numeric_limits
 
 namespace Photon{
 using namespace std;
