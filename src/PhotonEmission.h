@@ -111,6 +111,7 @@ class PhotonEmission {
     void outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode=-1);
     void outputPhotonSpvn_individualchannel();
     double suppression_factor(double tau,double T);
+    void SaveDileptoninJS(); 
     std::vector<float> PassdileptonspectratoJS();
 };
 }

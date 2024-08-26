@@ -213,7 +213,7 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
     hydroWhichHydro = whichHydro;
     if (hydroWhichHydro < 10) {
         ostringstream config_file;
-        config_file << "results/music_input";
+        config_file << "dilepton_results/music_input";
         ifstream configuration;
         configuration.open(config_file.str().c_str(), ios::in);
         if (!configuration) {
@@ -296,10 +296,10 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
 
         // read in temperature, QGP fraction , flow velocity
         // The name of the evolution file: evolution_name
-        string evolution_name = "results/evolution_xyeta.dat";
+        string evolution_name = "dilepton_results/evolution_xyeta.dat";
         string evolution_name_Wmunu =
-            "results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
-        string evolution_name_Pi = "results/evolution_bulk_pressure_xyeta.dat";
+            "dilepton_results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
+        string evolution_name_Pi = "dilepton_results/evolution_bulk_pressure_xyeta.dat";
         cout << "Evolution file name = " << evolution_name << endl;
 
         std::FILE *fin;
@@ -461,10 +461,10 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
         int num_fluid_cell_trans = ixmax*ixmax;
 
         // read in hydro evolution
-        string evolution_name = "results/evolution_xyeta.dat";
+        string evolution_name = "dilepton_results/evolution_xyeta.dat";
         string evolution_name_Wmunu =
-                "results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
-        string evolution_name_Pi = "results/evolution_bulk_pressure_xyeta.dat";
+                "dilepton_results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
+        string evolution_name_Pi = "dilepton_results/evolution_bulk_pressure_xyeta.dat";
 
         std::FILE *fin;
         string evolution_file_name = evolution_name;
@@ -626,10 +626,10 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
         int num_fluid_cell_trans = ixmax*ixmax;
 
         // read in hydro evolution
-        string evolution_name = "results/evolution_xyeta.dat";
+        string evolution_name = "dilepton_results/evolution_xyeta.dat";
         string evolution_name_Wmunu =
-                "results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
-        string evolution_name_Pi = "results/evolution_bulk_pressure_xyeta.dat";
+                "dilepton_results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
+        string evolution_name_Pi = "dilepton_results/evolution_bulk_pressure_xyeta.dat";
 
         std::FILE *fin;
         string evolution_file_name = evolution_name;
@@ -775,7 +775,7 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
 
         // read in temperature and flow velocity
         // The name of the evolution file: evolution_name
-        string evolution_name = "results/evolution_all_xyeta.dat";
+        string evolution_name = "dilepton_results/evolution_all_xyeta.dat";
         cout << "Evolution file name = " << evolution_name << endl;
         std::FILE *fin;
         fin = std::fopen(evolution_name.c_str(), "rb");
@@ -874,7 +874,7 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
 
         // read in temperature and flow velocity
         // The name of the evolution file: evolution_name
-        string evolution_name = "results/evolution_pre_stage.dat";
+        string evolution_name = "dilepton_results/evolution_pre_stage.dat";
         cout << "Evolution file name = " << evolution_name << endl;
         std::FILE *fin;
         fin = std::fopen(evolution_name.c_str(), "rb");
@@ -1036,9 +1036,9 @@ void Hydroinfo::readHydroData(int whichHydro, int nskip_tau_in) {
 
         // read in temperature and flow velocity
         // The name of the evolution file: evolution_name
-        string evolution_name = "results/evolution_all_xyeta.dat";
+        string evolution_name = "dilepton_results/evolution_all_xyeta.dat";
         if(whichHydro == 22){
-            evolution_name = "results/evolution_all_xyeta_kompost.dat";
+            evolution_name = "dilepton_results/evolution_all_xyeta_kompost.dat";
         }
         cout << "Evolution file name = " << evolution_name << endl;
         std::FILE *fin;

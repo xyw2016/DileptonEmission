@@ -54,7 +54,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     nphi = paraRdr->getVal("nphi");
     nrapidity = paraRdr->getVal("nrapidity");
     norder = paraRdr->getVal("norder");
-    rate_path_ = "ph_rates/";
+    rate_path_ = "dilepton_rates/";
 
     bRateTable_    = false;
     bShearVisCorr_ = false;

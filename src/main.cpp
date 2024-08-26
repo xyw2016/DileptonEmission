@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
     printf("OpenMP acceleration is on...\n");
 #endif
     std::shared_ptr<ParameterReader> paraRdr(new ParameterReader());
-    paraRdr->readFromFile("parameters.dat");
+    paraRdr->readFromFile("dilepton_parameters.dat");
     paraRdr->readFromArguments(argc, argv);
 
     // create integration grid along eta direction for boost-invariant medium

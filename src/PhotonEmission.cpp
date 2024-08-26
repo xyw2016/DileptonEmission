@@ -46,7 +46,7 @@ using PhysConsts::eps;
 
 PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     paraRdr = paraRdr_in;
-    output_path = "results/";
+    output_path = "dilepton_results/";
 
     hydro_flag = paraRdr->getVal("hydro_flag");
     differential_flag = paraRdr->getVal("differential_flag");
@@ -1341,6 +1341,138 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     }
 }
 
+void PhotonEmission::SaveDileptoninJS() {
+    ostringstream filename_stream_eq_SpMatrix;
+    ostringstream filename_stream_eq_Spvn;
+    ostringstream filename_stream_eq_inte_Spvn;
+
+
+    ostringstream filename_stream_tot_SpMatrix;
+    ostringstream filename_stream_tot_Spvn;
+    ostringstream filename_stream_tot_inte_Spvn;
+
+
+    string filename = "JS_dilepton";
+    string file_end = ".dat";
+
+    filename_stream_eq_SpMatrix << output_path << filename
+                                << "_eq_SpMatrix"<<file_end;
+    filename_stream_eq_Spvn << output_path << filename 
+                                << "_eq_Spvn"<<file_end;
+    filename_stream_eq_inte_Spvn << output_path << filename 
+                                << "_eq_Spvn_inte"<<file_end;
+
+
+    filename_stream_tot_SpMatrix << output_path << filename 
+                                << "_tot_SpMatrix"<<file_end;
+    filename_stream_tot_Spvn << output_path << filename 
+                                << "_tot_Spvn"<<file_end;
+    filename_stream_tot_inte_Spvn << output_path << filename 
+                                << "_tot_Spvn_inte"<<file_end;
+
+
+    ofstream fphoton_eq_SpMatrix(filename_stream_eq_SpMatrix.str().c_str(),std::ios_base::app);
+    ofstream fphoton_eq_Spvn(filename_stream_eq_Spvn.str().c_str(),std::ios_base::app);
+    ofstream fphoton_eq_inte_Spvn(filename_stream_eq_inte_Spvn.str().c_str(),std::ios_base::app);
+
+
+    ofstream fphoton_tot_SpMatrix(filename_stream_tot_SpMatrix.str().c_str(),std::ios_base::app);
+    ofstream fphoton_tot_Spvn(filename_stream_tot_Spvn.str().c_str(),std::ios_base::app);
+    ofstream fphoton_tot_inte_Spvn(filename_stream_tot_inte_Spvn.str().c_str(),std::ios_base::app);
+
+
+    fphoton_eq_SpMatrix << "#event  "<<endl;
+    fphoton_tot_SpMatrix << "#event  "<<endl;
+    double dy = dilepton_QGP_thermal->get_dy();
+    for (int m = 0; m < nm; m++) {
+        for (int i=0; i < nphi; i++) {
+            double phi = dilepton_QGP_thermal->getPhotonphi(i);
+            fphoton_eq_SpMatrix << phi << "  ";
+            fphoton_tot_SpMatrix << phi << "  ";
+            for (int j = 0; j < np; j++) {
+                double temp_eq  = 0.0;
+                double temp_tot = 0.0;
+                for (int k = 0; k < nrapidity; k++) {
+                    double y_weight = dilepton_QGP_thermal->getPhoton_yweight(k);
+                    // below dy/Dy to make everything rapidity density, Dy is the rapidity range
+                    double weight = y_weight*dy/Dy;
+                    temp_eq  += dNd2pTdphidy_eq[m][j][i][k]*weight;
+                    temp_tot += dNd2pTdphidy_tot[m][j][i][k]*weight;
+                }
+                fphoton_eq_SpMatrix << scientific << setprecision(6) << setw(16)
+                                    << temp_eq << "  ";
+                fphoton_tot_SpMatrix << scientific << setprecision(6) << setw(16)
+                                    << temp_tot << "  ";
+            }
+            fphoton_eq_SpMatrix << endl;
+            fphoton_tot_SpMatrix << endl;
+        }
+    }
+
+    fphoton_eq_Spvn << "#event  "<<endl;
+    fphoton_tot_Spvn <<"#event  "<<endl;
+    // pT differential, dN/(2pi pTdpT MdM dy) and vn(M, pT)
+    for (int m = 0; m < nm; m++) {
+        for (int i = 0; i < np; i++) {
+            double M_ll = dilepton_QGP_thermal->getDileptonMass(m);
+            double pT = dilepton_QGP_thermal->getPhotonp(i);
+            fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
+                            << M_ll << "  "<< pT << "  " << dNd2pTd2M_eq[m][i] << "  ";
+            fphoton_tot_Spvn << scientific << setprecision(6) << setw(16)
+                            << M_ll << "  "<< pT << "  " << dNd2pTd2M_tot[m][i] << "  ";
+            
+
+            for (int order=1; order < norder; order++) {
+                fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
+                                << order << "   " << vnpT_cos_eq[order][m][i] << "  "
+                                << vnpT_sin_eq[order][m][i] << "  "
+                                << sqrt(pow(vnpT_cos_eq[order][m][i], 2)
+                                        + pow(vnpT_sin_eq[order][m][i], 2)) << "  ";
+                fphoton_tot_Spvn << scientific << setprecision(6) << setw(16)
+                                << order << "   " << vnpT_cos_tot[order][m][i] << "  "
+                                << vnpT_sin_tot[order][m][i] << "  "
+                                << sqrt(pow(vnpT_cos_tot[order][m][i], 2)
+                                        + pow(vnpT_sin_tot[order][m][i], 2)) << "  ";
+            }
+            fphoton_eq_Spvn << endl;
+            fphoton_tot_Spvn << endl;
+            
+        }
+    }
+    
+
+
+    fphoton_eq_inte_Spvn << "#event  "<<endl; 
+    fphoton_tot_inte_Spvn<< "#event  "<<endl;  
+
+    // pT integrated
+    for (int m = 0; m < nm; m++) {
+        double M_ll = dilepton_QGP_thermal->getDileptonMass(m);
+        // get dN/dMdy from dN/MdMdy
+        fphoton_eq_inte_Spvn << scientific << setprecision(6) << setw(16)
+                        << M_ll << "  " << dNd2Mdy_eq[m] << "  "; 
+        fphoton_tot_inte_Spvn << scientific << setprecision(6) << setw(16)
+                        << M_ll << "  " << dNd2Mdy_tot[m] << "  ";
+
+
+        for (int order = 0; order < norder; order++) {
+            fphoton_eq_inte_Spvn << scientific << setprecision(6) << setw(16)
+                                << order << "   " << vn_cos_eq[order][m] << "   "
+                                << vn_sin_eq[order][m] << "   "
+                                << sqrt(pow(vn_cos_eq[order][m], 2)
+                                        + pow(vn_sin_eq[order][m], 2)) << "  ";
+            fphoton_tot_inte_Spvn << scientific << setprecision(6) << setw(16)
+                                << order << "   " << vn_cos_tot[order][m] << "   "
+                                << vn_sin_tot[order][m] << "   "
+                                << sqrt(pow(vn_cos_tot[order][m], 2)
+                                    + pow(vn_sin_tot[order][m], 2)) << "  ";
+        }
+        fphoton_eq_inte_Spvn << endl;
+        fphoton_tot_inte_Spvn << endl;
+    }
+
+
+}
 std::vector<float> PhotonEmission::PassdileptonspectratoJS() {
 
   
