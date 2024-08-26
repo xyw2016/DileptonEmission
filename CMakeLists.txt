@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.4)
 project (DileptonEmission LANGUAGES CXX C)
 
-set(libname "EM")
+set(libname "dilepton")
 set(exename "dilepton_emission.e")
 
 # require C++11
