@@ -1180,9 +1180,9 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename) {
                                 + pow(vn_sin_tot[order], 2)) << endl;
     }
 }
-void PhotonEmission::SavePhotoninJS(int eventid) {
+void PhotonEmission::SavePhotoninJS() {
 
-    string filename = "JS";
+    string filename = "JS_Photon";
     ostringstream filename_stream_eq_SpMatrix;
     ostringstream filename_stream_eq_Spvn;
     ostringstream filename_stream_SpMatrix;
@@ -1205,8 +1205,8 @@ void PhotonEmission::SavePhotoninJS(int eventid) {
     ofstream fphotonSpvn(filename_stream_Spvn.str().c_str(),std::ios_base::app);
     ofstream fphotoninte_eq_Spvn(filename_stream_inte_eq_Spvn.str().c_str(),std::ios_base::app);
     ofstream fphotoninteSpvn(filename_stream_inte_Spvn.str().c_str(),std::ios_base::app);
-    fphoton_eq_SpMatrix <<"# event "<< eventid<<std::endl;
-    fphotonSpMatrix <<"# event "<< eventid<<std::endl;
+    fphoton_eq_SpMatrix <<"# event "<<std::endl;
+    fphotonSpMatrix <<"# event "<<std::endl;
     for (int i=0; i < nphi; i++) {
         double phi = photon_QGP_2_to_2->getPhotonphi(i);
         fphoton_eq_SpMatrix << phi << "  ";
@@ -1227,8 +1227,8 @@ void PhotonEmission::SavePhotoninJS(int eventid) {
         fphoton_eq_SpMatrix << endl;
         fphotonSpMatrix << endl;
     }
-    fphoton_eq_Spvn <<"# event "<< eventid<<std::endl;
-    fphotonSpvn <<"# event "<< eventid<<std::endl;
+    fphoton_eq_Spvn <<"# event "<<std::endl;
+    fphotonSpvn <<"# event "<<std::endl;
     for (int i = 0; i < np; i++) {
         double pT = photon_QGP_2_to_2->getPhotonp(i);
         fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
@@ -1251,8 +1251,8 @@ void PhotonEmission::SavePhotoninJS(int eventid) {
         fphotonSpvn << endl;
     }
 
-    fphotoninte_eq_Spvn <<"# event "<< eventid<<std::endl;
-    fphotoninteSpvn <<"# event "<< eventid<<std::endl;
+    fphotoninte_eq_Spvn <<"# event "<<std::endl;
+    fphotoninteSpvn <<"# event "<< std::endl;
     for (int order = 0; order < norder; order++) {
         fphotoninte_eq_Spvn << scientific << setprecision(6) << setw(16)
                             << order << "   " << vn_cos_eq[order] << "   "

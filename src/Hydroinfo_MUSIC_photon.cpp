@@ -41,6 +41,7 @@ Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
 }
 
 void Hydroinfo_MUSIC::readHydroDatafromJS(const std::vector<float>& bulkdata){
+    hydroWhichHydro = 12;
     lattice_2D.clear();
     lattice_3D.clear();
     lattice_3D_ideal.clear();
@@ -49,6 +50,8 @@ void Hydroinfo_MUSIC::readHydroDatafromJS(const std::vector<float>& bulkdata){
     cout << "Using new MUSIC hydro format (no grid) reading data ..."
          << endl;
 
+    hydroTmin = std::numeric_limits<float>::max();
+    hydroTmax = 0.0;
 
     float header[16];
     hydroTau0 = bulkdata[0];
@@ -176,6 +179,8 @@ void Hydroinfo_MUSIC::readHydroDatafromJS(const std::vector<float>& bulkdata){
         cout << "hydro_dx = " << hydroDx << " fm" << endl;
         cout << "hydro_eta_max = " << hydro_eta_max << endl;
         cout << "hydro_deta = " << hydroDeta << endl;
+        cout << "hydro_T_max = " << hydroTmax << endl;
+        cout << "hydro_T_min = " << hydroTmin << endl;
 
 }
 void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
