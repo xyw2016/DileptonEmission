@@ -44,8 +44,8 @@ namespace Photon{
         thermalPhotons.calPhoton_SpvnpT_individualchannel();
         thermalPhotons.calPhoton_total_SpMatrix();
         thermalPhotons.calPhoton_total_Spvn();
-        
-        //dilepton_sp = thermalPhotons.PassdileptonspectratoJS();
+        int eventid = 0; 
+        thermalPhotons.SavePhotoninJS(eventid);
         
         delete hydroinfo_ptr;
         //return dilepton_sp;

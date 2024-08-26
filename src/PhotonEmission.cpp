@@ -30,7 +30,7 @@ using TENSORTRANSFORM::getTransverseflow_u_mu_low;
 
 PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     paraRdr = paraRdr_in;
-    output_path = "results/";
+    output_path = "ph_results/";
 
     hydro_flag = paraRdr->getVal("hydro_flag");
     differential_flag = paraRdr->getVal("differential_flag");
@@ -1167,6 +1167,92 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename) {
         fphotonSpvn << endl;
     }
 
+    for (int order = 0; order < norder; order++) {
+        fphotoninte_eq_Spvn << scientific << setprecision(6) << setw(16)
+                            << order << "   " << vn_cos_eq[order] << "   "
+                            << vn_sin_eq[order] << "   "
+                            << sqrt(pow(vn_cos_eq[order], 2)
+                                    + pow(vn_sin_eq[order], 2)) << endl;
+        fphotoninteSpvn << scientific << setprecision(6) << setw(16)
+                        << order << "   " << vn_cos_tot[order] << "   "
+                        << vn_sin_tot[order] << "   "
+                        << sqrt(pow(vn_cos_tot[order], 2)
+                                + pow(vn_sin_tot[order], 2)) << endl;
+    }
+}
+void PhotonEmission::SavePhotoninJS(int eventid) {
+
+    string filename = "JS";
+    ostringstream filename_stream_eq_SpMatrix;
+    ostringstream filename_stream_eq_Spvn;
+    ostringstream filename_stream_SpMatrix;
+    ostringstream filename_stream_Spvn;
+    ostringstream filename_stream_inte_eq_Spvn;
+    ostringstream filename_stream_inte_Spvn;
+
+    filename_stream_eq_SpMatrix << output_path << filename
+                                << "_eq_SpMatrix.dat";
+    filename_stream_eq_Spvn << output_path << filename << "_eq_Spvn.dat";
+    filename_stream_SpMatrix << output_path << filename << "_SpMatrix.dat";
+    filename_stream_Spvn << output_path << filename << "_Spvn.dat";
+    filename_stream_inte_eq_Spvn << output_path << filename
+                                 << "_eq_Spvn_inte.dat";
+    filename_stream_inte_Spvn << output_path << filename << "_Spvn_inte.dat";
+
+    ofstream fphoton_eq_SpMatrix(filename_stream_eq_SpMatrix.str().c_str(),std::ios_base::app);
+    ofstream fphoton_eq_Spvn(filename_stream_eq_Spvn.str().c_str(),std::ios_base::app);
+    ofstream fphotonSpMatrix(filename_stream_SpMatrix.str().c_str(),std::ios_base::app);
+    ofstream fphotonSpvn(filename_stream_Spvn.str().c_str(),std::ios_base::app);
+    ofstream fphotoninte_eq_Spvn(filename_stream_inte_eq_Spvn.str().c_str(),std::ios_base::app);
+    ofstream fphotoninteSpvn(filename_stream_inte_Spvn.str().c_str(),std::ios_base::app);
+    fphoton_eq_SpMatrix <<"# event "<< eventid<<std::endl;
+    fphotonSpMatrix <<"# event "<< eventid<<std::endl;
+    for (int i=0; i < nphi; i++) {
+        double phi = photon_QGP_2_to_2->getPhotonphi(i);
+        fphoton_eq_SpMatrix << phi << "  ";
+        fphotonSpMatrix << phi << "  ";
+        for (int j = 0; j < np; j++) {
+            double temp_eq = 0.0;
+            double temp_tot = 0.0;
+            double dy = photon_QGP_2_to_2->get_dy();
+            for (int k = 0; k < nrapidity; k++) {
+                temp_eq += dNd2pTdphidy_eq[j][i][k]*dy;
+                temp_tot += dNd2pTdphidy[j][i][k]*dy;
+            }
+            fphoton_eq_SpMatrix << scientific << setprecision(6) << setw(16)
+                                << temp_eq << "  ";
+            fphotonSpMatrix << scientific << setprecision(6) << setw(16)
+                            << temp_tot << "  ";
+        }
+        fphoton_eq_SpMatrix << endl;
+        fphotonSpMatrix << endl;
+    }
+    fphoton_eq_Spvn <<"# event "<< eventid<<std::endl;
+    fphotonSpvn <<"# event "<< eventid<<std::endl;
+    for (int i = 0; i < np; i++) {
+        double pT = photon_QGP_2_to_2->getPhotonp(i);
+        fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
+                        << pT << "  " << dNd2pT_eq[i] << "  ";
+        fphotonSpvn << scientific << setprecision(6) << setw(16)
+                    << pT << "  " << dNd2pT[i] << "  ";
+        for (int order=1; order < norder; order++) {
+            fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
+                            << vnpT_cos_eq[order][i] << "  "
+                            << vnpT_sin_eq[order][i] << "  "
+                            << sqrt(pow(vnpT_cos_eq[order][i], 2)
+                                    + pow(vnpT_sin_eq[order][i], 2)) << "  ";
+            fphotonSpvn << scientific << setprecision(6) << setw(16)
+                        << vnpT_cos[order][i] << "  "
+                        << vnpT_sin[order][i] << "  "
+                        << sqrt(pow(vnpT_cos[order][i], 2)
+                                + pow(vnpT_sin[order][i], 2)) << "  ";
+        }
+        fphoton_eq_Spvn << endl;
+        fphotonSpvn << endl;
+    }
+
+    fphotoninte_eq_Spvn <<"# event "<< eventid<<std::endl;
+    fphotoninteSpvn <<"# event "<< eventid<<std::endl;
     for (int order = 0; order < norder; order++) {
         fphotoninte_eq_Spvn << scientific << setprecision(6) << setw(16)
                             << order << "   " << vn_cos_eq[order] << "   "

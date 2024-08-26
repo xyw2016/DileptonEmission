@@ -90,6 +90,7 @@ class PhotonEmission {
     void calPhoton_SpvnpT_individualchannel();
     void calPhoton_total_Spvn();
     void outputPhoton_total_SpvnpT(std::string );
+    void SavePhotoninJS(int eventid);
     void outputPhotonSpvn();
 };
 }
