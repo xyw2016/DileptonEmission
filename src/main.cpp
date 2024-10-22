@@ -79,10 +79,10 @@ int main(int argc, char** argv) {
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
 	if(USE_2D_mode){
-            thermalPhotons.calPhotonemission_2d(hydroinfo_ptr);
+            thermalPhotons.calPhotonemission_2d(hydroinfo_ptr,hydro_mode);
 	}
 	else{
-            thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
+            thermalPhotons.calPhotonemission_3d(hydroinfo_ptr,hydro_mode);
 	}
         delete hydroinfo_ptr;
 
@@ -126,10 +126,10 @@ int main(int argc, char** argv) {
          Hydroinfo_MUSIC* hydroinfo_ptr_prehydro = new Hydroinfo_MUSIC(); 
          hydroinfo_ptr_prehydro->readHydroData(hydro_mode, nskip_tau);
 	if(USE_2D_mode){
-            thermalPhotons_prehydro.calPhotonemission_2d(hydroinfo_ptr_prehydro);
+            thermalPhotons_prehydro.calPhotonemission_2d(hydroinfo_ptr_prehydro,hydro_mode);
 	}
 	else{
-            thermalPhotons_prehydro.calPhotonemission_3d(hydroinfo_ptr_prehydro);
+            thermalPhotons_prehydro.calPhotonemission_3d(hydroinfo_ptr_prehydro,hydro_mode);
 	}
         delete hydroinfo_ptr_prehydro;
 

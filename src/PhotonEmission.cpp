@@ -755,8 +755,8 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
                             dNd2pTdphidy_visc_all[i3] += dNd2pTdphidy_cell_visc*spsfactor;
                             dNd2pTdphidy_diff_all[i3] += dNd2pTdphidy_cell_diff*spsfactor;
                             dNd2pTdphidy_tot_all[i3] += dNd2pTdphidy_cell_tot*spsfactor;
-                            dNd2pTdphidy_pol_lambda_theta_all[i3] += dNd2pTdphidy_cell_lambda_theta;
-                            dNd2pTdphidy_pol_lambda_phi_all[i3] += dNd2pTdphidy_cell_lambda_phi;
+                            dNd2pTdphidy_pol_lambda_theta_all[i3] += dNd2pTdphidy_cell_lambda_theta*spsfactor;
+                            dNd2pTdphidy_pol_lambda_phi_all[i3] += dNd2pTdphidy_cell_lambda_phi*spsfactor;
 
 
                             
@@ -1280,8 +1280,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                             dNd2pTdphidy_visc_all[n + CORES * i3] += dNd2pTdphidy_cell_visc*spsfactor;
                             dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff*spsfactor;
                             dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot*spsfactor;
-                            dNd2pTdphidy_pol_lambda_theta_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_theta;
-                            dNd2pTdphidy_pol_lambda_phi_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_phi;
+                            dNd2pTdphidy_pol_lambda_theta_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_theta*spsfactor;
+                            dNd2pTdphidy_pol_lambda_phi_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_phi*spsfactor;
 
 
                             
