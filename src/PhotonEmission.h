@@ -67,6 +67,8 @@ class PhotonEmission {
     double **dNd2pTd2M_diff;
     double **dNd2pTd2M_tot;
     double **dNd2pTd2M_pol_lambda_theta;
+    double **dNd2pTd2M_pol_lambda_norm;
+
     double **dNd2pTd2M_pol_lambda_phi;
 
 
@@ -80,12 +82,13 @@ class PhotonEmission {
     double ***vnpT_cos_diff, ***vnpT_sin_diff;
     double ****dNd2pTdphidy_tot;
     double ****dNd2pTdphidy_pol_lambda_theta;
+    double ****dNd2pTdphidy_pol_lambda_norm;
     double ****dNd2pTdphidy_pol_lambda_phi;
 
     
     double ***vnpT_cos_tot, ***vnpT_sin_tot;
 
-    std::vector<double> dNd2Mdy_eq, dNd2Mdy_visc, dNd2Mdy_diff, dNd2Mdy_tot, dNd2Mdy_pol_lambda_theta, dNd2Mdy_pol_lambda_phi;
+    std::vector<double> dNd2Mdy_eq, dNd2Mdy_visc, dNd2Mdy_diff, dNd2Mdy_tot,dNd2Mdy_pol_lambda_norm, dNd2Mdy_pol_lambda_theta, dNd2Mdy_pol_lambda_phi;
     std::vector<double> dNd2Mdy_eqT, dNd2Mdy_eqL;
     double **vn_sin_eq;
     double **vn_cos_eq;

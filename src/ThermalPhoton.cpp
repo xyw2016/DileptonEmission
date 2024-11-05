@@ -402,7 +402,7 @@ void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_fact
 void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (&flow_u_mu_Min)[4], double Eq, double M_ll, double pi_zz, double bulkPi, 
 	double diff_factor, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double volume, double fraction,
 	double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_eqT, double &dNd2pTdphidy_cell_eqL, double &dNd2pTdphidy_cell_visc, 
-    double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot, double &dNd2pTdphidy_cell_lambda_theta, double &dNd2pTdphidy_cell_lambda_phi) {
+    double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot,double &dNd2pTdphidy_cell_lambda_norm, double &dNd2pTdphidy_cell_lambda_theta, double &dNd2pTdphidy_cell_lambda_phi) {
 
     const double volfrac = volume*fraction;
 
@@ -483,7 +483,9 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     }
 
 
-    dNd2pTdphidy_cell_lambda_theta = lambda_theta*dNd2pTdphidy_cell_eq;
+    dNd2pTdphidy_cell_lambda_theta = lambda_theta*dNd2pTdphidy_cell_eq/(1.0+lambda_theta/3.);
+    dNd2pTdphidy_cell_lambda_norm = dNd2pTdphidy_cell_eq/(1.0+lambda_theta/3.);
+
     //dNd2pTdphidy_cell_lambda_theta = lambda_theta;
     
     if(std::isnan(dNd2pTdphidy_cell_lambda_theta))
@@ -524,7 +526,7 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     //lambda_phi = lambda_phi;
 
 
-    dNd2pTdphidy_cell_lambda_phi = lambda_phi*dNd2pTdphidy_cell_eq;
+    dNd2pTdphidy_cell_lambda_phi = lambda_phi*dNd2pTdphidy_cell_eq/(1.0+lambda_theta/3.);
 
     if(std::isnan(dNd2pTdphidy_cell_lambda_phi))
     { 
