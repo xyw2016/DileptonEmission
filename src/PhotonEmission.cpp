@@ -65,8 +65,10 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     print_hydroGridinfo();
 
     // read the photon emission rate tables
+    std::cout<<" Read emission rate! " <<std::endl;
     InitializePhotonEmissionRateTables();
-    
+    std::cout<<" Read emission rate! end" <<std::endl;
+
     // dN/MdMdPT2dphidy
     dNd2pTdphidy_eq = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_eqT = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
@@ -123,6 +125,9 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     vn_sin_tot = createA2DMatrix(norder, nm, 0.);
      
     if (differential_flag == 1) {
+
+        std::cout<<"Start differential table" <<std::endl;
+
         dNd2pTdphidydTdtau_eq = createA6DMatrix(nTcut, n_tau_cut, nm, np, nphi, nrapidity, 0.);
         dNd2pTdphidydTdtau_visc = createA6DMatrix(nTcut, n_tau_cut, nm, np, nphi, nrapidity, 0.);
         dNd2pTdphidydTdtau_diff = createA6DMatrix(nTcut, n_tau_cut, nm, np, nphi, nrapidity, 0.);
@@ -132,6 +137,7 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
         dNd2pTdphidydTdtau_visc_all = createA3DMatrix(nTcut, n_tau_cut, CORES*nrapidity*np*nphi*nm, 0.);
         dNd2pTdphidydTdtau_diff_all = createA3DMatrix(nTcut, n_tau_cut, CORES*nrapidity*np*nphi*nm, 0.);
         dNd2pTdphidydTdtau_tot_all = createA3DMatrix(nTcut, n_tau_cut, CORES*nrapidity*np*nphi*nm, 0.);
+        std::cout<<"Initialize differential table" <<std::endl;
     }
 
 }
@@ -192,6 +198,7 @@ PhotonEmission::~PhotonEmission() {
         deleteA3DMatrix(dNd2pTdphidydTdtau_visc_all, nTcut, n_tau_cut);
         deleteA3DMatrix(dNd2pTdphidydTdtau_diff_all, nTcut, n_tau_cut);
         deleteA3DMatrix(dNd2pTdphidydTdtau_tot_all, nTcut, n_tau_cut);
+        std::cout<<"Delete differential table" <<std::endl;
     }
 }
 
@@ -897,6 +904,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
     double dT_cut = (T_cuthigh - T_cutlow)/(nTcut - 1);
     double dtau_cut = (tau_cut_high - tau_cut_low)/(n_tau_cut - 1);
 
+    std::cout<<"Differential table T range: "<<T_cuthigh<<" GeV" <<" - " << T_cutlow<<" GeV" << " dT:"<< dT_cut <<" GeV" <<std::endl;
+    std::cout<<"Differential table tau range: "<<tau_cut_high<<" fm" <<" - " << tau_cut_low<<" fm" << " dtau:"<< dtau_cut <<" fm" <<std::endl;
+
+
     if (differential_flag == 1){
         if (tau_max>tau_cut_high||tau0<tau_cut_low){
             printf("Warning: proper time out of [tau_cut_low, tau_cut_high].\n");
@@ -1431,7 +1442,10 @@ void PhotonEmission::outputPhotonSpvn_individualchannel() {
     // dilepton_QGP_thermal->outputPhoton_SpvnpT_shell(output_path);
     if (differential_flag == 1) {
         dilepton_QGP_thermal->outputPhoton_Spectra_dTdtau(output_path, T_cuthigh, T_cutlow, tau_cut_high, tau_cut_low);
+
         dilepton_QGP_thermal->outputPhoton_Spvn_dTdtau(output_path, T_cuthigh, T_cutlow, tau_cut_high, tau_cut_low);
+
+        dilepton_QGP_thermal->outputPhoton_Spectra_full_diff(output_path, T_cuthigh, T_cutlow, tau_cut_high, tau_cut_low);
     }
 }
 

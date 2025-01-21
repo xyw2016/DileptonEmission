@@ -184,6 +184,8 @@ class ThermalPhoton {
     void outputPhoton_SpvnpT_shell(std::string path);
     void outputPhoton_Spvn_dTdtau(std::string path, double Tcut_high, double Tcut_low, double tau_cut_high, double tau_cut_low);
     void outputPhoton_Spectra_dTdtau(std::string path, double Tcut_high, double Tcut_low, double tau_cut_high, double tau_cut_low);
+    void outputPhoton_Spectra_full_diff(std::string path, double Tcut_high, double Tcut_low, double tau_cut_high, double tau_cut_low);
+
 
     struct Table {
         int nx, ny, nz, nw;

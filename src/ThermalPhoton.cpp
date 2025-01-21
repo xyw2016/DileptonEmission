@@ -569,6 +569,73 @@ void ThermalPhoton::calPhoton_SpMatrix_dTdtau(double ******dNd2pTdphidydTdtau_eq
 	}
 }
 
+void ThermalPhoton::outputPhoton_Spectra_full_diff(string path, double Tcut_high, double Tcut_low, double tau_cut_high, double tau_cut_low){
+
+    double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
+    double dtau = (tau_cut_high - tau_cut_low)/(n_tau_cut - 1);
+
+    ostringstream filename_Sp_full_diff_eq;
+    ostringstream filename_Sp_full_diff_visc;
+    ostringstream filename_Sp_full_diff_diff;
+    ostringstream filename_Sp_full_diff_tot;
+
+    filename_Sp_full_diff_eq 	<< path << emissionProcess_name
+                         	<< "_Sp_full_eq.dat";
+    filename_Sp_full_diff_visc  << path << emissionProcess_name
+                            << "_Sp_full_visc.dat";
+    filename_Sp_full_diff_diff 	<< path << emissionProcess_name
+                          	<< "_Sp_full_diff.dat";
+    filename_Sp_full_diff_tot 	<< path << emissionProcess_name
+                          	<< "_Sp_full_tot.dat";
+
+    ofstream ofeq(filename_Sp_full_diff_eq.str().c_str());
+    ofstream ofvisc(filename_Sp_full_diff_visc.str().c_str());
+    ofstream ofdiff(filename_Sp_full_diff_diff.str().c_str());
+    ofstream oftot(filename_Sp_full_diff_tot.str().c_str());
+
+    for (int i = 0; i < nTcut; i++) {
+        double T_local = Tcut_low + i*dT;        
+        for (int j = 0; j < n_tau_cut; j++) {
+		    double tau_local = tau_cut_low + j*dtau;
+            for (int k = 0; k < nm; k++) {
+                double Mll_local = getDileptonMass(k);
+		        for (int l = 0; l < np; l++) {
+                    double pT_local = getPhotonp(l);
+		            for (int m = 0; m < nphi; m++) {
+                        double phi_local = getPhotonphi(m);
+		                for (int n = 0; n < nrapidity; n++) {
+                            double y_local = getPhotonrapidity(n);
+
+                            ofeq << scientific << setw(18) << setprecision(8) 
+                 		          << T_local << " "  << tau_local << " "<<Mll_local<<" "<<pT_local<<" "
+                                  << phi_local<<" "<<y_local<<" "<< dNd2pTdphidydTdtau_eq[i][j][k][l][m][n]<<std::endl;
+                            ofvisc << scientific << setw(18) << setprecision(8) 
+                 		          << T_local << " "  << tau_local << " "<<Mll_local<<" "<<pT_local<<" "
+                                  << phi_local<<" "<<y_local<<" "<<dNd2pTdphidydTdtau_visc[i][j][k][l][m][n]<<std::endl;
+                            ofdiff << scientific << setw(18) << setprecision(8) 
+                 		          << T_local << " "  << tau_local << " "<<Mll_local<<" "<<pT_local<<" "
+                                  << phi_local<<" "<<y_local<<" "<<dNd2pTdphidydTdtau_diff[i][j][k][l][m][n]<<std::endl;
+
+                            oftot << scientific << setw(18) << setprecision(8) 
+                 		          << T_local << " "  << tau_local << " "<<Mll_local<<" "<<pT_local<<" "
+                                  << phi_local<<" "<<y_local<<" "<<dNd2pTdphidydTdtau_tot[i][j][k][l][m][n]<<std::endl;
+		                }
+		            }
+		        }
+		    }
+		}
+	}
+
+    ofeq.close();
+    ofvisc.close();
+    ofdiff.close();
+    oftot.close();
+
+
+
+
+}
+
 
 void ThermalPhoton::calPhoton_Spectra_dTdtau() {
     // calculate the photon spectra at T-tau interval
