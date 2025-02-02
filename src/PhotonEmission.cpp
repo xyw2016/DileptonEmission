@@ -94,6 +94,17 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     dNd2pTd2M_pol_lambda_phi = createA2DMatrix(nm, np, 0);
 
 
+    dNd2pTd2Mdy_eq = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_eqT = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_eqL = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_visc = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_diff = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_tot = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_pol_lambda_theta = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_pol_lambda_norm = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_pol_lambda_phi = createA3DMatrix(nm, np, nrapidity, 0);
+
+
 
     dNd2Mdy_eq.resize(nm, 0);
     dNd2Mdy_eqT.resize(nm, 0);
@@ -114,6 +125,17 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     vnpT_sin_diff = createA3DMatrix(norder, nm, np, 0.);
     vnpT_cos_tot = createA3DMatrix(norder, nm, np, 0.);
     vnpT_sin_tot = createA3DMatrix(norder, nm, np, 0.);
+
+
+    vnMpTy_cos_eq = createA4DMatrix(norder, nm, np, nrapidity, 0.);
+    vnMpTy_sin_eq = createA4DMatrix(norder, nm, np, nrapidity, 0.);
+    vnMpTy_cos_visc = createA4DMatrix(norder, nm, np, nrapidity, 0.);
+    vnMpTy_sin_visc = createA4DMatrix(norder, nm, np, nrapidity, 0.);
+    vnMpTy_cos_diff = createA4DMatrix(norder, nm, np, nrapidity, 0.);
+    vnMpTy_sin_diff = createA4DMatrix(norder, nm, np, nrapidity, 0.);
+    vnMpTy_cos_tot = createA4DMatrix(norder, nm, np, nrapidity, 0.);
+    vnMpTy_sin_tot = createA4DMatrix(norder, nm, np, nrapidity, 0.);
+
 
     vn_cos_eq = createA2DMatrix(norder, nm, 0.);
     vn_sin_eq = createA2DMatrix(norder, nm, 0.);
@@ -166,6 +188,16 @@ PhotonEmission::~PhotonEmission() {
     deleteA2DMatrix(dNd2pTd2M_pol_lambda_norm, nm);
     deleteA2DMatrix(dNd2pTd2M_pol_lambda_phi, nm);
 
+    deleteA3DMatrix(dNd2pTd2Mdy_eq, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_eqT, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_eqL, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_visc, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_diff, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_tot, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_pol_lambda_theta, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_pol_lambda_norm, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_pol_lambda_phi, nm, np);
+
 
 
     deleteA3DMatrix(vnpT_cos_eq, norder, nm);
@@ -176,6 +208,15 @@ PhotonEmission::~PhotonEmission() {
     deleteA3DMatrix(vnpT_sin_diff, norder, nm);
     deleteA3DMatrix(vnpT_cos_tot, norder, nm);
     deleteA3DMatrix(vnpT_sin_tot, norder, nm);
+
+    deleteA4DMatrix(vnMpTy_cos_eq, norder, nm, np);
+    deleteA4DMatrix(vnMpTy_sin_eq, norder, nm, np);
+    deleteA4DMatrix(vnMpTy_cos_visc, norder, nm, np);
+    deleteA4DMatrix(vnMpTy_sin_visc, norder, nm, np);
+    deleteA4DMatrix(vnMpTy_cos_diff, norder, nm, np);
+    deleteA4DMatrix(vnMpTy_sin_diff, norder, nm, np);
+    deleteA4DMatrix(vnMpTy_cos_tot, norder, nm, np);
+    deleteA4DMatrix(vnMpTy_sin_tot, norder, nm, np);
 
     deleteA2DMatrix(vn_cos_eq, norder);
     deleteA2DMatrix(vn_sin_eq, norder);
@@ -1544,6 +1585,8 @@ void PhotonEmission::calPhoton_total_Spvn() {
             dNd2pTd2M_tot[m][i] = dNd2pTd2M_tot[m][i]/(2*M_PI);
         }
     }
+
+
     
     // pT integrated flow
     for (int m = 0; m < nm; m++) {
@@ -1559,6 +1602,80 @@ void PhotonEmission::calPhoton_total_Spvn() {
 
         }
     }
+
+
+    for (int k = 0; k < nrapidity; k++){
+        double y_weight = dilepton_QGP_thermal->getPhoton_yweight(k); //y
+        for (int m = 0; m < nm; m++) {
+            for (int i = 0; i < np; i++) {
+                double p = dilepton_QGP_thermal->getPhotonp(i); //p_T
+                double pweight = dilepton_QGP_thermal->getPhoton_pweight(i);
+                
+                for (int j = 0; j < nphi; j++) {
+                    double phi = dilepton_QGP_thermal->getPhotonphi(j); //phi
+                    double phi_weight = dilepton_QGP_thermal->getPhoton_phiweight(j);
+                    
+                    dNd2pTd2Mdy_eq[m][i][k]  += dNd2pTdphidy_eq[m][i][j][k]*phi_weight;
+                    dNd2pTd2Mdy_eqT[m][i][k] += dNd2pTdphidy_eqT[m][i][j][k]*phi_weight;
+                    dNd2pTd2Mdy_eqL[m][i][k] += dNd2pTdphidy_eqL[m][i][j][k]*phi_weight;
+                    dNd2pTd2Mdy_visc[m][i][k] += dNd2pTdphidy_visc[m][i][j][k]*phi_weight;
+                    dNd2pTd2Mdy_diff[m][i][k] += dNd2pTdphidy_diff[m][i][j][k]*phi_weight;
+                    dNd2pTd2Mdy_tot[m][i][k] += dNd2pTdphidy_tot[m][i][j][k]*phi_weight;
+                    dNd2pTd2Mdy_pol_lambda_theta[m][i][k] += dNd2pTdphidy_pol_lambda_theta[m][i][j][k]*phi_weight;
+                    dNd2pTd2Mdy_pol_lambda_norm[m][i][k] += dNd2pTdphidy_pol_lambda_norm[m][i][j][k]*phi_weight;
+                    dNd2pTd2Mdy_pol_lambda_phi[m][i][k] += dNd2pTdphidy_pol_lambda_phi[m][i][j][k]*phi_weight;
+
+                    for (int order = 0; order < norder; order++) {
+                        vnMpTy_cos_eq[order][m][i][k]  += (
+                                dNd2pTdphidy_eq[m][i][j][k]*phi_weight*cos(order*phi));
+                        vnMpTy_cos_visc[order][m][i][k]  += (
+                                dNd2pTdphidy_visc[m][i][j][k]*phi_weight*cos(order*phi));
+                        vnMpTy_cos_diff[order][m][i][k]  += (
+                                dNd2pTdphidy_diff[m][i][j][k]*phi_weight*cos(order*phi));
+                        vnMpTy_cos_tot[order][m][i][k] += (
+                                dNd2pTdphidy_tot[m][i][j][k]*phi_weight*cos(order*phi));
+                        vnMpTy_sin_eq[order][m][i][k]  += (
+                                dNd2pTdphidy_eq[m][i][j][k]*phi_weight*sin(order*phi));
+                        vnMpTy_sin_visc[order][m][i][k]  += (
+                                dNd2pTdphidy_visc[m][i][j][k]*phi_weight*sin(order*phi));
+                        vnMpTy_sin_diff[order][m][i][k]  += (
+                                dNd2pTdphidy_diff[m][i][j][k]*phi_weight*sin(order*phi));
+                        vnMpTy_sin_tot[order][m][i][k] += (
+                                dNd2pTdphidy_tot[m][i][j][k]*phi_weight*sin(order*phi));
+                    }
+                }
+
+
+
+
+                for(int order = 0; order < norder ; order++){
+
+                    vnMpTy_cos_eq[order][m][i][k]   = vnMpTy_cos_eq[order][m][i][k]/dNd2pTd2Mdy_eq[m][i][k];
+                    vnMpTy_cos_visc[order][m][i][k] = vnMpTy_cos_visc[order][m][i][k]/dNd2pTd2Mdy_visc[m][i][k];
+                    vnMpTy_cos_diff[order][m][i][k] = vnMpTy_cos_diff[order][m][i][k]/dNd2pTd2Mdy_diff[m][i][k];
+                    vnMpTy_cos_tot[order][m][i][k]  = vnMpTy_cos_tot[order][m][i][k]/dNd2pTd2Mdy_tot[m][i][k]; 
+                    vnMpTy_sin_eq[order][m][i][k]   = vnMpTy_sin_eq[order][m][i][k]/dNd2pTd2Mdy_eq[m][i][k];
+                    vnMpTy_sin_visc[order][m][i][k]  = vnMpTy_sin_visc[order][m][i][k]/dNd2pTd2Mdy_visc[m][i][k];
+                    vnMpTy_sin_diff[order][m][i][k]  = vnMpTy_sin_diff[order][m][i][k]/dNd2pTd2Mdy_diff[m][i][k];
+                    vnMpTy_sin_tot[order][m][i][k] =  vnMpTy_sin_tot[order][m][i][k]/dNd2pTd2Mdy_tot[m][i][k]; 
+                }
+
+
+
+
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
 }
 
 
@@ -1671,6 +1788,18 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     ostringstream filename_stream_pol_lambda_phi_Spvn;
     ostringstream filename_stream_pol_lambda_phi_inte_Spvn;
 
+    //rapdity
+    ostringstream filename_stream_eq_SpMatrix_dy;
+    ostringstream filename_stream_eq_TL_SpMatrix_dy;
+    ostringstream filename_stream_visc_SpMatrix_dy;
+    ostringstream filename_stream_diff_SpMatrix_dy;
+    ostringstream filename_stream_tot_SpMatrix_dy;
+    ostringstream filename_stream_pol_lambda_theta_SpMatrix_dy;
+    ostringstream filename_stream_pol_lambda_norm_SpMatrix_dy;
+    ostringstream filename_stream_pol_lambda_phi_SpMatrix_dy;
+
+
+
 
     string filename = " ";
     bool flag_hydro = paraRdr->getVal("flag_hydro");
@@ -1764,6 +1893,36 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
                                 << "_pol_lambda_phi_Spvn"<<file_end;
     filename_stream_pol_lambda_phi_inte_Spvn << output_path << filename 
                                 << "_pol_lambda_phi_Spvn_inte"<<file_end;
+
+
+    //rapidiy
+    filename_stream_eq_SpMatrix_dy << output_path << filename
+                                << "_eq_Spvn_MpTy"<<file_end;
+    filename_stream_eq_TL_SpMatrix_dy << output_path << filename
+                                << "_eq_TL_Spvn_MpTy"<<file_end;
+    filename_stream_visc_SpMatrix_dy << output_path << filename 
+                                << "_visc_Spvn_MpTy"<<file_end;
+    filename_stream_diff_SpMatrix_dy << output_path << filename 
+                                << "_diff_Spvn_MpTy"<<file_end;
+    filename_stream_tot_SpMatrix_dy << output_path << filename 
+                                << "_tot_Spvn_MpTy"<<file_end;
+    filename_stream_pol_lambda_theta_SpMatrix_dy<< output_path << filename 
+                                << "_pol_lambda_theta_Spvn_MpTy"<<file_end;
+    filename_stream_pol_lambda_norm_SpMatrix_dy<< output_path << filename 
+                                << "_pol_lambda_norm_Spvn_MpTy"<<file_end;
+    filename_stream_pol_lambda_phi_SpMatrix_dy<< output_path << filename 
+                                << "_pol_lambda_phi_Spvn_MpTy"<<file_end;
+
+    ofstream fphoton_eq_SpMatrix_dy(filename_stream_eq_SpMatrix_dy.str().c_str());
+    ofstream fphoton_eq_TL_SpMatrix_dy(filename_stream_eq_TL_SpMatrix_dy.str().c_str());
+    ofstream fphoton_visc_SpMatrix_dy(filename_stream_visc_SpMatrix_dy.str().c_str());
+    ofstream fphoton_diff_SpMatrix_dy(filename_stream_diff_SpMatrix_dy.str().c_str());
+    ofstream fphoton_tot_SpMatrix_dy(filename_stream_tot_SpMatrix_dy.str().c_str());
+    ofstream fphoton_pol_lambda_theta_SpMatrix_dy(filename_stream_pol_lambda_theta_SpMatrix_dy.str().c_str());
+    ofstream fphoton_pol_lambda_norm_SpMatrix_dy(filename_stream_pol_lambda_norm_SpMatrix_dy.str().c_str());
+    ofstream fphoton_pol_lambda_phi_SpMatrix_dy(filename_stream_pol_lambda_phi_SpMatrix_dy.str().c_str());
+
+
 
     ofstream fphoton_eq_SpMatrix(filename_stream_eq_SpMatrix.str().c_str());
     ofstream fphoton_eq_Spvn(filename_stream_eq_Spvn.str().c_str());
@@ -1864,6 +2023,66 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
 
         }
     }
+
+    
+    for (int m = 0; m < nm; m++) {
+        for (int i = 0; i < np; i++) {
+                for (int k = 0; k < nrapidity; k++){
+                    double mll_local = dilepton_QGP_thermal->getDileptonMass(m); //Mll
+                    double p_local = dilepton_QGP_thermal->getPhotonp(i); //p_T
+                    double y_local = dilepton_QGP_thermal->getPhotonrapidity(k);
+                    
+                    fphoton_eq_SpMatrix_dy<< scientific << setprecision(6) << setw(16)
+                                 << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_eq[m][i][k] << "  ";
+                    fphoton_eq_TL_SpMatrix_dy<< scientific << setprecision(6) << setw(16)
+                                 << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_eqT[m][i][k] << "  "<<dNd2pTd2Mdy_eqL[m][i][k]<<" ";
+                    fphoton_visc_SpMatrix_dy<< scientific << setprecision(6) << setw(16)
+                                << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_visc[m][i][k] << "  ";
+                    fphoton_diff_SpMatrix_dy<< scientific << setprecision(6) << setw(16)
+                                << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_diff[m][i][k] << "  ";
+                    fphoton_tot_SpMatrix_dy << scientific << setprecision(6) << setw(16)
+                                << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_tot[m][i][k] << "  ";
+                    fphoton_pol_lambda_theta_SpMatrix_dy<< scientific << setprecision(6) << setw(16) 
+                                << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_pol_lambda_theta[m][i][k] << "  ";
+                    fphoton_pol_lambda_norm_SpMatrix_dy<< scientific << setprecision(6) << setw(16) 
+                                << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_pol_lambda_norm[m][i][k] << "  ";
+                    fphoton_pol_lambda_phi_SpMatrix_dy<< scientific << setprecision(6) << setw(16) 
+                                << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_pol_lambda_phi[m][i][k] << "  ";
+                    for (int order = 1; order < norder; order++) {
+
+                        fphoton_eq_SpMatrix_dy<< scientific << setprecision(6) << setw(16)
+                                 << order << "  "<<vnMpTy_cos_eq[order][m][i][k]<<" "<<vnMpTy_sin_eq[order][m][i][k]<<" "<< sqrt(pow(vnMpTy_cos_eq[order][m][i][k], 2)
+                                        + pow(vnMpTy_sin_eq[order][m][i][k], 2))<< "  ";
+                        fphoton_visc_SpMatrix_dy<< scientific << setprecision(6) << setw(16)
+                                 << order << "  "<<vnMpTy_cos_visc[order][m][i][k]<<" "<<vnMpTy_sin_visc[order][m][i][k]<<" "<< sqrt(pow(vnMpTy_cos_visc[order][m][i][k], 2)
+                                        + pow(vnMpTy_sin_visc[order][m][i][k], 2))<< "  ";
+                        fphoton_diff_SpMatrix_dy<< scientific << setprecision(6) << setw(16)
+                                 << order << "  "<<vnMpTy_cos_diff[order][m][i][k]<<" "<<vnMpTy_sin_diff[order][m][i][k]<<" "<< sqrt(pow(vnMpTy_cos_diff[order][m][i][k], 2)
+                                        + pow(vnMpTy_sin_diff[order][m][i][k], 2))<< "  ";
+                        
+                        fphoton_tot_SpMatrix_dy<< scientific << setprecision(6) << setw(16)
+                                 << order << "  "<<vnMpTy_cos_tot[order][m][i][k]<<" "<<vnMpTy_sin_tot[order][m][i][k]<<" "<< sqrt(pow(vnMpTy_cos_tot[order][m][i][k], 2)
+                                        + pow(vnMpTy_sin_tot[order][m][i][k], 2))<< "  ";
+                    
+                    }
+
+                    fphoton_eq_SpMatrix_dy<< endl;
+                    fphoton_eq_TL_SpMatrix_dy<< endl;
+                    fphoton_visc_SpMatrix_dy<< endl;
+                    fphoton_diff_SpMatrix_dy<< endl;
+                    fphoton_tot_SpMatrix_dy << endl;
+                    fphoton_pol_lambda_theta_SpMatrix_dy<< endl;
+                    fphoton_pol_lambda_norm_SpMatrix_dy<< endl;
+                    fphoton_pol_lambda_phi_SpMatrix_dy<< endl;
+
+
+
+                
+                
+                }
+        }
+    }
+
 
     // pT differential, dN/(2pi pTdpT MdM dy) and vn(M, pT)
     for (int m = 0; m < nm; m++) {
