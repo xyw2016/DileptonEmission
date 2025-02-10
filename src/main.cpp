@@ -113,9 +113,8 @@ int main(int argc, char** argv) {
 	 double sig_lambda_array[1] = {0.0};
 	 //double sig_lambda_array[1] = {1.249};
 	 for(int isig = 0; isig < 1; isig++){
-         for(int isuppress_order = 0; isuppress_order < 3; isuppress_order++)
-	 {
-
+  
+          int isuppress_order = 1;
 	  paraRdr->setVal("sig_lambda",sig_lambda_array[isig]);
           paraRdr->setVal("suppress_order",isuppress_order);
           std::cout<<" ============================= " <<std::endl;
@@ -148,7 +147,7 @@ int main(int argc, char** argv) {
 
 
 
-        }
+
         }
 	}
 

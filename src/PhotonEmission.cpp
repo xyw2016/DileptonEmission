@@ -796,7 +796,7 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
                                     Eq_localrest_Tb, M_ll[j], visc_fac, bulkPi_fac, diff_fac,
                                     temp_local, muB_local, inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,
                                     dNd2pTdphidy_cell_eq, dNd2pTdphidy_cell_eqT, dNd2pTdphidy_cell_eqL, dNd2pTdphidy_cell_visc,
-                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot,dNd2pTdphidy_cell_lambda_norm,dNd2pTdphidy_cell_lambda_theta,dNd2pTdphidy_cell_lambda_phi);
+                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot,dNd2pTdphidy_cell_lambda_norm,dNd2pTdphidy_cell_lambda_theta,dNd2pTdphidy_cell_lambda_phi,spsfactor,hydro_mode);
                                 
                                 
                             }
@@ -804,15 +804,15 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
 
                             // add contributions from QGP and Hadronic matter, etc
                             // these are dN/(MdM pTdpTdphi dy)
-                            dNd2pTdphidy_eq_all[i3] += dNd2pTdphidy_cell_eq*spsfactor;
-                            dNd2pTdphidy_eqT_all[i3] += dNd2pTdphidy_cell_eqT*spsfactor;
-                            dNd2pTdphidy_eqL_all[i3] += dNd2pTdphidy_cell_eqL*spsfactor;
-                            dNd2pTdphidy_visc_all[i3] += dNd2pTdphidy_cell_visc*spsfactor;
-                            dNd2pTdphidy_diff_all[i3] += dNd2pTdphidy_cell_diff*spsfactor;
-                            dNd2pTdphidy_tot_all[i3] += dNd2pTdphidy_cell_tot*spsfactor;
-                            dNd2pTdphidy_pol_lambda_theta_all[i3] += dNd2pTdphidy_cell_lambda_theta*spsfactor;
-                            dNd2pTdphidy_pol_lambda_norm_all[i3] += dNd2pTdphidy_cell_lambda_norm*spsfactor;
-                            dNd2pTdphidy_pol_lambda_phi_all[i3] += dNd2pTdphidy_cell_lambda_phi*spsfactor;
+                            dNd2pTdphidy_eq_all[i3] += dNd2pTdphidy_cell_eq;
+                            dNd2pTdphidy_eqT_all[i3] += dNd2pTdphidy_cell_eqT;
+                            dNd2pTdphidy_eqL_all[i3] += dNd2pTdphidy_cell_eqL;
+                            dNd2pTdphidy_visc_all[i3] += dNd2pTdphidy_cell_visc;
+                            dNd2pTdphidy_diff_all[i3] += dNd2pTdphidy_cell_diff;
+                            dNd2pTdphidy_tot_all[i3] += dNd2pTdphidy_cell_tot;
+                            dNd2pTdphidy_pol_lambda_theta_all[i3] += dNd2pTdphidy_cell_lambda_theta;
+                            dNd2pTdphidy_pol_lambda_norm_all[i3] += dNd2pTdphidy_cell_lambda_norm;
+                            dNd2pTdphidy_pol_lambda_phi_all[i3] += dNd2pTdphidy_cell_lambda_phi;
 
 
                             
@@ -1320,7 +1320,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                                     Eq_localrest_Tb, M_ll[j], visc_fac, bulkPi_fac, diff_fac,
                                     temp_local, muB_local, inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,
                                     dNd2pTdphidy_cell_eq, dNd2pTdphidy_cell_eqT, dNd2pTdphidy_cell_eqL, dNd2pTdphidy_cell_visc,
-                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot,dNd2pTdphidy_cell_lambda_norm,dNd2pTdphidy_cell_lambda_theta,dNd2pTdphidy_cell_lambda_phi);
+                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot,dNd2pTdphidy_cell_lambda_norm,dNd2pTdphidy_cell_lambda_theta,dNd2pTdphidy_cell_lambda_phi,spsfactor,hydro_mode);
                                 
                                 
                             }
@@ -1338,24 +1338,24 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
 
                             // add contributions from QGP and Hadronic matter, etc
                             // these are dN/(MdM pTdpTdphi dy)
-                            dNd2pTdphidy_eq_all[n + CORES * i3] += dNd2pTdphidy_cell_eq*spsfactor;
-                            dNd2pTdphidy_eqT_all[n + CORES * i3] += dNd2pTdphidy_cell_eqT*spsfactor;
-                            dNd2pTdphidy_eqL_all[n + CORES * i3] += dNd2pTdphidy_cell_eqL*spsfactor;
-                            dNd2pTdphidy_visc_all[n + CORES * i3] += dNd2pTdphidy_cell_visc*spsfactor;
-                            dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff*spsfactor;
-                            dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot*spsfactor;
-                            dNd2pTdphidy_pol_lambda_theta_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_theta*spsfactor;
-                            dNd2pTdphidy_pol_lambda_norm_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_norm*spsfactor;
-                            dNd2pTdphidy_pol_lambda_phi_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_phi*spsfactor;
+                            dNd2pTdphidy_eq_all[n + CORES * i3] += dNd2pTdphidy_cell_eq;
+                            dNd2pTdphidy_eqT_all[n + CORES * i3] += dNd2pTdphidy_cell_eqT;
+                            dNd2pTdphidy_eqL_all[n + CORES * i3] += dNd2pTdphidy_cell_eqL;
+                            dNd2pTdphidy_visc_all[n + CORES * i3] += dNd2pTdphidy_cell_visc;
+                            dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff;
+                            dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot;
+                            dNd2pTdphidy_pol_lambda_theta_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_theta;
+                            dNd2pTdphidy_pol_lambda_norm_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_norm;
+                            dNd2pTdphidy_pol_lambda_phi_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_phi;
 
 
                             
 
                             if (differential_flag == 1) {
-                                dNd2pTdphidydTdtau_eq_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_eq*spsfactor;
-                                dNd2pTdphidydTdtau_visc_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_visc*spsfactor;
-                                dNd2pTdphidydTdtau_diff_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_diff*spsfactor;
-                                dNd2pTdphidydTdtau_tot_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_tot*spsfactor;
+                                dNd2pTdphidydTdtau_eq_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_eq;
+                                dNd2pTdphidydTdtau_visc_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_visc;
+                                dNd2pTdphidydTdtau_diff_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_diff;
+                                dNd2pTdphidydTdtau_tot_all[idx_T][idx_tau][n+CORES*i3] += dNd2pTdphidy_cell_tot;
                             }
 
                         } // M_ll

@@ -49,11 +49,13 @@ nTcut = 20
 calHGIdFlag = 0
 
 etaovers=0.12
-flag_prehydro = 0 
-flag_hydro = 1 
+flag_prehydro = 1 
+flag_hydro = 0 
+beta = 1.0
 
-Hydro_2D = 0 
-USE_2D_mode = 0 
+
+Hydro_2D = 1 
+USE_2D_mode = 1 
 Hydro_etas_i = -3.
 Hydro_etas_f =  3.
 Hydro_netas_n = 21;

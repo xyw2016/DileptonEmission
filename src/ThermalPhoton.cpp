@@ -65,6 +65,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     include_visc_deltaf = paraRdr->getVal("include_shearvisc_deltaf");
 
     alpha_s = paraRdr->getVal("alpha_s");
+    beta = paraRdr->getVal("beta");
 
     // if muB is off, no need to include diffusion correction
     if(turn_on_muB_==0)
@@ -378,14 +379,35 @@ void ThermalPhoton::FiniteBaryonRates(double T, double muB, double inv_eplusp, d
 
 void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_factor, double bulkPi_factor, double diff_factor, 
     double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double &eqrate_ptr, double &eqrateT_ptr, double &eqrateL_ptr, 
-	double &viscrate_ptr, double &bulkvis_ptr, double &diffrate_ptr) 
+	double &viscrate_ptr, double &bulkvis_ptr, double &diffrate_ptr,double suppress_factor,int hydro_mode) 
 {
 
 	if (bRateTable_) {
         // interpolate NLO equilibrium rate
         double k = sqrt(Eq*Eq-M_ll*M_ll);
+        double  eqrate_ptr0=0.0, eqrateT_ptr0=0.0, eqrateL_ptr0=0.0;
+        double  eqrate_ptr1=0.0, eqrateT_ptr1=0.0, eqrateL_ptr1=0.0;
+        double alpha_s0 = 0.0;
+        
+        if (hydro_mode == 22){
 
-  		NLO_rate(grid_T,grid_L,Eq,k,alpha_s,muB,T,me, eqrate_ptr, eqrateT_ptr, eqrateL_ptr);
+        
+  		NLO_rate(grid_T,grid_L,Eq,k,alpha_s0,muB,T,me, eqrate_ptr0, eqrateT_ptr0, eqrateL_ptr0);        
+  		NLO_rate(grid_T,grid_L,Eq,k,alpha_s,muB,T,me, eqrate_ptr1, eqrateT_ptr1, eqrateL_ptr1);
+        eqrate_ptr = eqrate_ptr0*suppress_factor + (eqrate_ptr1-eqrate_ptr0)*pow(suppress_factor,beta);
+        eqrateT_ptr = eqrateT_ptr0*suppress_factor + (eqrateT_ptr1-eqrateT_ptr0)*pow(suppress_factor,beta);
+        eqrateL_ptr = eqrateL_ptr0*suppress_factor + (eqrateL_ptr1-eqrateL_ptr0)*pow(suppress_factor,beta);
+
+        }
+        else if(hydro_mode == 12){
+            NLO_rate(grid_T,grid_L,Eq,k,alpha_s,muB,T,me, eqrate_ptr, eqrateT_ptr, eqrateL_ptr);
+        }
+        else{
+            std::cout<<" wrong hydro flag: "<< hydro_mode <<" exit() "<<std::endl;
+        }
+
+
+        
   		diffrate_ptr = 0.;
     } else {
     	// use LO analytical form
@@ -402,7 +424,7 @@ void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_fact
 void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (&flow_u_mu_Min)[4], double Eq, double M_ll, double pi_zz, double bulkPi, 
 	double diff_factor, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double volume, double fraction,
 	double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_eqT, double &dNd2pTdphidy_cell_eqL, double &dNd2pTdphidy_cell_visc, 
-    double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot,double &dNd2pTdphidy_cell_lambda_norm, double &dNd2pTdphidy_cell_lambda_theta, double &dNd2pTdphidy_cell_lambda_phi) {
+    double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot,double &dNd2pTdphidy_cell_lambda_norm, double &dNd2pTdphidy_cell_lambda_theta, double &dNd2pTdphidy_cell_lambda_phi,double suppress_factor,int hydro_mode) {
 
     const double volfrac = volume*fraction;
 
@@ -420,7 +442,7 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     // dilepton emission diffusion correction at local rest cell
     double em_diffrate = 0.;
     getPhotonemissionRate(Eq, M_ll, pi_zz, bulkPi, diff_factor, T, muB, inv_eplusp, rhoB_over_eplusp,
-                          em_eqrate, em_eqrateT, em_eqrateL, em_visrate, em_bulkvis, em_diffrate);
+                          em_eqrate, em_eqrateT, em_eqrateL, em_visrate, em_bulkvis, em_diffrate, suppress_factor,hydro_mode);
 
     //    std::cout<<" wxy3 "<< em_eqrate<<" "<<em_eqrateT<<" "<<em_eqrateL<<std::endl;
     double temp_eq_sum   = em_eqrate*volfrac;

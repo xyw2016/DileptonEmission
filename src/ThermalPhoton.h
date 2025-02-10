@@ -36,6 +36,7 @@ class ThermalPhoton {
     int turn_on_muB_;
 
     double alpha_s;
+    double beta;
 
     // photon emission rate
     std::unique_ptr<Table2D> Photonemission_eqrateTable_ptr;
@@ -109,7 +110,7 @@ class ThermalPhoton {
 
     // yields and spectra in temperature or proper time
     double ***dNpTdpTdydT_eq, ***dNpTdpTdydT_visc; 
-    double ***dNpTdpTdydT_diff, ***dNpTdpTdydT_tot;
+    double ***dNpTdpTdydT_diff, ***dNpTdpTdydT_tot; 
 
     double ***dNpTdpTdydtau_eq, ***dNpTdpTdydtau_visc; 
     double ***dNpTdpTdydtau_diff, ***dNpTdpTdydtau_tot;
@@ -159,11 +160,11 @@ class ThermalPhoton {
 
     void getPhotonemissionRate(double Eq, double M_ll, double pi_zz, double bulkPi,
         double diff_factor, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double &eqrate_ptr, double &eqrateT_ptr, 
-        double &eqrateL_ptr, double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr);
+        double &eqrateL_ptr, double &visrate_ptr, double &bulkvis_ptr, double &diffrate_ptr,const double suppress_factor,const int hydro_mode);
     void calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (&flow_u_mu_Min)[4],double Eq, double M_ll, double pi_zz, double bulkPi, 
         double diff_factor, double T, double muB, double inv_eplusp, double rhoB_over_eplusp, double volume, double fraction,
         double &dNd2pTdphidy_cell_eq, double &dNd2pTdphidy_cell_eqT, double &dNd2pTdphidy_cell_eqL, double &dNd2pTdphidy_cell_visc, 
-        double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot,double &dNd2pTdphidy_cell_lambda_norm, double &dNd2pTdphidy_cell_lambda_theta, double &dNd2pTdphidy_cell_lambda_phi);
+        double &dNd2pTdphidy_cell_diff, double &dNd2pTdphidy_cell_tot,double &dNd2pTdphidy_cell_lambda_norm, double &dNd2pTdphidy_cell_lambda_theta, double &dNd2pTdphidy_cell_lambda_phi,const double suppress_factor,const int hydro_mode);
 
     void calPhoton_SpvnpT(double ***dNd2pTdphipy,
                           double ***vnypT_cos, double *** vnypT_sin,
