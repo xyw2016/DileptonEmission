@@ -9,6 +9,7 @@ an input file and/or from the command line. Version 1.02 (03-14-2012) Zhi Qiu
 #include <string>
 #include <vector>
 
+namespace Photon_dilepton{
 class ParameterReader {
   private:
     std::vector<std::string>* names;
@@ -52,7 +53,7 @@ class ParameterReader {
     // print out all parameters to the screen
     void echo();
 };
-
+}
 #endif
 
 /***********************************************************************

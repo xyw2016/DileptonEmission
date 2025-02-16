@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 
+namespace Photon_dilepton{
 using namespace std;
 
 int gauss_quadrature(
@@ -1438,4 +1439,5 @@ void sgqf(
     }
 
     return;
+}
 }

@@ -3,6 +3,7 @@
 
 #include <ctime>
 
+namespace Photon_dilepton{
 class Stopwatch {
   private:
     time_t start, end;
@@ -16,7 +17,7 @@ class Stopwatch {
     void toc() { end = clock(); }
     double takeTime() { return ((double)(end - start)) / CLOCKS_PER_SEC; }
 };
-
+}
 #endif
 
 /*-----------------------------------------------------------------------

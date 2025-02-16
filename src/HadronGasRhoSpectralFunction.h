@@ -7,6 +7,7 @@
 #include "ParameterReader.h"
 #include "ThermalPhoton.h"
 
+namespace Photon_dilepton{
 class HadronGasRhoSpectralFunction : public ThermalPhoton {
   public:
     HadronGasRhoSpectralFunction(
@@ -19,5 +20,5 @@ class HadronGasRhoSpectralFunction : public ThermalPhoton {
         double T, double muB, std::vector<double> &Eq,
         std::vector<double> &eqrate_ptr);
 };
-
+}
 #endif

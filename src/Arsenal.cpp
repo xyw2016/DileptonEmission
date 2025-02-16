@@ -12,6 +12,7 @@ using std::endl;
 using std::string;
 using std::vector;
 
+namespace Photon_dilepton{
 namespace ARSENAL {
 
 double Simpson_sum(double* array, int num, double h_step) {
@@ -675,3 +676,4 @@ void deleteA2DMatrix(double** mat, const int n1) {
 }
 
 }  // namespace ARSENAL
+}

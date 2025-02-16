@@ -3,6 +3,7 @@
 
 #include <cmath>
 
+namespace Photon_dilepton{
 HadronGasPiRhoOmega::HadronGasPiRhoOmega(
     std::shared_ptr<ParameterReader> paraRdr_in, std::string emissionProcess)
     : ThermalPhoton {paraRdr_in, emissionProcess} {}
@@ -50,4 +51,5 @@ void HadronGasPiRhoOmega::analyticRates(
 
         eqrate_ptr[i] = FFpiro + FFompi + FFomro;
     }
+}
 }

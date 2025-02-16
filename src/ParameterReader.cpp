@@ -12,6 +12,7 @@ Ver 1.02
 #include "Arsenal.h"
 #include "stdlib.h"
 
+namespace Photon_dilepton{
 using namespace std;
 using namespace ARSENAL;
 
@@ -184,4 +185,5 @@ void ParameterReader::echo()
     for (unsigned long ii = 0; ii < names->size(); ii++)
         cout << (*names)[ii] << "=" << (*values)[ii] << "  ";
     cout << endl;
+}
 }

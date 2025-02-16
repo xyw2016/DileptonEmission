@@ -12,6 +12,7 @@
 #include "Arsenal.h"
 #include "data_struct.h"
 
+namespace Photon_dilepton{
 using namespace std;
 using PhysConsts::alphaEM;
 using PhysConsts::hbarC;
@@ -359,4 +360,5 @@ void DileptonQGPNLO::getRateFromTable(
     rateL = prefac * rhoL_app;
 
     rateTot = 2. * rateT + rateL;
+}
 }

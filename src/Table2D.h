@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+namespace Photon_dilepton{
 class Table2D {
   private:
     std::vector<std::vector<double>*>* data;
@@ -33,5 +34,5 @@ class Table2D {
     }
     void outputTabletoFile(std::string filename);
 };
-
+}
 #endif

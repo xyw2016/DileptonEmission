@@ -6,14 +6,16 @@
 // This file contains routines to read in hydro data from files and functions
 // that return interpolated data at a given space-time point
 
-#ifndef SRC_HYDROINFO_MUSIC_H_
-#define SRC_HYDROINFO_MUSIC_H_
+#ifndef SRC_HYDROINFO_MUSIC_EM_H_
+#define SRC_HYDROINFO_MUSIC_EM_H_
 
 #include <string>
 #include <vector>
+#include <limits>
 
 #include "data_struct.h"
 
+namespace Photon_dilepton{
 class Hydroinfo_MUSIC {
   private:
     float hydroTau0;      // tau_0 in the hydro data files
@@ -27,6 +29,8 @@ class Hydroinfo_MUSIC {
     float hydroDeta;      // step dz in fm in the hydro data files in
                           // the z-direction for 3D hydro
 
+    float hydroTmax;       // max temperature
+    float hydroTmin;       // min temperature
     int nskip_tau, nskip_x, nskip_eta;
 
     int hydroWhichHydro;  // choose a hydro evolution model to use
@@ -65,6 +69,7 @@ class Hydroinfo_MUSIC {
 
     bool isBoostInvariant() const { return (boost_invariant_); }
 
+    void readHydroDatafromJS(const std::vector<float>& bulkdata);
     void readHydroData(int whichHydro, int nskip_tau_in);
 
     void getHydroValues(float x, float y, float z, float t, fluidCell *info);
@@ -74,5 +79,5 @@ class Hydroinfo_MUSIC {
         float tau0, float tau_max, float dtau, float x_max, float dx,
         float z_max, float dz);
 };
-
+}
 #endif  // SRC_HYDROINFO_MUSIC_H_

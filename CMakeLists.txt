@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.5)
 project (PhotonEmission LANGUAGES CXX C)
 
-set(libname "hydro_photonEmission")
+set(libname "photon_dilepton")
 set(exename "hydro_photonEmission.e")
 
 # require C++11

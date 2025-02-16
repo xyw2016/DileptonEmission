@@ -1,5 +1,5 @@
 set (SOURCES
-     Hydroinfo_h5.cpp
+     Hydroinfo_h5_em.cpp
      Arsenal.cpp
      ThermalPhoton.cpp
      ThermalDilepton.cpp
@@ -8,7 +8,7 @@ set (SOURCES
      ParameterReader.cpp
      tensor_trans.cpp
      gauss_quadrature.cpp
-     Hydroinfo_MUSIC.cpp
+     Hydroinfo_MUSIC_em.cpp
      QGP2to2Total.cpp
      QGPAMYCollinear.cpp
      HadronGasRhoSpectralFunction.cpp
@@ -16,6 +16,7 @@ set (SOURCES
      HadronGasPiRhoOmega.cpp
      DileptonQGPLO.cpp
      DileptonQGPNLO.cpp
+     JS_photon_dilepton.cpp
     )
 
 add_library(${libname} SHARED ${SOURCES})

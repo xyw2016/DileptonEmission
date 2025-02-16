@@ -7,6 +7,7 @@
 #include <sstream>
 using namespace std;
 
+namespace Photon_dilepton{
 namespace TENSORTRANSFORM {
 
 // lorentz matrix to first boost along longitudinal direction and then
@@ -136,3 +137,4 @@ double Rotation_Tensor_zz(double** M, double* R_z_i) {
 }
 
 }  // namespace TENSORTRANSFORM
+}

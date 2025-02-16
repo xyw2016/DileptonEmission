@@ -7,6 +7,7 @@
 #include "ParameterReader.h"
 #include "ThermalPhoton.h"
 
+namespace Photon_dilepton{
 class QGPAMYCollinear : public ThermalPhoton {
   public:
     QGPAMYCollinear(
@@ -19,5 +20,5 @@ class QGPAMYCollinear : public ThermalPhoton {
         double T, double muB, std::vector<double> &Eq,
         std::vector<double> &eqrate_ptr);
 };
-
+}
 #endif

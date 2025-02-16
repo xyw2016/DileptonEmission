@@ -7,6 +7,7 @@
 #include "ParameterReader.h"
 #include "ThermalDilepton.h"
 
+namespace Photon_dilepton{
 class DileptonQGPLO : public ThermalDilepton {
   public:
     DileptonQGPLO(
@@ -31,5 +32,5 @@ class DileptonQGPLO : public ThermalDilepton {
     const double OOFP = 0.0795774715459476678844418816863;  // 1/(4*pi)
     
 };
-
+}
 #endif  // SRC_DILEPTONQGPLO_H

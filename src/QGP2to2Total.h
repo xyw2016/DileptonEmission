@@ -7,6 +7,7 @@
 #include "ParameterReader.h"
 #include "ThermalPhoton.h"
 
+namespace Photon_dilepton{
 class QGP2to2Total : public ThermalPhoton {
   public:
     QGP2to2Total(
@@ -19,5 +20,5 @@ class QGP2to2Total : public ThermalPhoton {
         double T, double muB, std::vector<double> &Eq,
         std::vector<double> &eqrate_ptr);
 };
-
+}
 #endif

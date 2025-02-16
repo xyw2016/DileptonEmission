@@ -10,6 +10,7 @@
 #include "ParameterReader.h"
 #include "Table2D.h"
 
+namespace Photon_dilepton{
 class ThermalPhoton {
   private:
     std::shared_ptr<ParameterReader> paraRdr;
@@ -206,4 +207,5 @@ class ThermalPhoton {
     void update_rates_with_polyakov_suppression();
     double get_polyakov_suppression_factor(double T_in_GeV);
 };
+}
 #endif  // SRC_THERMALPHOTON_H_

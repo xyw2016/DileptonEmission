@@ -18,6 +18,7 @@
 #include "data_struct.h"
 #include "gauss_quadrature.h"
 
+namespace Photon_dilepton{
 using namespace std;
 using ARSENAL::createA2DMatrix;
 using ARSENAL::createA3DMatrix;
@@ -384,4 +385,5 @@ void ThermalDilepton::outputPhoton_SpvnpT_shell(string path) {
     outputPhoton_SpvnpT(
         path, "eqL", dNpTdpTdphidydM_eqL, vnMInvpT_cos_eqL, vnMInvpT_sin_eqL,
         vnMInv_cos_eqL, vnMInv_sin_eqL);
+}
 }

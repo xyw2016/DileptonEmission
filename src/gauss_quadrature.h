@@ -1,6 +1,7 @@
 #ifndef GAUSS_QUADRATURE_H
 #define GAUSS_QUADRATURE_H
 
+namespace Photon_dilepton{
 int gauss_quadrature(
     int order, int kind, double alpha, double beta, double a, double b,
     double x[], double w[]);
@@ -33,5 +34,5 @@ void scqf(
     double b);
 void sgqf(
     int nt, double aj[], double bj[], double zemu, double t[], double wts[]);
-
+}
 #endif

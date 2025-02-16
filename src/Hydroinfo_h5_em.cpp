@@ -1,4 +1,4 @@
-#include "Hydroinfo_h5.h"
+#include "Hydroinfo_h5_em.h"
 
 #include <stdlib.h>
 
@@ -11,6 +11,7 @@
 
 #include "hdf5.h"
 
+namespace Photon_dilepton{
 using namespace std;
 
 HydroinfoH5::HydroinfoH5() {
@@ -673,4 +674,5 @@ double HydroinfoH5::cubeInterp(
                   + A011 * (1 - x) * y * z + A110 * x * y * (1 - z)
                   + A111 * x * y * z;
     return (Axyz);
+}
 }

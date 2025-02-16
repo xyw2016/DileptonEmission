@@ -8,6 +8,7 @@
 #include "ParameterReader.h"
 #include "ThermalDilepton.h"
 
+namespace Photon_dilepton{
 class DileptonQGPNLO : public ThermalDilepton {
   public:
     DileptonQGPNLO(
@@ -54,5 +55,5 @@ class DileptonQGPNLO : public ThermalDilepton {
     std::vector<double> MoverT_list;
     std::vector<double> koverT_list;
 };
-
+}
 #endif  // SRC_DILEPTONQGPNLO_H

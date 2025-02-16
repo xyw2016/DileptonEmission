@@ -14,13 +14,14 @@
 #include "HadronGasPiRhoOmega.h"
 #include "HadronGasPipiBremsstrahlung.h"
 #include "HadronGasRhoSpectralFunction.h"
-#include "Hydroinfo_h5.h"
+#include "Hydroinfo_h5_em.h"
 #include "ParameterReader.h"
 #include "QGP2to2Total.h"
 #include "QGPAMYCollinear.h"
 #include "ThermalPhoton.h"
 #include "tensor_trans.h"
 
+namespace Photon_dilepton{
 using namespace std;
 using ARSENAL::createA2DMatrix;
 using ARSENAL::createA3DMatrix;
@@ -1269,4 +1270,5 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename) {
             << sqrt(pow(vn_cos_tot[order], 2) + pow(vn_sin_tot[order], 2))
             << endl;
     }
+}
 }

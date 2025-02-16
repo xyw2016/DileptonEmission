@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+namespace Photon_dilepton{
 HadronGasRhoSpectralFunction::HadronGasRhoSpectralFunction(
     std::shared_ptr<ParameterReader> paraRdr_in, std::string emissionProcess)
     : ThermalPhoton {paraRdr_in, emissionProcess} {}
@@ -61,4 +62,5 @@ void HadronGasRhoSpectralFunction::NetBaryonCorrection(
         double logFrho = dmT - kmT / (Eq_local * Eq_local) - mmT / Eq_local;
         eqrate_ptr[i] *= exp(logFrho);
     }
+}
 }

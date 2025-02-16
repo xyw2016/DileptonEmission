@@ -3,6 +3,7 @@
 
 #include <cmath>
 
+namespace Photon_dilepton{
 HadronGasPipiBremsstrahlung::HadronGasPipiBremsstrahlung(
     std::shared_ptr<ParameterReader> paraRdr_in, std::string emissionProcess)
     : ThermalPhoton {paraRdr_in, emissionProcess} {}
@@ -28,4 +29,5 @@ void HadronGasPipiBremsstrahlung::analyticRates(
             eqrate_ptr[i] = 0.;
         }
     }
+}
 }

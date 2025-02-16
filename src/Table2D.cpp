@@ -10,6 +10,7 @@
 #include "Arsenal.h"
 #include "stdlib.h"
 
+namespace Photon_dilepton{
 Table2D::Table2D() {};
 
 Table2D::Table2D(std::string filename) { loadTableFromFile(filename); };
@@ -43,4 +44,5 @@ void Table2D::outputTabletoFile(std::string filename) {
         }
         output << std::endl;
     }
+}
 }

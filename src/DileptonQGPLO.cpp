@@ -6,6 +6,7 @@
 
 #include "data_struct.h"
 
+namespace Photon_dilepton{
 using PhysConsts::hbarC;
 using PhysConsts::alphaEM;
 using PhysConsts::hbarC;
@@ -127,4 +128,5 @@ void DileptonQGPLO::analyticRates(
 
     rateTot = 2. * rateT + rateL;
 
+}
 }

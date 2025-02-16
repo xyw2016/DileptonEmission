@@ -20,13 +20,14 @@
 #include <sstream>
 
 #include "./Arsenal.h"
-#include "./Hydroinfo_MUSIC.h"
-#include "./Hydroinfo_h5.h"
+#include "./Hydroinfo_MUSIC_em.h"
+#include "./Hydroinfo_h5_em.h"
 #include "./ParameterReader.h"
 #include "./PhotonEmission.h"
 #include "./Stopwatch.h"
 #include "./gauss_quadrature.h"
 
+using namespace Photon_dilepton;
 using namespace std;
 
 int main(int argc, char** argv) {

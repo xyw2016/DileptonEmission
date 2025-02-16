@@ -10,6 +10,7 @@
 #include "ParameterReader.h"
 #include "Table2D.h"
 
+namespace Photon_dilepton{
 class ThermalDilepton {
   private:
     std::shared_ptr<ParameterReader> paraRdr;
@@ -113,5 +114,5 @@ class ThermalDilepton {
         double **vnMInv_sin);
     void outputPhoton_SpvnpT_shell(std::string path);
 };
-
+}
 #endif  // SRC_THERMALDILEPTON_H

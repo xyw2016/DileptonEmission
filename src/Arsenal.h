@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+namespace Photon_dilepton{
 namespace ARSENAL {
 
 double Simpson_sum(double*, int, double);
@@ -66,5 +67,5 @@ void deleteA5DMatrix(
     double***** mat, const int n1, const int n2, const int n3, const int n4);
 
 };  // namespace ARSENAL
-
+}
 #endif
