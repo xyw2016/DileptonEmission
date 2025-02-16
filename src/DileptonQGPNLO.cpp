@@ -26,7 +26,7 @@ void error_handler_nlo(const char *reason, const char *file, int line, int gsl_e
 DileptonQGPNLO::DileptonQGPNLO(
     std::shared_ptr<ParameterReader> paraRdr_in, std::string emissionProcess)
     : ThermalDilepton {paraRdr_in, emissionProcess} {
-    ratePath_ = "ph_rates/";
+    ratePath_ = "ph_dlep_rates/";
     readInEmissionTables(emissionProcess);
 }
 

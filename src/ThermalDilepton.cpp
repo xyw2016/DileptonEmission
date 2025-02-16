@@ -40,7 +40,7 @@ ThermalDilepton::ThermalDilepton(
     nrapidity = paraRdr->getVal("nrapidity");
     nMInv_ = paraRdr->getVal("nMInv");
     norder_ = paraRdr->getVal("norder");
-    rate_path_ = "ph_rates/";
+    rate_path_ = "ph_dlep_rates/";
 
     alphaS_ = paraRdr->getVal("alpha_s");
 

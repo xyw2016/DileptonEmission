@@ -36,7 +36,7 @@ ThermalPhoton::ThermalPhoton(
     nphi = paraRdr->getVal("nphi");
     nrapidity = paraRdr->getVal("nrapidity");
     norder = paraRdr->getVal("norder");
-    rate_path_ = "ph_rates/";
+    rate_path_ = "ph_dlep_rates/";
 
     bRateTable_ = false;
     bShearVisCorr_ = false;
