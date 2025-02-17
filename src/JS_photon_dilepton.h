@@ -34,7 +34,7 @@ class JS_photon_dilepton{
 
 
 
-      std::vector<float> run(const std::vector<float>& bulkdata);
+      std::vector<float> run(const std::vector<float>& bulkdata,int ID = 0);
 
 };
 

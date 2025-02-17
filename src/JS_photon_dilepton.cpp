@@ -15,7 +15,7 @@ namespace Photon_dilepton{
     }
 
 
-    std::vector<float> JS_photon_dilepton::run(const std::vector<float>& bulkdata)
+    std::vector<float> JS_photon_dilepton::run(const std::vector<float>& bulkdata,int ID)
     {
         int neta = paraRdr->getVal("neta");
         double eta_i = paraRdr->getVal("eta_i");
@@ -44,12 +44,16 @@ namespace Photon_dilepton{
         thermalPhotons.calPhoton_SpvnpT_individualchannel();
         thermalPhotons.calPhoton_total_SpMatrix();
         thermalPhotons.calPhoton_total_Spvn();
-        int eventid = 0; 
-        //thermalPhotons.SavePhotoninJS(eventid);
+        std::ostringstream output_reset;
+	output_reset << "ph_dlep_results/"<<ID<<"/";
+        thermalPhotons.reset_output_path(output_reset.str());
+        thermalPhotons.outputPhotonSpvn();
         
         delete hydroinfo_ptr;
         //return dilepton_sp;
-        return photon_sp;
+        // clean up
+        delete[] eta_ptr;
+        delete[] etaweight_ptr;
         
 
 
