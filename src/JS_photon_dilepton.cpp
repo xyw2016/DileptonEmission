@@ -15,7 +15,7 @@ namespace Photon_dilepton{
     }
 
 
-    std::vector<float> JS_photon_dilepton::run(const std::vector<float>& bulkdata,const std::string ID)
+    void JS_photon_dilepton::run(const std::vector<float>& bulkdata,const int info_in_memory,const std::string ID)
     {
         int neta = paraRdr->getVal("neta");
         double eta_i = paraRdr->getVal("eta_i");
@@ -30,7 +30,17 @@ namespace Photon_dilepton{
 	}
 
 	hydroinfo_ptr = new Hydroinfo_MUSIC();
-        hydroinfo_ptr->readHydroDatafromJS(bulkdata);
+	if (info_in_memory == 1){
+        	hydroinfo_ptr->readHydroDatafromJS(bulkdata);
+	}
+	else{
+        	int hydro_mode = 12;
+        	int nskip_tau = 1;
+		hydroinfo_ptr->set_evo_path("./evolution_all_xyeta_MUSIC.dat");
+        	hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
+
+	}
+
         // calculate thermal photons from the hydro medium
         if (hydroinfo_ptr->isBoostInvariant()) {
             thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,

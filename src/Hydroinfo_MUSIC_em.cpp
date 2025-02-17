@@ -27,6 +27,7 @@ Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
     nskip_tau = 1;
     nskip_x = 1;
     nskip_eta = 1;
+    path_evo = "results/evolution_all_xyeta.dat";
 }
 
 Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
@@ -859,7 +860,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
 
         // read in temperature and flow velocity
         // The name of the evolution file: evolution_name
-        string evolution_name = "results/evolution_all_xyeta.dat";
+        string evolution_name = path_evo;
         cout << "Evolution file name = " << evolution_name << endl;
         std::FILE *fin;
         fin = std::fopen(evolution_name.c_str(), "rb");

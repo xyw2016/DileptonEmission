@@ -44,6 +44,8 @@ class Hydroinfo_MUSIC {
     int turn_on_rhob;
     int turn_on_diff;
 
+    std::string path_evo;
+
     // array to store hydro information
     std::vector<fluidCell_2D> lattice_2D;
     std::vector<fluidCell_3D> lattice_3D;
@@ -66,6 +68,7 @@ class Hydroinfo_MUSIC {
     int get_hydro_Nskip_x() { return (nskip_x); }
     int get_hydro_Nskip_eta() { return (nskip_eta); }
     int get_number_of_fluid_cells_3d() { return (lattice_new_.size()); }
+    void set_evo_path(const std::string& a) { path_evo = a;}
 
     bool isBoostInvariant() const { return (boost_invariant_); }
 
