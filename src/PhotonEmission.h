@@ -94,7 +94,7 @@ class PhotonEmission {
     void calPhoton_total_Spvn();
     void outputPhoton_total_SpvnpT(std::string);
     void outputPhotonSpvn();
-    std::string reset_output_path(std::string a){ output_path = a;};
+    void reset_output_path(std::string a){ output_path = a;};
 };
 }
 #endif  // SRC_PHOTONEMISSION_H_

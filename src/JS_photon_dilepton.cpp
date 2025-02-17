@@ -15,7 +15,7 @@ namespace Photon_dilepton{
     }
 
 
-    std::vector<float> JS_photon_dilepton::run(const std::vector<float>& bulkdata,int ID)
+    std::vector<float> JS_photon_dilepton::run(const std::vector<float>& bulkdata,const std::string ID)
     {
         int neta = paraRdr->getVal("neta");
         double eta_i = paraRdr->getVal("eta_i");
