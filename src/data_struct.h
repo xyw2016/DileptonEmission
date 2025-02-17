@@ -1,5 +1,5 @@
-#ifndef DATA_STRUCT_H_
-#define DATA_STRUCT_H_
+#ifndef DATA_STRUCT_EM_H_
+#define DATA_STRUCT_EM_H_
 
 namespace Photon_dilepton{
 namespace PhysConsts {
