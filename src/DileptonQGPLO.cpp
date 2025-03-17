@@ -1,23 +1,23 @@
 #include "DileptonQGPLO.h"
-#include <gsl/gsl_sf_fermi_dirac.h>
+
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_sf_fermi_dirac.h>
 
 #include <cmath>
 
 #include "data_struct.h"
 
-using PhysConsts::hbarC;
 using PhysConsts::alphaEM;
 using PhysConsts::hbarC;
 
-void error_handler_lo(const char *reason, const char *file, int line, int gsl_errno) {
-    //fprintf(stderr, "GSL ERROR: %s:%d: %s (error code: %d)\n", file, line, reason, gsl_errno);
+void error_handler_lo(
+    const char *reason, const char *file, int line, int gsl_errno) {
+    // fprintf(stderr, "GSL ERROR: %s:%d: %s (error code: %d)\n", file, line,
+    // reason, gsl_errno);
 }
 DileptonQGPLO::DileptonQGPLO(
     std::shared_ptr<ParameterReader> paraRdr_in, std::string emissionProcess)
     : ThermalDilepton {paraRdr_in, emissionProcess} {}
-
-
 
 double DileptonQGPLO::nB(double x) {
     double e = exp(-x);
@@ -32,52 +32,44 @@ double DileptonQGPLO::mllFactor(double x) {
         return (1. + 2. * x) * sqrt(1. - 4. * x);
 }
 
-
-//double DileptonQGPLO::l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
+// double DileptonQGPLO::l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
 //
-//double DileptonQGPLO::l2f(double x) { return -gsl_sf_fermi_dirac_1(-x); }
+// double DileptonQGPLO::l2f(double x) { return -gsl_sf_fermi_dirac_1(-x); }
 //
-//double DileptonQGPLO::l3f(double x) { return -gsl_sf_fermi_dirac_2(-x); }
+// double DileptonQGPLO::l3f(double x) { return -gsl_sf_fermi_dirac_2(-x); }
 
-double DileptonQGPLO::l1f(double x) { 
-    
+double DileptonQGPLO::l1f(double x) {
     gsl_set_error_handler(&error_handler_lo);
-    gsl_sf_result result; 
+    gsl_sf_result result;
     int status = gsl_sf_fermi_dirac_0_e(-x, &result);
 
     if (status != GSL_SUCCESS) {
-        //printf("An error occurred: %f\n", result.val);
-	//not printf, set result.val=0.0
+        // printf("An error occurred: %f\n", result.val);
+        // not printf, set result.val=0.0
     }
     return result.val;
-
 }
-double DileptonQGPLO::l2f(double x) { 
-    
+double DileptonQGPLO::l2f(double x) {
     gsl_set_error_handler(&error_handler_lo);
-    gsl_sf_result result; 
+    gsl_sf_result result;
     int status = gsl_sf_fermi_dirac_1_e(-x, &result);
 
     if (status != GSL_SUCCESS) {
-        //printf("An error occurred: %f\n", result.val);
-	//not printf, set result.val=0.0
+        // printf("An error occurred: %f\n", result.val);
+        // not printf, set result.val=0.0
     }
     return -result.val;
-
 }
-double DileptonQGPLO::l3f(double x) { 
-    
+double DileptonQGPLO::l3f(double x) {
     gsl_set_error_handler(&error_handler_lo);
-    gsl_sf_result result; 
+    gsl_sf_result result;
     int status = -gsl_sf_fermi_dirac_2_e(-x, &result);
     if (status != GSL_SUCCESS) {
-        //printf("An error occurred: %f\n", result.val);
-	//not printf, set result.val=0.0
+        // printf("An error occurred: %f\n", result.val);
+        // not printf, set result.val=0.0
     }
 
-
     return -result.val;
-
 }
 
 void DileptonQGPLO::rho_LO(
@@ -96,7 +88,7 @@ void DileptonQGPLO::rho_LO(
 
     r00 = l3f(kp + mu) + l3f(kp - mu) - l3f(km + mu) - l3f(km - mu);
     r00 = r00 * 2. / k + l2f(kp + mu) + l2f(kp - mu)
-            + somk * (l2f(km + mu) + l2f(km - mu));
+          + somk * (l2f(km + mu) + l2f(km - mu));
     r00 = r00 * 6. + .5 * k * k * (somk + 1.);
     r00 *= -OOFP;
 
@@ -104,27 +96,23 @@ void DileptonQGPLO::rho_LO(
     rT = .5 * (rV - rL);
 }
 
-
 // PRC. 93, 044902, 2016
 void DileptonQGPLO::analyticRates(
-    const double E, const double k,  const double muB,
-    const double T, const double m_l, double &rateTot, double &rateT,
-    double &rateL) {
-  
+    const double E, const double k, const double muB, const double T,
+    const double m_l, double &rateTot, double &rateT, double &rateL) {
     double M2 = E * E - k * k;
 
     double prefactor = mllFactor(m_l * m_l / M2) * (2. / 3.) * pow(hbarC, -4.)
-                           * pow(alphaEM, 2.);
-    
+                       * pow(alphaEM, 2.);
+
     double rhoT_app, rhoL_app;
     rho_LO(E / T, k / T, muB / T, rhoT_app, rhoL_app);
 
     double prefac =
-    prefactor * nB(E / T) * pow(T, 2.) / (3. * pow(M_PI, 3.) * M2);
+        prefactor * nB(E / T) * pow(T, 2.) / (3. * pow(M_PI, 3.) * M2);
 
     rateT = prefac * rhoT_app;
     rateL = prefac * rhoL_app;
 
     rateTot = 2. * rateT + rateL;
-
 }
