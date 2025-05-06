@@ -25,6 +25,8 @@
 #include "Arsenal.h"
 #include "data_struct.h"
 #include "QGP_NLO.h"
+#include "tensor_trans.h"
+
 
 using namespace std;
 using ARSENAL::createA2DMatrix;
@@ -38,6 +40,8 @@ using ARSENAL::deleteA4DMatrix;
 using ARSENAL::deleteA5DMatrix;
 using ARSENAL::deleteA6DMatrix;
 using ARSENAL::logarithmic_mass_grid;
+using TENSORTRANSFORM::boost_matrix;
+
 
 using PhysConsts::me;
 
@@ -54,6 +58,8 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     nrapidity = paraRdr->getVal("nrapidity");
     norder = paraRdr->getVal("norder");
     rate_path_ = "ph_rates/";
+
+    CS_frame = paraRdr->getVal("CS_frame");
 
     bRateTable_    = false;
     bShearVisCorr_ = false;
@@ -462,10 +468,77 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     double u_dot_kvec = flow_u_mu_Min[1]*p_lab_Min[1]
                         +flow_u_mu_Min[2]*p_lab_Min[2]
                         +flow_u_mu_Min[3]*p_lab_Min[3];
+
     
-    double factor_pol_0 = pow((p_lab_Min[0]*u_dot_kvec_norm - p_lab_min_vec_square*flow_u_mu_Min[0]),2)/
-                          (pow((p_lab_Min[0]*flow_u_mu_Min[0]-u_dot_kvec),2)-M_ll*M_ll);
-    factor_pol_0 = factor_pol_0 - 1./3.0;
+    
+    double factor_pol_0_tem1 = pow((p_lab_Min[0]*u_dot_kvec_norm - p_lab_min_vec_square*flow_u_mu_Min[0]),2)/
+                          (pow((p_lab_Min[0]*flow_u_mu_Min[0]-u_dot_kvec),2)-M_ll*M_ll);                          
+    double factor_pol_0 = factor_pol_0_tem1 - 1./3.0;
+    
+    //std::cout << factor_pol_0 <<" 1 " << factor_pol_0_tem <<std::endl;
+
+    
+    ///////////// CS_frame
+    double v_dilepton_boost[3] = {p_lab_Min[1]/p_lab_Min[0],p_lab_Min[2]/p_lab_Min[0],p_lab_Min[3]/p_lab_Min[0]};
+    
+    
+    int rows = 4, cols = 4;
+    double** lambda_munu = createA2DMatrix(rows, cols, 0.);
+   
+    boost_matrix(lambda_munu, v_dilepton_boost[0], 
+        v_dilepton_boost[1], v_dilepton_boost[2]);
+    
+    double pA_beam_lab[4] = {1,0,0,1};
+    double pB_beam_lab[4] = {1,0,0,-1};
+    double pA_beam_lrf[4] = {0,0,0,0};
+    double pB_beam_lrf[4] = {0,0,0,0};
+
+
+    double uflow_dilepton_lrf[4] = {0,0,0,0};
+     
+    for (int boostj = 0; boostj < 4; boostj++) {
+        //double checkk = 0.0;   
+        for (int boosti = 0; boosti < 4; boosti++) {
+            pA_beam_lrf[boostj] += lambda_munu[boostj][boosti]*pA_beam_lab[boosti];
+            pB_beam_lrf[boostj] += lambda_munu[boostj][boosti]*pB_beam_lab[boosti];
+            uflow_dilepton_lrf[boostj] += lambda_munu[boostj][boosti]*flow_u_mu_Min[boosti];
+        }
+        
+        //std::cout<<checkk<<"  check ";
+    }
+
+    //std::cout<<std::endl;
+
+    
+   
+
+    double unit_z[4] = {pA_beam_lrf[0]-pB_beam_lrf[0],pA_beam_lrf[1]-pB_beam_lrf[1],pA_beam_lrf[2]-pB_beam_lrf[2],pA_beam_lrf[3]-pB_beam_lrf[3]};
+    
+    double unit_z_sq = sqrt(unit_z[1]* unit_z[1] + unit_z[2]* unit_z[2] + unit_z[3]* unit_z[3]);
+
+    unit_z[1] =  unit_z[1]/unit_z_sq;
+    unit_z[2] =  unit_z[2]/unit_z_sq;
+    unit_z[3] =  unit_z[3]/unit_z_sq;
+
+   
+
+    double uz_sq_lrf = pow(uflow_dilepton_lrf[1]*unit_z[1] + uflow_dilepton_lrf[2]*unit_z[2] +uflow_dilepton_lrf[3]*unit_z[3],2);
+    double u_vec_sq = uflow_dilepton_lrf[1]*uflow_dilepton_lrf[1] + uflow_dilepton_lrf[2]*uflow_dilepton_lrf[2] +uflow_dilepton_lrf[3]*uflow_dilepton_lrf[3];
+    
+     double check_u1 = flow_u_mu_Min[1]+(p_lab_Min[0]/M_ll -1)*u_dot_kvec_norm*p_lab_Min_norm[1] - p_lab_Min_norm[1]*flow_u_mu_Min[0]/M_ll;
+
+    
+    if (CS_frame == 1 )
+    {
+    double factor_pol_0_tem = uz_sq_lrf/u_vec_sq;            
+    factor_pol_0 = factor_pol_0_tem - 1./3.0;
+    }
+
+    
+
+    ///////////// CS_frame
+
+
 
     double factor_pol_1 = me*me/(p_lab_min_vec_square*p_lab_min_vec_square);
     double rho_delta= temp_eqT_sum - temp_eqL_sum;
@@ -486,12 +559,30 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     dNd2pTdphidy_cell_lambda_theta = lambda_theta*dNd2pTdphidy_cell_eq/(1.0+lambda_theta/3.);
     dNd2pTdphidy_cell_lambda_norm = dNd2pTdphidy_cell_eq/(1.0+lambda_theta/3.);
 
+    
+
+    
+
+    
+
+    
+
+
+
+
     //dNd2pTdphidy_cell_lambda_theta = lambda_theta;
     
     if(std::isnan(dNd2pTdphidy_cell_lambda_theta))
+    //if(std::isnan(temp_eqT_sum))
+    
     { 
         std::cout<< "ERROR: lambda_theta is NAN !!!!!! "<<std::endl;
         std::cout<< temp_eqT_sum << " "<< temp_eqL_sum <<" "<<lambda_theta1<<" "<<factor_pol_0<<" "<<lambda_theta2<< " "<<dNd2pTdphidy_cell_lambda_theta<<std::endl;
+        std::cout << u_vec_sq<<" "<< uflow_dilepton_lrf[1]<<" "<<uflow_dilepton_lrf[2]<<" "<<uflow_dilepton_lrf[3]<<std::endl;
+        std::cout << flow_u_mu_Min[0]<<" "<< flow_u_mu_Min[1]<<" "<<flow_u_mu_Min[2]<<" "<<flow_u_mu_Min[3]<<std::endl;
+        std::cout << v_dilepton_boost[0]<<" "<< v_dilepton_boost[1]<<" "<<v_dilepton_boost[2]<<std::endl;
+        
+        exit(1);
     }
 
     // lambda_phi
@@ -511,10 +602,44 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     lambda_phi_ux_sq = lambda_phi_ux_sq/(1- phat_dot_khat* phat_dot_khat);
 
     double lambda_phi_uy_sq = phat_cross_khat_dot_uflow*phat_cross_khat_dot_uflow/(1- phat_dot_khat* phat_dot_khat);
-
+    
     double uflow_lrf_sq = pow((p_lab_Min[0]*flow_u_mu_Min[0]-u_dot_kvec)/M_ll,2) - 1.0;
 
     double uxsq_m_uysq_usq = (lambda_phi_ux_sq-lambda_phi_uy_sq)/uflow_lrf_sq;
+
+    //cs_frame
+    //double unit_y[4] = {0.0, p_lab_Min[2]*unit_z[3] - p_lab_Min[3]*unit_z[2] , p_lab_Min[3]*unit_z[1] - p_lab_Min[1]*unit_z[3] , p_lab_Min[1]*unit_z[2] - p_lab_Min[2]*unit_z[1] };
+
+    double unit_y[4] = {0.0, p_beam[2]*p_lab_Min_norm[3] - p_beam[3]*p_lab_Min_norm[2] , p_beam[3]*p_lab_Min_norm[1] - p_beam[1]*p_lab_Min_norm[3] , p_beam[1]*p_lab_Min_norm[2] - p_beam[2]*p_lab_Min_norm[1] };
+    
+    double unit_y_sq = sqrt(unit_y[1]* unit_y[1] + unit_y[2]* unit_y[2] + unit_y[3]* unit_y[3]);
+    
+    
+    unit_y[1] =  unit_y[1]/unit_y_sq;
+    unit_y[2] =  unit_y[2]/unit_y_sq;
+    unit_y[3] =  unit_y[3]/unit_y_sq;
+
+
+    double unit_x[4] = { 0.0, unit_y[2]*unit_z[3] - unit_y[3]*unit_z[2] , unit_y[3]*unit_z[1] - unit_y[1]*unit_z[3] , unit_y[1]*unit_z[2] - unit_y[2]*unit_z[1] };
+
+    
+
+    double unit_x_sq = sqrt(unit_x[1]* unit_x[1] + unit_x[2]* unit_x[2] + unit_x[3]* unit_x[3]);
+    unit_x[1] =  unit_x[1]/unit_x_sq;
+    unit_x[2] =  unit_x[2]/unit_x_sq;
+    unit_x[3] =  unit_x[3]/unit_x_sq;
+
+
+
+    double ux_sq_lrf = pow(uflow_dilepton_lrf[1]*unit_x[1] + uflow_dilepton_lrf[2]*unit_x[2] +uflow_dilepton_lrf[3]*unit_x[3],2);
+
+    double uy_sq_lrf = pow(uflow_dilepton_lrf[1]*unit_y[1] + uflow_dilepton_lrf[2]*unit_y[2] +uflow_dilepton_lrf[3]*unit_y[3],2);
+    
+    if (CS_frame ==1){
+        uxsq_m_uysq_usq = (ux_sq_lrf - uy_sq_lrf)/u_vec_sq;
+    }
+
+
 
     double lambda_phi = (1.0 - 4.0*factor_pol_1)*rho_delta/lambda_theta2;
     
@@ -540,7 +665,8 @@ void ThermalPhoton::calThermalPhotonemission_3d(double (&p_lab_Min)[4], double (
     
 
     
-    
+    deleteA2DMatrix(lambda_munu, rows);
+
 
 
     

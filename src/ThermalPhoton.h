@@ -22,6 +22,8 @@ class ThermalPhoton {
 
     int use_logarithmic_mass_grid;
 
+    int CS_frame;
+
     double dy;
     double dM;
     double Dy;

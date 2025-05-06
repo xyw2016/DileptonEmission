@@ -622,6 +622,9 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
                 ux = fluidCellptr->ux;
                 uy = fluidCellptr->uy;
                 ueta = fluidCellptr->ueta;
+                // ux = 0.0; //fluidCellptr->ux;
+                // uy = 0.0; //fluidCellptr->uy;
+                // ueta = 0.0; // fluidCellptr->ueta;
             }
 
             double utau = sqrt(1. + ux*ux + uy*uy + ueta*ueta);
@@ -1141,6 +1144,11 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                 uy = 0.0;
                 ueta = 0.0;
             } else {
+
+                // ux = 0.0; //fluidCellptr->ux;
+                // uy = 0.0; //fluidCellptr->uy;
+                // ueta = 0.0; // fluidCellptr->ueta;
+
                 ux = fluidCellptr.ux;
                 uy = fluidCellptr.uy;
                 ueta = fluidCellptr.ueta;
@@ -1162,6 +1170,12 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
             flow_u_mu_Min[1] = ux;
             flow_u_mu_Min[2] = uy;
             flow_u_mu_Min[3] = sinh_eta*utau + cosh_eta*ueta;
+
+
+            // flow_u_mu_Min[0] = 1.0; //cosh_eta*utau + sinh_eta*ueta;
+            // flow_u_mu_Min[1] = 0.0;//ux;
+            // flow_u_mu_Min[2] = 0.0;//uy;
+            // flow_u_mu_Min[3] = 0.0;//sinh_eta*utau + cosh_eta*ueta;
 
 
             
@@ -1258,9 +1272,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                                     p_Min_lrf[j] += lambda_munu[j][i]*p_lab_Min[i];
                                 }                            
                             }
-                            //std::cout << j <<" wxy 1 "<<std::endl;
-
-
+                            
+                        
                             
                             double pvec_lrf, pvec3, pvec5; // Minkowski spatial magnitude |vec p| and |vec p|^3
                             pvec_lrf = sqrt(p_Min_lrf[1]*p_Min_lrf[1] + p_Min_lrf[2]*p_Min_lrf[2] + p_Min_lrf[3]*p_Min_lrf[3]);
