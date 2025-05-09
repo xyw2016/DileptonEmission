@@ -1820,11 +1820,14 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     
     double sig_lambda = 0.0;
     double suppress_order = 0.0;
+    double beta = 0.0;
 
     if(hydro_mode == 22 && flag_prehydro){
         filename = "Pre_hydro_dilepton";
         sig_lambda = paraRdr->getVal("sig_lambda");
-        suppress_order = paraRdr->getVal("suppress_order");
+        beta = paraRdr->getVal("beta");
+
+        //suppress_order = paraRdr->getVal("suppress_order");
     }
     if(hydro_mode == 12 && flag_hydro){
         filename = "Hydro_dilepton";
@@ -1833,7 +1836,8 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     if(hydro_mode == -1 && flag_hydro && flag_prehydro){
         filename = "Total_dilepton";
         sig_lambda = paraRdr->getVal("sig_lambda");
-        suppress_order = paraRdr->getVal("suppress_order");
+        //suppress_order = paraRdr->getVal("suppress_order");
+        beta = paraRdr->getVal("beta");
     }
     
 
@@ -1842,7 +1846,10 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     stream_sig << fixed << setprecision(3) << sig_lambda;
     string str_sig = stream_sig.str();
    
-    string num_sf = to_string(static_cast<int>(round(suppress_order)));
+    ostringstream stream_beta;
+    stream_beta << fixed << setprecision(2) << beta;
+
+    string num_sf = stream_beta.str();
    
     
     string file_end = "_"+str_sig+"_"+num_sf+".dat";

@@ -71,8 +71,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     include_visc_deltaf = paraRdr->getVal("include_shearvisc_deltaf");
 
     alpha_s = paraRdr->getVal("alpha_s");
-    beta = paraRdr->getVal("beta");
-
+    
     // if muB is off, no need to include diffusion correction
     if(turn_on_muB_==0)
     	include_diff_deltaf = 0;
@@ -388,21 +387,28 @@ void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_fact
 	double &viscrate_ptr, double &bulkvis_ptr, double &diffrate_ptr,double suppress_factor,int hydro_mode) 
 {
 
-	if (bRateTable_) {
+    if (bRateTable_) {
         // interpolate NLO equilibrium rate
         double k = sqrt(Eq*Eq-M_ll*M_ll);
         double  eqrate_ptr0=0.0, eqrateT_ptr0=0.0, eqrateL_ptr0=0.0;
         double  eqrate_ptr1=0.0, eqrateT_ptr1=0.0, eqrateL_ptr1=0.0;
         double alpha_s0 = 0.0;
         
-        if (hydro_mode == 22){
-
+        if (hydro_mode == 22 ){
+            beta = paraRdr->getVal("beta");
+	
+            if (beta > 0){
         
-  		NLO_rate(grid_T,grid_L,Eq,k,alpha_s0,muB,T,me, eqrate_ptr0, eqrateT_ptr0, eqrateL_ptr0);        
-  		NLO_rate(grid_T,grid_L,Eq,k,alpha_s,muB,T,me, eqrate_ptr1, eqrateT_ptr1, eqrateL_ptr1);
-        eqrate_ptr = eqrate_ptr0*suppress_factor + (eqrate_ptr1-eqrate_ptr0)*pow(suppress_factor,beta);
-        eqrateT_ptr = eqrateT_ptr0*suppress_factor + (eqrateT_ptr1-eqrateT_ptr0)*pow(suppress_factor,beta);
-        eqrateL_ptr = eqrateL_ptr0*suppress_factor + (eqrateL_ptr1-eqrateL_ptr0)*pow(suppress_factor,beta);
+  		    NLO_rate(grid_T,grid_L,Eq,k,alpha_s0,muB,T,me, eqrate_ptr0, eqrateT_ptr0, eqrateL_ptr0);        
+  		    NLO_rate(grid_T,grid_L,Eq,k,alpha_s,muB,T,me, eqrate_ptr1, eqrateT_ptr1, eqrateL_ptr1);
+
+            eqrate_ptr = eqrate_ptr0*pow(suppress_factor,2) + (eqrate_ptr1-eqrate_ptr0)*pow(suppress_factor,beta);
+            eqrateT_ptr = eqrateT_ptr0*pow(suppress_factor,2) + (eqrateT_ptr1-eqrateT_ptr0)*pow(suppress_factor,beta);
+            eqrateL_ptr = eqrateL_ptr0*pow(suppress_factor,2) + (eqrateL_ptr1-eqrateL_ptr0)*pow(suppress_factor,beta);
+            }
+            else{
+                NLO_rate(grid_T,grid_L,Eq,k,alpha_s,muB,T,me, eqrate_ptr, eqrateT_ptr, eqrateL_ptr);
+            }
 
         }
         else if(hydro_mode == 12){
@@ -412,17 +418,32 @@ void ThermalPhoton::getPhotonemissionRate(double Eq, double M_ll, double pi_fact
             std::cout<<" wrong hydro flag: "<< hydro_mode <<" exit() "<<std::endl;
         }
 
-
         
   		diffrate_ptr = 0.;
+        viscrate_ptr = 0.;
+        bulkvis_ptr = 0.;
+
     } else {
+
+            
     	// use LO analytical form
     	FiniteBaryonRates(T, muB, inv_eplusp, rhoB_over_eplusp, Eq, M_ll, eqrate_ptr, eqrateT_ptr, eqrateL_ptr, 
             viscrate_ptr, diffrate_ptr, include_visc_deltaf, include_diff_deltaf);
+        if (hydro_mode == 22){
+            beta = paraRdr->getVal("beta");
+	
+            if (beta > 0 ){
+                eqrate_ptr = eqrate_ptr*pow(suppress_factor,2);
+                eqrateT_ptr = eqrateT_ptr*pow(suppress_factor,2);
+                eqrateL_ptr = eqrateL_ptr*pow(suppress_factor,2);
+            }
+
+        }
     }
 
     viscrate_ptr = pi_factor * viscrate_ptr;
     diffrate_ptr = diff_factor * diffrate_ptr;
+    bulkvis_ptr = 0.;
 }
 
 

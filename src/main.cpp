@@ -25,6 +25,8 @@
 #else
     #include <omp.h>
 #endif
+#include <vector>
+
 
 #include "./PhotonEmission.h"
 #include "./Hydroinfo_h5.h"
@@ -68,6 +70,7 @@ int main(int argc, char** argv) {
     int hydro_flag = paraRdr->getVal("hydro_flag");
     bool USE_2D_mode = paraRdr->getVal("USE_2D_mode");
     
+    std::cout <<" here !" <<std::endl;
     if(flag_hydro){
 
     
@@ -78,12 +81,12 @@ int main(int argc, char** argv) {
 	    int nskip_tau = 1;
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
-	if(USE_2D_mode){
-            thermalPhotons.calPhotonemission_2d(hydroinfo_ptr,hydro_mode);
-	}
-	else{
-            thermalPhotons.calPhotonemission_3d(hydroinfo_ptr,hydro_mode);
-	}
+        if(USE_2D_mode){
+                thermalPhotons.calPhotonemission_2d(hydroinfo_ptr,hydro_mode);
+        }
+        else{
+                thermalPhotons.calPhotonemission_3d(hydroinfo_ptr,hydro_mode);
+        }
         delete hydroinfo_ptr;
 
          // sum up all channels and compute thermal photon spectra and vn
@@ -109,27 +112,43 @@ int main(int argc, char** argv) {
 
          int hydro_mode = 22;
          int nskip_tau = 1;
-	 //double sig_lambda_array[3] = {1.249,0.833,0.0};
-	 double sig_lambda_array[1] = {0.0};
-	 //double sig_lambda_array[1] = {1.249};
-	 for(int isig = 0; isig < 1; isig++){
-  
+	     vector<double> beta_array = {-1.0, 1.0, 1.5, 2.0};
+         int flag_order = paraRdr->getVal("dilepton_emission_rate");
+
+         if (flag_order == 1){
+
+            beta_array.clear();
+            beta_array.push_back(-1.0);
+            beta_array.push_back(2.0);
+         }
+
+	     double sig_lambda_array[1] = {0.0};
+	      for(int isig = 0; isig < 1; isig++){
+            for(int ibeta = 0; ibeta < beta_array.size(); ibeta++){
+
+            
           int isuppress_order = 1;
-	  paraRdr->setVal("sig_lambda",sig_lambda_array[isig]);
+	      paraRdr->setVal("sig_lambda",sig_lambda_array[isig]);
           paraRdr->setVal("suppress_order",isuppress_order);
+          paraRdr->setVal("beta",beta_array[ibeta]);
+
           std::cout<<" ============================= " <<std::endl;
           std::cout<<" sig_lambda " << sig_lambda_array[isig]<<std::endl;
           std::cout<<" suppress_order " << isuppress_order<<std::endl;
+          
+          std::cout<<" beta " << beta_array[ibeta]<<std::endl;
           std::cout<<" ============================= " <<std::endl;
+
+         
          PhotonEmission thermalPhotons_prehydro(paraRdr); 
          Hydroinfo_MUSIC* hydroinfo_ptr_prehydro = new Hydroinfo_MUSIC(); 
          hydroinfo_ptr_prehydro->readHydroData(hydro_mode, nskip_tau);
-	if(USE_2D_mode){
-            thermalPhotons_prehydro.calPhotonemission_2d(hydroinfo_ptr_prehydro,hydro_mode);
-	}
-	else{
-            thermalPhotons_prehydro.calPhotonemission_3d(hydroinfo_ptr_prehydro,hydro_mode);
-	}
+        if(USE_2D_mode){
+                thermalPhotons_prehydro.calPhotonemission_2d(hydroinfo_ptr_prehydro,hydro_mode);
+        }
+        else{
+                thermalPhotons_prehydro.calPhotonemission_3d(hydroinfo_ptr_prehydro,hydro_mode);
+        }
         delete hydroinfo_ptr_prehydro;
 
         // sum up all channels and compute thermal photon spectra and vn
@@ -149,6 +168,7 @@ int main(int argc, char** argv) {
 
 
         }
+    }
 	}
 
     }
