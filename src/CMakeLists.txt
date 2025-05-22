@@ -11,6 +11,7 @@ set (SOURCES
      QGP_LO_analytic.cpp
      QGP_NLO.cpp
      QGP_LO.cpp
+     HadronGas_rho_omega_phi.cpp
     )
 
 add_library(${libname} SHARED ${SOURCES})

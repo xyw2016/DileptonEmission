@@ -38,7 +38,7 @@ Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
   lattice_new_.clear();
 }
 
-void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
+void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in, int flag_tz) {
   // all hydro data is stored in tau steps (not t)
   // evolution is converted to tau when accessing the hydro data
   lattice_2D.clear();
@@ -978,7 +978,21 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
       newCell.cs2 = cell_info[7];
       newCell.ux = cell_info[8];
       newCell.uy = cell_info[9];
-      newCell.ueta = cell_info[10];
+
+      if (flag_tz == 1)
+      {
+      newCell.uz = cell_info[10];
+      double ut_local = sqrt(1+newCell.ux*newCell.ux+newCell.uy*newCell.uy+newCell.uz*newCell.uz);
+      double local_eta = -hydro_eta_max + newCell.ieta*hydroDeta;
+      double local_sinh = sinh(local_eta);
+      double local_cosh = cosh(local_eta);     
+      newCell.ueta = -local_sinh*ut_local + local_cosh*newCell.uz;
+      }
+      
+      if (flag_tz == 0){
+        newCell.ueta = cell_info[10];
+      }
+      
       if (turn_on_rhob == 1) {
         newCell.rhoB = cell_info[11];
         newCell.muB = cell_info[12];

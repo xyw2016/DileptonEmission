@@ -69,7 +69,7 @@ public:
 
   bool isBoostInvariant() const { return (boost_invariant_); }
 
-  void readHydroData(int whichHydro, int nskip_tau_in);
+  void readHydroData(int whichHydro, int nskip_tau_in, int flag_tz = 0);
 
   void getHydroValues(float x, float y, float z, float t, fluidCell *info);
   void get_hydro_cell_info_3d(int cell_id, fluidCell_3D_new &info);

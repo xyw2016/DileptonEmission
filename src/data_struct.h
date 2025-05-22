@@ -177,6 +177,7 @@ public:
   float pressure = 0.;
   float ux = 0.;
   float uy = 0.;
+  float uz = 0.;
   float ueta = 0.;
   float cs2 = 0.;
   float muB = 0.;

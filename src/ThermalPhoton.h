@@ -24,6 +24,8 @@ private:
 
   int CORES;
 
+  int CS_frame;
+
   double dy;
   double dM;
   double Dy;
@@ -235,6 +237,43 @@ public:
   double getPhotonrapidity(int i) { return (y[i]); }
   double getPhoton_yweight(int i) { return (y_weight[i]); }
 
+  inline double get_dNd2pTdphidy_eq(int m, int i, int j, int k) const {
+    return dNd2pTdphidy_eq[m][i][j][k];
+  }
+
+  inline double get_dNd2pTdphidy_eqT(int m, int i, int j, int k) const {
+    return dNd2pTdphidy_eqT[m][i][j][k];
+  }
+
+  inline double get_dNd2pTdphidy_eqL(int m, int i, int j, int k) const {
+    return dNd2pTdphidy_eqL[m][i][j][k];
+  }
+
+  inline double get_dNd2pTdphidy_visc(int m, int i, int j, int k) const {
+    return dNd2pTdphidy_visc[m][i][j][k];
+  }
+
+  inline double get_dNd2pTdphidy_diff(int m, int i, int j, int k) const {
+    return dNd2pTdphidy_diff[m][i][j][k];
+  }
+
+  inline double get_dNd2pTdphidy_tot(int m, int i, int j, int k) const {
+    return dNd2pTdphidy_tot[m][i][j][k];
+  }
+
+  inline double get_dNd2pTdphidy_pol_lambda_theta(int m, int i, int j, int k) const {
+    return dNd2pTdphidy_pol_lambda_theta[m][i][j][k];
+  }
+
+  inline double get_dNd2pTdphidy_pol_lambda_norm(int m, int i, int j, int k) const {
+    return dNd2pTdphidy_pol_lambda_norm[m][i][j][k];
+  }
+
+  inline double get_dNd2pTdphidy_pol_lambda_phi(int m, int i, int j, int k) const {
+    return dNd2pTdphidy_pol_lambda_phi[m][i][j][k];
+  }
+  
+
   virtual void analyticRates(double T, double muB, std::vector<double> &Eq,
                              double *M_ll, std::vector<double> &eqrate_ptr,
                              int nm, int np, int nphi, int nrapidity);
@@ -281,6 +320,8 @@ public:
     double * dNd2Mdy_eq, double **dNd2pTd2M_eq,
     double ***dNd2pTd2Mdy_eq,double ****vnMpTy_cos_eq,double ****vnMpTy_sin_eq);
 
+  void calPhoton_SpvnpT_pol(double ****dNd2pTdphidy_pol_lambda_theta, double **dNd2pTd2M_pol_lambda_theta, double*dNd2Mdy_pol_lambda_theta, double*** dNd2pTd2Mdy_pol_lambda_theta);
+
   void calPhoton_SpvnpT_shell();
   void calPhoton_Spvn_dTdtau();
   void calPhoton_Spectra_dTdtau();
@@ -288,12 +329,13 @@ public:
                                  double ******dNd2pTdphidydTdtau_visc,
                                  double ******dNd2pTdphidydTdtau_diff,
                                  double ******dNd2pTdphidydTdtau_tot);
-  void outputPhoton_SpvnpT(std::string path, std::string type_str,
-                           double ***dNd2pTdphidy, double ***vnypT_cos,
-                           double ***vnypT_sin, double **vnpT_cos,
-                           double **vnpT_sin, std::vector<double> &vn_cos,
-                           std::vector<double> &vn_sin);
-  void outputPhoton_SpvnpT_shell(std::string path);
+  void outputPhoton_SpvnpT(std::string path, std::string type_str,std::string type_str2,
+                            double ****dNd2pTdphidy_eq, double ***vnpT_cos_eq,double ***vnpT_sin_eq,
+                            double **vn_cos_eq, double **vn_sin_eq,
+                            double * dNd2Mdy_eq, double **dNd2pTd2M_eq,
+                            double ***dNd2pTd2Mdy_eq,double ****vnMpTy_cos_eq,double ****vnMpTy_sin_eq);
+  void outputPhoton_SpvnpT_pol(std::string path,std::string type_str,std::string type_str2, double **** dNd2pTdphidy_pol_lambda_theta,double *** dNd2pTd2Mdy_pol_lambda_theta, double** dNd2pTd2M_pol_lambda_theta,double* dNd2Mdy_pol_lambda_theta, double* dNd2Mdy_pol_lambda_norm);
+  void outputPhoton_SpvnpT_shell(std::string path,std::string type_str);
   void outputPhoton_Spvn_dTdtau(std::string path, double Tcut_high,
                                 double Tcut_low, double tau_cut_high,
                                 double tau_cut_low);
@@ -321,6 +363,13 @@ public:
                 double alpha_s, double muB, double T, double m_l,
                 double &rateTot, double &rateT, double &rateL);
    void reduce_multile_core();
+   virtual void getRateFromTable(const double E,
+    const double T_local, const double k_local, const double M_local, double &rateTot,
+    double &rateT, double &rateL){
+      rateTot = 0.0;
+      rateT = 0.0;
+      rateL = 0.0;
+  };
 
 private:
   Table grid_T;

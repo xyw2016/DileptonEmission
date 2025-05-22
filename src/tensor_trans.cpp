@@ -11,42 +11,80 @@ namespace TENSORTRANSFORM {
 
 // lorentz matrix to first boost along longitudinal direction and then
 // transverse direction
-void boost_matrix(double **lambda_munu, double vx, double vy, double vz) {
-  double gamma_perp, gamma_L, gamma;
-  double beta, beta_1, beta_2, beta_3;
-  double eps = 1e-100;
+// void boost_matrix(double **lambda_munu, double vx, double vy, double vz) {
+//   double gamma_perp, gamma_L, gamma;
+//   double beta, beta_1, beta_2, beta_3;
+//   double eps = 1e-100;
 
-  gamma_perp = 1 / sqrt(1 - vx * vx - vy * vy + eps);
-  gamma_L = 1 / sqrt(1 - vz * vz + eps);
-  gamma = gamma_perp * gamma_L;
-  /*if(isnan(gamma))
-  {
-     cout<<"gamma is nan!" << endl;
-     cout<<"v:" << vx << "  " << vy << "   " << vz << endl;
-     exit(1);
-  }*/
-  beta_1 = vx / gamma_L;
-  beta_2 = vy / gamma_L;
-  beta_3 = vz;
-  beta = sqrt(beta_1 * beta_1 + beta_2 * beta_2 + beta_3 * beta_3 + eps);
+//   gamma_perp = 1 / sqrt(1 - vx * vx - vy * vy + eps);
+//   gamma_L = 1 / sqrt(1 - vz * vz + eps);
+//   gamma = gamma_perp * gamma_L;
+//   /*if(isnan(gamma))
+//   {
+//      cout<<"gamma is nan!" << endl;
+//      cout<<"v:" << vx << "  " << vy << "   " << vz << endl;
+//      exit(1);
+//   }*/
+//   beta_1 = vx / gamma_L;
+//   beta_2 = vy / gamma_L;
+//   beta_3 = vz;
+//   beta = sqrt(beta_1 * beta_1 + beta_2 * beta_2 + beta_3 * beta_3 + eps);
 
-  lambda_munu[0][0] = gamma;
-  lambda_munu[0][1] = -gamma * beta_1;
-  lambda_munu[0][2] = -gamma * beta_2;
-  lambda_munu[0][3] = -gamma * beta_3;
-  lambda_munu[1][0] = lambda_munu[0][1];
-  lambda_munu[1][1] = 1 + (gamma - 1) * beta_1 * beta_1 / beta / beta;
-  lambda_munu[1][2] = (gamma - 1) * beta_1 * beta_2 / beta / beta;
-  lambda_munu[1][3] = (gamma - 1) * beta_1 * beta_3 / beta / beta;
-  lambda_munu[2][0] = lambda_munu[0][2];
-  lambda_munu[2][1] = lambda_munu[1][2];
-  lambda_munu[2][2] = 1 + (gamma - 1) * beta_2 * beta_2 / beta / beta;
-  lambda_munu[2][3] = (gamma - 1) * beta_2 * beta_3 / beta / beta;
-  lambda_munu[3][0] = lambda_munu[0][3];
-  lambda_munu[3][1] = lambda_munu[1][3];
-  lambda_munu[3][2] = lambda_munu[2][3];
-  lambda_munu[3][3] = 1 + (gamma - 1) * beta_3 * beta_3 / beta / beta;
+//   lambda_munu[0][0] = gamma;
+//   lambda_munu[0][1] = -gamma * beta_1;
+//   lambda_munu[0][2] = -gamma * beta_2;
+//   lambda_munu[0][3] = -gamma * beta_3;
+//   lambda_munu[1][0] = lambda_munu[0][1];
+//   lambda_munu[1][1] = 1 + (gamma - 1) * beta_1 * beta_1 / beta / beta;
+//   lambda_munu[1][2] = (gamma - 1) * beta_1 * beta_2 / beta / beta;
+//   lambda_munu[1][3] = (gamma - 1) * beta_1 * beta_3 / beta / beta;
+//   lambda_munu[2][0] = lambda_munu[0][2];
+//   lambda_munu[2][1] = lambda_munu[1][2];
+//   lambda_munu[2][2] = 1 + (gamma - 1) * beta_2 * beta_2 / beta / beta;
+//   lambda_munu[2][3] = (gamma - 1) * beta_2 * beta_3 / beta / beta;
+//   lambda_munu[3][0] = lambda_munu[0][3];
+//   lambda_munu[3][1] = lambda_munu[1][3];
+//   lambda_munu[3][2] = lambda_munu[2][3];
+//   lambda_munu[3][3] = 1 + (gamma - 1) * beta_3 * beta_3 / beta / beta;
+// }
+
+
+void boost_matrix(double** lambda_munu, double vx, double vy, double vz) {
+
+
+      double gamma;
+      double beta, beta_1, beta_2, beta_3;
+      double eps = 1e-100;
+  
+      
+  
+      beta_1 = vx; // vx
+      beta_2 = vy; // vy
+      beta_3 = vz; // vz
+      beta = sqrt(beta_1 * beta_1 + beta_2 * beta_2 + beta_3 * beta_3 + eps);
+
+      gamma = 1.0 / sqrt(1.0 - beta*beta);
+  
+      lambda_munu[0][0] = gamma;
+      lambda_munu[0][1] = -gamma * beta_1;
+      lambda_munu[0][2] = -gamma * beta_2;
+      lambda_munu[0][3] = -gamma * beta_3;
+      lambda_munu[1][0] = lambda_munu[0][1];
+      lambda_munu[1][1] = 1 + (gamma - 1) * beta_1 * beta_1 / beta / beta;
+      lambda_munu[1][2] = (gamma - 1) * beta_1 * beta_2 / beta / beta;
+      lambda_munu[1][3] = (gamma - 1) * beta_1 * beta_3 / beta / beta;
+      lambda_munu[2][0] = lambda_munu[0][2];
+      lambda_munu[2][1] = lambda_munu[1][2];
+      lambda_munu[2][2] = 1 + (gamma - 1) * beta_2 * beta_2 / beta / beta;
+      lambda_munu[2][3] = (gamma - 1) * beta_2 * beta_3 / beta / beta;
+      lambda_munu[3][0] = lambda_munu[0][3];
+      lambda_munu[3][1] = lambda_munu[1][3];
+      lambda_munu[3][2] = lambda_munu[2][3];
+      lambda_munu[3][3] = 1 + (gamma - 1) * beta_3 * beta_3 / beta / beta;
 }
+
+
+
 
 // inputs are 4-velocity in Minkowski coordinates in lab frame
 // void lorentz_boost_matrix(double** lambda_munu, double ut, double ux, double
