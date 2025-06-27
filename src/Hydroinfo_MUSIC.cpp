@@ -1031,7 +1031,6 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in, int flag_t
         newCell.qz = 0.;
       }
       lattice_new_.push_back(newCell);
-
       ik++;
       if (ik % 50000 == 0)
         cout << "o" << flush;
