@@ -1092,10 +1092,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,
 
         // fluid cell is out of interest, temperature below T_dec or eta larger
         // than ETAmax
-        // if (hydro_flag == 2 && (temp_local < T_dec || eta_local > ETAmax))
-        //   continue;
-        // if (hydro_flag == 22 && (temp_local < T_dec || eta_local > ETAmax))
-        //   continue;
+        if (hydro_flag == 2 && (temp_local < T_dec || eta_local > ETAmax))
+          continue;
+        if (hydro_flag == 22 && (temp_local < T_dec || eta_local > ETAmax))
+          continue;
 
         if (differential_flag == 1) {
           if (temp_local > T_cuthigh || temp_local < T_cutlow ||
