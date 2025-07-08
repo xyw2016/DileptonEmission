@@ -79,6 +79,9 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     dNd2pTdphidy_pol_lambda_theta = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_pol_lambda_norm = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
     dNd2pTdphidy_pol_lambda_phi = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_pol_lambda_theta_phi = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_pol_lambda_phi_prep = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_pol_lambda_theta_phi_prep = createA4DMatrix(nm, np, nphi, nrapidity, 0.);
 
 
     
@@ -92,6 +95,10 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     dNd2pTd2M_pol_lambda_theta = createA2DMatrix(nm, np, 0);
     dNd2pTd2M_pol_lambda_norm = createA2DMatrix(nm, np, 0);
     dNd2pTd2M_pol_lambda_phi = createA2DMatrix(nm, np, 0);
+    dNd2pTd2M_pol_lambda_theta_phi = createA2DMatrix(nm, np, 0);
+    dNd2pTd2M_pol_lambda_phi_prep = createA2DMatrix(nm, np, 0);
+    dNd2pTd2M_pol_lambda_theta_phi_prep = createA2DMatrix(nm, np, 0);
+    
 
 
     dNd2pTd2Mdy_eq = createA3DMatrix(nm, np, nrapidity, 0);
@@ -103,6 +110,9 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     dNd2pTd2Mdy_pol_lambda_theta = createA3DMatrix(nm, np, nrapidity, 0);
     dNd2pTd2Mdy_pol_lambda_norm = createA3DMatrix(nm, np, nrapidity, 0);
     dNd2pTd2Mdy_pol_lambda_phi = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_pol_lambda_theta_phi = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_pol_lambda_phi_prep = createA3DMatrix(nm, np, nrapidity, 0);
+    dNd2pTd2Mdy_pol_lambda_theta_phi_prep = createA3DMatrix(nm, np, nrapidity, 0);
 
 
 
@@ -115,6 +125,9 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     dNd2Mdy_pol_lambda_theta.resize(nm, 0);
     dNd2Mdy_pol_lambda_norm.resize(nm, 0);
     dNd2Mdy_pol_lambda_phi.resize(nm, 0);
+    dNd2Mdy_pol_lambda_theta_phi.resize(nm, 0);
+    dNd2Mdy_pol_lambda_phi_prep.resize(nm, 0);
+    dNd2Mdy_pol_lambda_theta_phi_prep.resize(nm, 0);
 
 
     vnpT_cos_eq = createA3DMatrix(norder, nm, np, 0.);
@@ -176,6 +189,10 @@ PhotonEmission::~PhotonEmission() {
     deleteA4DMatrix(dNd2pTdphidy_pol_lambda_theta, nm, np, nphi);
     deleteA4DMatrix(dNd2pTdphidy_pol_lambda_norm, nm, np, nphi);
     deleteA4DMatrix(dNd2pTdphidy_pol_lambda_phi, nm, np, nphi);
+    deleteA4DMatrix(dNd2pTdphidy_pol_lambda_theta_phi, nm, np, nphi);
+    deleteA4DMatrix(dNd2pTdphidy_pol_lambda_phi_prep, nm, np, nphi);
+    deleteA4DMatrix(dNd2pTdphidy_pol_lambda_theta_phi_prep, nm, np, nphi);
+
 
 
     deleteA2DMatrix(dNd2pTd2M_eq, nm);
@@ -187,6 +204,9 @@ PhotonEmission::~PhotonEmission() {
     deleteA2DMatrix(dNd2pTd2M_pol_lambda_theta, nm);
     deleteA2DMatrix(dNd2pTd2M_pol_lambda_norm, nm);
     deleteA2DMatrix(dNd2pTd2M_pol_lambda_phi, nm);
+    deleteA2DMatrix(dNd2pTd2M_pol_lambda_theta_phi, nm);
+    deleteA2DMatrix(dNd2pTd2M_pol_lambda_phi_prep, nm);
+    deleteA2DMatrix(dNd2pTd2M_pol_lambda_theta_phi_prep, nm);
 
     deleteA3DMatrix(dNd2pTd2Mdy_eq, nm, np);
     deleteA3DMatrix(dNd2pTd2Mdy_eqT, nm, np);
@@ -197,6 +217,9 @@ PhotonEmission::~PhotonEmission() {
     deleteA3DMatrix(dNd2pTd2Mdy_pol_lambda_theta, nm, np);
     deleteA3DMatrix(dNd2pTd2Mdy_pol_lambda_norm, nm, np);
     deleteA3DMatrix(dNd2pTd2Mdy_pol_lambda_phi, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_pol_lambda_theta_phi, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_pol_lambda_phi_prep, nm, np);
+    deleteA3DMatrix(dNd2pTd2Mdy_pol_lambda_theta_phi_prep, nm, np);
 
 
 
@@ -460,6 +483,9 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
     double *dNd2pTdphidy_pol_lambda_theta_all = (double*)calloc(nrapidity*np*nphi*nm, sizeof(double));
     double *dNd2pTdphidy_pol_lambda_norm_all = (double*)calloc(nrapidity*np*nphi*nm, sizeof(double));
     double *dNd2pTdphidy_pol_lambda_phi_all = (double*)calloc(nrapidity*np*nphi*nm, sizeof(double));
+    double *dNd2pTdphidy_pol_lambda_theta_phi_all = (double*)calloc(nrapidity*np*nphi*nm, sizeof(double));
+    double *dNd2pTdphidy_pol_lambda_phi_prep_all = (double*)calloc(nrapidity*np*nphi*nm, sizeof(double));
+    double *dNd2pTdphidy_pol_lambda_theta_phi_prep_all = (double*)calloc(nrapidity*np*nphi*nm, sizeof(double));
 
 
 
@@ -600,7 +626,7 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
             if (differential_flag == 1){
                 if (temp_local > T_cuthigh||temp_local < T_cutlow||tau_local>tau_cut_high||tau_local<tau_cut_low){
                     printf("Warning: local temperature or proper time out of [T_cutlow, T_cuthigh] or [tau_cut_low, tau_cut_high].\n");
-                    printf("The boundaries should be enlarged to encolse all hydro cells...\n");
+                    printf("The boundaries should be enlarged to enclose all hydro cells...\n");
                     continue;
                 }
             }
@@ -787,6 +813,9 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
                             double dNd2pTdphidy_cell_lambda_theta = 0.;
                             double dNd2pTdphidy_cell_lambda_norm = 0.;
                             double dNd2pTdphidy_cell_lambda_phi = 0.;
+                            double dNd2pTdphidy_cell_lambda_theta_phi = 0.;
+                            double dNd2pTdphidy_cell_lambda_phi_prep = 0.;
+                            double dNd2pTdphidy_cell_lambda_theta_phi_prep = 0.;
 
 
                             // begin to calculate thermal photon emission
@@ -799,7 +828,10 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
                                     Eq_localrest_Tb, M_ll[j], visc_fac, bulkPi_fac, diff_fac,
                                     temp_local, muB_local, inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,
                                     dNd2pTdphidy_cell_eq, dNd2pTdphidy_cell_eqT, dNd2pTdphidy_cell_eqL, dNd2pTdphidy_cell_visc,
-                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot,dNd2pTdphidy_cell_lambda_norm,dNd2pTdphidy_cell_lambda_theta,dNd2pTdphidy_cell_lambda_phi,spsfactor,hydro_mode);
+                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot,dNd2pTdphidy_cell_lambda_norm,dNd2pTdphidy_cell_lambda_theta,dNd2pTdphidy_cell_lambda_phi,
+                                    dNd2pTdphidy_cell_lambda_theta_phi,dNd2pTdphidy_cell_lambda_phi_prep,
+                                    dNd2pTdphidy_cell_lambda_theta_phi_prep,
+                                    spsfactor,hydro_mode);
                                 
                                 
                             }
@@ -816,6 +848,9 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
                             dNd2pTdphidy_pol_lambda_theta_all[i3] += dNd2pTdphidy_cell_lambda_theta;
                             dNd2pTdphidy_pol_lambda_norm_all[i3] += dNd2pTdphidy_cell_lambda_norm;
                             dNd2pTdphidy_pol_lambda_phi_all[i3] += dNd2pTdphidy_cell_lambda_phi;
+                            dNd2pTdphidy_pol_lambda_theta_phi_all[i3] += dNd2pTdphidy_cell_lambda_theta_phi;
+                            dNd2pTdphidy_pol_lambda_phi_prep_all[i3] += dNd2pTdphidy_cell_lambda_phi_prep;
+                            dNd2pTdphidy_pol_lambda_theta_phi_prep_all[i3] += dNd2pTdphidy_cell_lambda_theta_phi_prep;
 
 
                             
@@ -850,6 +885,10 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
                     dNd2pTdphidy_pol_lambda_norm[j][l][m][k] = dNd2pTdphidy_pol_lambda_norm_all[i3];
                     dNd2pTdphidy_pol_lambda_phi[j][l][m][k] = dNd2pTdphidy_pol_lambda_phi_all[i3];
 
+                    dNd2pTdphidy_pol_lambda_theta_phi[j][l][m][k] = dNd2pTdphidy_pol_lambda_theta_phi_all[i3];
+                    dNd2pTdphidy_pol_lambda_phi_prep[j][l][m][k] = dNd2pTdphidy_pol_lambda_phi_prep_all[i3];
+                    dNd2pTdphidy_pol_lambda_theta_phi_prep[j][l][m][k] = dNd2pTdphidy_pol_lambda_theta_phi_prep_all[i3];
+
 
                    
 
@@ -873,6 +912,10 @@ void PhotonEmission::calPhotonemission_2d(void *hydroinfo_ptr_in,int hydro_mode)
     free(dNd2pTdphidy_pol_lambda_theta_all);
     free(dNd2pTdphidy_pol_lambda_norm_all);
     free(dNd2pTdphidy_pol_lambda_phi_all);
+
+    free(dNd2pTdphidy_pol_lambda_theta_phi_all);
+    free(dNd2pTdphidy_pol_lambda_phi_prep_all);
+    free(dNd2pTdphidy_pol_lambda_theta_phi_prep_all);
 
 }
 
@@ -987,6 +1030,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
     double *dNd2pTdphidy_pol_lambda_theta_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
     double *dNd2pTdphidy_pol_lambda_norm_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
     double *dNd2pTdphidy_pol_lambda_phi_all = (double*)calloc(CORES * nrapidity*np*nphi*nm, sizeof(double));
+    double *dNd2pTdphidy_pol_lambda_theta_phi_all = (double*)calloc(nrapidity*np*nphi*nm, sizeof(double));
+    double *dNd2pTdphidy_pol_lambda_phi_prep_all = (double*)calloc(nrapidity*np*nphi*nm, sizeof(double));
+    double *dNd2pTdphidy_pol_lambda_theta_phi_prep_all = (double*)calloc(nrapidity*np*nphi*nm, sizeof(double));
+
 
 
 
@@ -1322,6 +1369,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                             double dNd2pTdphidy_cell_lambda_norm = 0.;
                             double dNd2pTdphidy_cell_lambda_phi = 0.;
 
+                            double dNd2pTdphidy_cell_lambda_theta_phi = 0.;
+                            double dNd2pTdphidy_cell_lambda_phi_prep = 0.;
+                            double dNd2pTdphidy_cell_lambda_theta_phi_prep = 0.;
+
 
                             // begin to calculate thermal photon emission
                             if (hydro_flag==2 && temp_local > T_sw) {
@@ -1333,7 +1384,11 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                                     Eq_localrest_Tb, M_ll[j], visc_fac, bulkPi_fac, diff_fac,
                                     temp_local, muB_local, inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,
                                     dNd2pTdphidy_cell_eq, dNd2pTdphidy_cell_eqT, dNd2pTdphidy_cell_eqL, dNd2pTdphidy_cell_visc,
-                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot,dNd2pTdphidy_cell_lambda_norm,dNd2pTdphidy_cell_lambda_theta,dNd2pTdphidy_cell_lambda_phi,spsfactor,hydro_mode);
+                                    dNd2pTdphidy_cell_diff, dNd2pTdphidy_cell_tot,dNd2pTdphidy_cell_lambda_norm,dNd2pTdphidy_cell_lambda_theta,dNd2pTdphidy_cell_lambda_phi,
+                                    dNd2pTdphidy_cell_lambda_theta_phi,
+                                    dNd2pTdphidy_cell_lambda_phi_prep,
+                                    dNd2pTdphidy_cell_lambda_theta_phi_prep,
+                                    spsfactor,hydro_mode);
                                 
                                 
                             }
@@ -1357,9 +1412,15 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                             dNd2pTdphidy_visc_all[n + CORES * i3] += dNd2pTdphidy_cell_visc;
                             dNd2pTdphidy_diff_all[n + CORES * i3] += dNd2pTdphidy_cell_diff;
                             dNd2pTdphidy_tot_all[n + CORES * i3] += dNd2pTdphidy_cell_tot;
+
                             dNd2pTdphidy_pol_lambda_theta_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_theta;
                             dNd2pTdphidy_pol_lambda_norm_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_norm;
                             dNd2pTdphidy_pol_lambda_phi_all[n + CORES * i3] += dNd2pTdphidy_cell_lambda_phi;
+
+                            dNd2pTdphidy_pol_lambda_theta_phi_all[i3] += dNd2pTdphidy_cell_lambda_theta_phi;
+                            dNd2pTdphidy_pol_lambda_phi_prep_all[i3] += dNd2pTdphidy_cell_lambda_phi_prep;
+                            dNd2pTdphidy_pol_lambda_theta_phi_prep_all[i3] += dNd2pTdphidy_cell_lambda_theta_phi_prep;
+
 
 
                             
@@ -1397,9 +1458,16 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                     double dN_pTdpTdphidy_pol_lambda_norm_tmp = 0.0;
                     double dN_pTdpTdphidy_pol_lambda_phi_tmp = 0.0;
 
+                    double dN_pTdpTdphidy_pol_lambda_theta_phi_tmp = 0.0;
+                    double dN_pTdpTdphidy_pol_lambda_phi_prep_tmp = 0.0;
+                    double dN_pTdpTdphidy_pol_lambda_theta_phi_prep_tmp = 0.0;
+
 
                     #pragma omp simd reduction(+:dN_pTdpTdphidy_eq_tmp,dN_pTdpTdphidy_eqT_tmp,dN_pTdpTdphidy_eqL_tmp,\
-                            dN_pTdpTdphidy_visc_tmp,dN_pTdpTdphidy_diff_tmp,dN_pTdpTdphidy_tot_tmp,dN_pTdpTdphidy_pol_lambda_norm_tmp,dN_pTdpTdphidy_pol_lambda_theta_tmp,dN_pTdpTdphidy_pol_lambda_phi_tmp)
+                            dN_pTdpTdphidy_visc_tmp,dN_pTdpTdphidy_diff_tmp,dN_pTdpTdphidy_tot_tmp,dN_pTdpTdphidy_pol_lambda_norm_tmp,dN_pTdpTdphidy_pol_lambda_theta_tmp,dN_pTdpTdphidy_pol_lambda_phi_tmp,\
+                            dN_pTdpTdphidy_pol_lambda_theta_phi_tmp,\
+                            dN_pTdpTdphidy_pol_lambda_phi_prep_tmp,\
+                            dN_pTdpTdphidy_pol_lambda_theta_phi_prep_tmp)
                     for(long n = 0; n < CORES; n++)
                     {
                         dN_pTdpTdphidy_eq_tmp += dNd2pTdphidy_eq_all[n+CORES*i3];
@@ -1411,6 +1479,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                         dN_pTdpTdphidy_pol_lambda_theta_tmp += dNd2pTdphidy_pol_lambda_theta_all[n+CORES*i3];
                         dN_pTdpTdphidy_pol_lambda_norm_tmp += dNd2pTdphidy_pol_lambda_norm_all[n+CORES*i3];
                         dN_pTdpTdphidy_pol_lambda_phi_tmp += dNd2pTdphidy_pol_lambda_phi_all[n+CORES*i3];
+                        dN_pTdpTdphidy_pol_lambda_theta_phi_tmp += dNd2pTdphidy_pol_lambda_theta_phi_all[n+CORES*i3];
+                        dN_pTdpTdphidy_pol_lambda_phi_prep_tmp += dNd2pTdphidy_pol_lambda_phi_prep_all[n+CORES*i3];
+                        dN_pTdpTdphidy_pol_lambda_theta_phi_prep_tmp += dNd2pTdphidy_pol_lambda_theta_phi_prep_all[n+CORES*i3];
 
                                               
                     } // sum over the cores
@@ -1425,6 +1496,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
                     dNd2pTdphidy_pol_lambda_theta[j][l][m][k] = dN_pTdpTdphidy_pol_lambda_theta_tmp;
                     dNd2pTdphidy_pol_lambda_norm[j][l][m][k] = dN_pTdpTdphidy_pol_lambda_norm_tmp;
                     dNd2pTdphidy_pol_lambda_phi[j][l][m][k] = dN_pTdpTdphidy_pol_lambda_phi_tmp;
+
+                    dNd2pTdphidy_pol_lambda_theta_phi[j][l][m][k] = dN_pTdpTdphidy_pol_lambda_theta_phi_tmp;
+                    dNd2pTdphidy_pol_lambda_phi_prep[j][l][m][k] = dN_pTdpTdphidy_pol_lambda_phi_prep_tmp;
+                    dNd2pTdphidy_pol_lambda_theta_phi_prep[j][l][m][k] = dN_pTdpTdphidy_pol_lambda_theta_phi_prep_tmp;
 
 
                     // distribution in (T, tau)
@@ -1477,6 +1552,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,int hydro_mode)
     free(dNd2pTdphidy_pol_lambda_theta_all);
     free(dNd2pTdphidy_pol_lambda_norm_all);
     free(dNd2pTdphidy_pol_lambda_phi_all);
+
+    free(dNd2pTdphidy_pol_lambda_theta_phi_all);
+    free(dNd2pTdphidy_pol_lambda_phi_prep_all);
+    free(dNd2pTdphidy_pol_lambda_theta_phi_prep_all);
 
 }
 
@@ -1532,6 +1611,12 @@ void PhotonEmission::calPhoton_total_Spvn() {
                     dNd2pTd2M_pol_lambda_theta[m][i] += dNd2pTdphidy_pol_lambda_theta[m][i][j][k]*weight;
                     dNd2pTd2M_pol_lambda_norm[m][i] += dNd2pTdphidy_pol_lambda_norm[m][i][j][k]*weight;
                     dNd2pTd2M_pol_lambda_phi[m][i] += dNd2pTdphidy_pol_lambda_phi[m][i][j][k]*weight;
+                    
+                    dNd2pTd2M_pol_lambda_theta_phi[m][i] += dNd2pTdphidy_pol_lambda_theta_phi[m][i][j][k]*weight;
+                    dNd2pTd2M_pol_lambda_phi_prep[m][i] += dNd2pTdphidy_pol_lambda_phi_prep[m][i][j][k]*weight;
+                    dNd2pTd2M_pol_lambda_theta_phi_prep[m][i] += dNd2pTdphidy_pol_lambda_theta_phi_prep[m][i][j][k]*weight;
+
+
 
                     for (int order = 0; order < norder; order++) {
                         vnpT_cos_eq[order][m][i]  += (
@@ -1588,6 +1673,10 @@ void PhotonEmission::calPhoton_total_Spvn() {
             dNd2Mdy_pol_lambda_norm[m] += dNd2pTd2M_pol_lambda_norm[m][i]*p*pweight;
             dNd2Mdy_pol_lambda_phi[m] += dNd2pTd2M_pol_lambda_phi[m][i]*p*pweight;
 
+            dNd2Mdy_pol_lambda_theta_phi[m] += dNd2pTd2M_pol_lambda_theta_phi[m][i]*p*pweight;
+            dNd2Mdy_pol_lambda_phi_prep[m] += dNd2pTd2M_pol_lambda_phi_prep[m][i]*p*pweight;
+            dNd2Mdy_pol_lambda_theta_phi_prep[m] += dNd2pTd2M_pol_lambda_theta_phi_prep[m][i]*p*pweight;
+
 
             // pT differential spectra, dN/(2pi pTdpT MdM dy)
             dNd2pTd2M_eq[m][i]  = dNd2pTd2M_eq[m][i]/(2*M_PI); 
@@ -1637,6 +1726,11 @@ void PhotonEmission::calPhoton_total_Spvn() {
                     dNd2pTd2Mdy_pol_lambda_theta[m][i][k] += dNd2pTdphidy_pol_lambda_theta[m][i][j][k]*phi_weight;
                     dNd2pTd2Mdy_pol_lambda_norm[m][i][k] += dNd2pTdphidy_pol_lambda_norm[m][i][j][k]*phi_weight;
                     dNd2pTd2Mdy_pol_lambda_phi[m][i][k] += dNd2pTdphidy_pol_lambda_phi[m][i][j][k]*phi_weight;
+
+                    dNd2pTd2Mdy_pol_lambda_theta_phi[m][i][k] += dNd2pTdphidy_pol_lambda_theta_phi[m][i][j][k]*phi_weight;
+                    dNd2pTd2Mdy_pol_lambda_phi_prep[m][i][k] += dNd2pTdphidy_pol_lambda_phi_prep[m][i][j][k]*phi_weight;
+                    dNd2pTd2Mdy_pol_lambda_theta_phi_prep[m][i][k] += dNd2pTdphidy_pol_lambda_theta_phi_prep[m][i][j][k]*phi_weight;
+
 
                     for (int order = 0; order < norder; order++) {
                         vnMpTy_cos_eq[order][m][i][k]  += (
@@ -1708,6 +1802,10 @@ void PhotonEmission::calPhoton_total_Spvn_sum(const PhotonEmission& spvn_tem) {
         dNd2Mdy_pol_lambda_norm[m] = 0.0;
         dNd2Mdy_pol_lambda_phi[m] = 0.0;
 
+        dNd2Mdy_pol_lambda_theta_phi[m] = 0.0;
+        dNd2Mdy_pol_lambda_phi_prep[m] = 0.0;
+        dNd2Mdy_pol_lambda_theta_phi_prep[m] = 0.0;
+
 
         for (int order=0; order < norder; order++) {
             vn_cos_eq[order][m]   = 0.0;
@@ -1755,6 +1853,9 @@ void PhotonEmission::calPhoton_total_Spvn_sum(const PhotonEmission& spvn_tem) {
                     dNd2pTdphidy_pol_lambda_norm[m][i][j][k] += spvn_tem.dNd2pTdphidy_pol_lambda_norm[m][i][j][k];         
                     dNd2pTdphidy_pol_lambda_phi[m][i][j][k] += spvn_tem.dNd2pTdphidy_pol_lambda_phi[m][i][j][k];         
 
+                    dNd2pTdphidy_pol_lambda_theta_phi[m][i][j][k] += spvn_tem.dNd2pTdphidy_pol_lambda_theta_phi[m][i][j][k];         
+                    dNd2pTdphidy_pol_lambda_phi_prep[m][i][j][k] += spvn_tem.dNd2pTdphidy_pol_lambda_phi_prep[m][i][j][k];         
+                    dNd2pTdphidy_pol_lambda_theta_phi_prep[m][i][j][k] += spvn_tem.dNd2pTdphidy_pol_lambda_theta_phi_prep[m][i][j][k];         
                 }
             }
         }
@@ -1801,6 +1902,19 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     ostringstream filename_stream_pol_lambda_phi_Spvn;
     ostringstream filename_stream_pol_lambda_phi_inte_Spvn;
 
+    ostringstream filename_stream_pol_lambda_theta_phi_SpMatrix;
+    ostringstream filename_stream_pol_lambda_theta_phi_Spvn;
+    ostringstream filename_stream_pol_lambda_theta_phi_inte_Spvn;
+
+    ostringstream filename_stream_pol_lambda_phi_prep_SpMatrix;
+    ostringstream filename_stream_pol_lambda_phi_prep_Spvn;
+    ostringstream filename_stream_pol_lambda_phi_prep_inte_Spvn;
+
+    ostringstream filename_stream_pol_lambda_theta_phi_prep_SpMatrix;
+    ostringstream filename_stream_pol_lambda_theta_phi_prep_Spvn;
+    ostringstream filename_stream_pol_lambda_theta_phi_prep_inte_Spvn;
+
+
     //rapdity
     ostringstream filename_stream_eq_SpMatrix_dy;
     ostringstream filename_stream_eq_TL_SpMatrix_dy;
@@ -1810,6 +1924,10 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     ostringstream filename_stream_pol_lambda_theta_SpMatrix_dy;
     ostringstream filename_stream_pol_lambda_norm_SpMatrix_dy;
     ostringstream filename_stream_pol_lambda_phi_SpMatrix_dy;
+
+    ostringstream filename_stream_pol_lambda_theta_phi_SpMatrix_dy;
+    ostringstream filename_stream_pol_lambda_phi_prep_SpMatrix_dy;
+    ostringstream filename_stream_pol_lambda_theta_phi_prep_SpMatrix_dy;
 
 
 
@@ -1914,6 +2032,29 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     filename_stream_pol_lambda_phi_inte_Spvn << output_path << filename 
                                 << "_pol_lambda_phi_Spvn_inte"<<file_end;
 
+    
+    filename_stream_pol_lambda_theta_phi_SpMatrix<< output_path << filename 
+                                << "_pol_lambda_theta_phi_SpMatrix"<<file_end;
+    filename_stream_pol_lambda_theta_phi_Spvn << output_path << filename 
+                                << "_pol_lambda_theta_phi_Spvn"<<file_end;
+    filename_stream_pol_lambda_theta_phi_inte_Spvn << output_path << filename 
+                                << "_pol_lambda_theta_phi_Spvn_inte"<<file_end;
+    
+    filename_stream_pol_lambda_phi_prep_SpMatrix<< output_path << filename 
+                                << "_pol_lambda_phi_prep_SpMatrix"<<file_end;
+    filename_stream_pol_lambda_phi_prep_Spvn << output_path << filename 
+                                << "_pol_lambda_phi_prep_Spvn"<<file_end;
+    filename_stream_pol_lambda_phi_prep_inte_Spvn << output_path << filename 
+                                << "_pol_lambda_phi_prep_Spvn_inte"<<file_end;
+
+
+    filename_stream_pol_lambda_theta_phi_prep_SpMatrix<< output_path << filename 
+                                << "_pol_lambda_theta_phi_prep_SpMatrix"<<file_end;
+    filename_stream_pol_lambda_theta_phi_prep_Spvn << output_path << filename 
+                                << "_pol_lambda_theta_phi_prep_Spvn"<<file_end;
+    filename_stream_pol_lambda_theta_phi_prep_inte_Spvn << output_path << filename 
+                                << "_pol_lambda_theta_phi_prep_Spvn_inte"<<file_end;
+
 
     //rapidiy
     filename_stream_eq_SpMatrix_dy << output_path << filename
@@ -1933,6 +2074,15 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     filename_stream_pol_lambda_phi_SpMatrix_dy<< output_path << filename 
                                 << "_pol_lambda_phi_Spvn_MpTy"<<file_end;
 
+
+    filename_stream_pol_lambda_theta_phi_SpMatrix_dy<< output_path << filename 
+                                << "_pol_lambda_theta_phi_Spvn_MpTy"<<file_end;
+    filename_stream_pol_lambda_phi_prep_SpMatrix_dy<< output_path << filename 
+                                << "_pol_lambda_phi_prep_Spvn_MpTy"<<file_end;
+    filename_stream_pol_lambda_theta_phi_prep_SpMatrix_dy<< output_path << filename 
+                                << "_pol_lambda_theta_phi_prep_Spvn_MpTy"<<file_end;
+    
+
     ofstream fphoton_eq_SpMatrix_dy(filename_stream_eq_SpMatrix_dy.str().c_str());
     ofstream fphoton_eq_TL_SpMatrix_dy(filename_stream_eq_TL_SpMatrix_dy.str().c_str());
     ofstream fphoton_visc_SpMatrix_dy(filename_stream_visc_SpMatrix_dy.str().c_str());
@@ -1941,6 +2091,11 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     ofstream fphoton_pol_lambda_theta_SpMatrix_dy(filename_stream_pol_lambda_theta_SpMatrix_dy.str().c_str());
     ofstream fphoton_pol_lambda_norm_SpMatrix_dy(filename_stream_pol_lambda_norm_SpMatrix_dy.str().c_str());
     ofstream fphoton_pol_lambda_phi_SpMatrix_dy(filename_stream_pol_lambda_phi_SpMatrix_dy.str().c_str());
+
+    ofstream fphoton_pol_lambda_theta_phi_SpMatrix_dy(filename_stream_pol_lambda_theta_phi_SpMatrix_dy.str().c_str());
+    ofstream fphoton_pol_lambda_phi_prep_SpMatrix_dy(filename_stream_pol_lambda_phi_prep_SpMatrix_dy.str().c_str());
+    ofstream fphoton_pol_lambda_theta_phi_prep_SpMatrix_dy(filename_stream_pol_lambda_theta_phi_prep_SpMatrix_dy.str().c_str());
+
 
 
 
@@ -1976,6 +2131,21 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
     ofstream fphoton_pol_lambda_phi_Spvn(filename_stream_pol_lambda_phi_Spvn.str().c_str());
     ofstream fphoton_pol_lambda_phi_inte_Spvn(filename_stream_pol_lambda_phi_inte_Spvn.str().c_str());
 
+
+    ofstream fphoton_pol_lambda_theta_phi_SpMatrix(filename_stream_pol_lambda_theta_phi_SpMatrix.str().c_str());
+    ofstream fphoton_pol_lambda_theta_phi_Spvn(filename_stream_pol_lambda_theta_phi_Spvn.str().c_str());
+    ofstream fphoton_pol_lambda_theta_phi_inte_Spvn(filename_stream_pol_lambda_theta_phi_inte_Spvn.str().c_str());
+
+
+    ofstream fphoton_pol_lambda_phi_prep_SpMatrix(filename_stream_pol_lambda_phi_prep_SpMatrix.str().c_str());
+    ofstream fphoton_pol_lambda_phi_prep_Spvn(filename_stream_pol_lambda_phi_prep_Spvn.str().c_str());
+    ofstream fphoton_pol_lambda_phi_prep_inte_Spvn(filename_stream_pol_lambda_phi_prep_inte_Spvn.str().c_str());
+
+    ofstream fphoton_pol_lambda_theta_phi_prep_SpMatrix(filename_stream_pol_lambda_theta_phi_prep_SpMatrix.str().c_str());
+    ofstream fphoton_pol_lambda_theta_phi_prep_Spvn(filename_stream_pol_lambda_theta_phi_prep_Spvn.str().c_str());
+    ofstream fphoton_pol_lambda_theta_phi_prep_inte_Spvn(filename_stream_pol_lambda_theta_phi_prep_inte_Spvn.str().c_str());
+
+
     double dy = dilepton_QGP_thermal->get_dy();
     for (int m = 0; m < nm; m++) {
         for (int i=0; i < nphi; i++) {
@@ -1988,6 +2158,9 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
             fphoton_pol_lambda_theta_SpMatrix << phi << "  ";
             fphoton_pol_lambda_norm_SpMatrix << phi << "  ";
             fphoton_pol_lambda_phi_SpMatrix << phi << "  ";
+            fphoton_pol_lambda_theta_phi_SpMatrix << phi << "  ";
+            fphoton_pol_lambda_phi_prep_SpMatrix << phi << "  ";
+            fphoton_pol_lambda_theta_phi_prep_SpMatrix << phi << "  ";
 
             for (int j = 0; j < np; j++) {
                 double temp_eq  = 0.0;
@@ -1999,6 +2172,9 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
                 double temp_pol_lambda_theta = 0.0;
                 double temp_pol_lambda_norm = 0.0;
                 double temp_pol_lambda_phi = 0.0;
+                double temp_pol_lambda_theta_phi = 0.0;
+                double temp_pol_lambda_phi_prep = 0.0;
+                double temp_pol_lambda_theta_phi_prep = 0.0;
                 
                 for (int k = 0; k < nrapidity; k++) {
                     double y_weight = dilepton_QGP_thermal->getPhoton_yweight(k);
@@ -2013,6 +2189,10 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
                     temp_pol_lambda_theta += dNd2pTdphidy_pol_lambda_theta[m][j][i][k]*weight;
                     temp_pol_lambda_norm += dNd2pTdphidy_pol_lambda_norm[m][j][i][k]*weight;
                     temp_pol_lambda_phi += dNd2pTdphidy_pol_lambda_phi[m][j][i][k]*weight;
+
+                    temp_pol_lambda_theta_phi += dNd2pTdphidy_pol_lambda_theta_phi[m][j][i][k]*weight;
+                    temp_pol_lambda_phi_prep += dNd2pTdphidy_pol_lambda_phi_prep[m][j][i][k]*weight;
+                    temp_pol_lambda_theta_phi_prep += dNd2pTdphidy_pol_lambda_theta_phi_prep[m][j][i][k]*weight;
 
                 }
                 fphoton_eq_SpMatrix << scientific << setprecision(6) << setw(16)
@@ -2031,6 +2211,13 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
                                     << temp_pol_lambda_norm << "  ";
                 fphoton_pol_lambda_phi_SpMatrix << scientific << setprecision(6) << setw(16)
                                     << temp_pol_lambda_phi << "  ";
+                fphoton_pol_lambda_theta_phi_SpMatrix << scientific << setprecision(6) << setw(16)
+                                    << temp_pol_lambda_theta_phi<< "  ";
+                fphoton_pol_lambda_phi_prep_SpMatrix << scientific << setprecision(6) << setw(16)
+                                    << temp_pol_lambda_phi_prep<< "  ";
+                fphoton_pol_lambda_theta_phi_prep_SpMatrix << scientific << setprecision(6) << setw(16)
+                                    << temp_pol_lambda_theta_phi_prep<< "  ";
+                            
             }
             fphoton_eq_SpMatrix << endl;
             fphoton_eq_TL_SpMatrix << endl;
@@ -2040,6 +2227,10 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
             fphoton_pol_lambda_theta_SpMatrix << endl;
             fphoton_pol_lambda_norm_SpMatrix << endl;
             fphoton_pol_lambda_phi_SpMatrix << endl;
+
+            fphoton_pol_lambda_theta_phi_SpMatrix << endl;
+            fphoton_pol_lambda_phi_prep_SpMatrix << endl;
+            fphoton_pol_lambda_theta_phi_prep_SpMatrix << endl;
 
         }
     }
@@ -2068,6 +2259,12 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
                                 << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_pol_lambda_norm[m][i][k] << "  ";
                     fphoton_pol_lambda_phi_SpMatrix_dy<< scientific << setprecision(6) << setw(16) 
                                 << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_pol_lambda_phi[m][i][k] << "  ";
+                    fphoton_pol_lambda_theta_phi_SpMatrix_dy<< scientific << setprecision(6) << setw(16) 
+                                << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_pol_lambda_theta_phi[m][i][k] << "  ";
+                    fphoton_pol_lambda_phi_prep_SpMatrix_dy<< scientific << setprecision(6) << setw(16) 
+                                << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_pol_lambda_phi_prep[m][i][k] << "  ";
+                    fphoton_pol_lambda_theta_phi_prep_SpMatrix_dy<< scientific << setprecision(6) << setw(16) 
+                                << mll_local << "  "<<p_local<<" "<<y_local<<" "<< dNd2pTd2Mdy_pol_lambda_theta_phi_prep[m][i][k] << "  ";
                     for (int order = 1; order < norder; order++) {
 
                         fphoton_eq_SpMatrix_dy<< scientific << setprecision(6) << setw(16)
@@ -2094,6 +2291,10 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
                     fphoton_pol_lambda_theta_SpMatrix_dy<< endl;
                     fphoton_pol_lambda_norm_SpMatrix_dy<< endl;
                     fphoton_pol_lambda_phi_SpMatrix_dy<< endl;
+
+                    fphoton_pol_lambda_theta_phi_SpMatrix_dy<< endl;
+                    fphoton_pol_lambda_phi_prep_SpMatrix_dy<< endl;
+                    fphoton_pol_lambda_theta_phi_prep_SpMatrix_dy<< endl;
 
 
 
@@ -2123,11 +2324,20 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
             fphoton_pol_lambda_theta_Spvn << scientific << setprecision(6) << setw(16)
                             << M_ll << "  "<< pT << "  " << dNd2pTd2M_pol_lambda_theta[m][i] << "  ";
             
-	    fphoton_pol_lambda_norm_Spvn << scientific << setprecision(6) << setw(16)
+	        fphoton_pol_lambda_norm_Spvn << scientific << setprecision(6) << setw(16)
                             << M_ll << "  "<< pT << "  " << dNd2pTd2M_pol_lambda_norm[m][i] << "  ";
 
             fphoton_pol_lambda_phi_Spvn << scientific << setprecision(6) << setw(16)
                             << M_ll << "  "<< pT << "  " << dNd2pTd2M_pol_lambda_phi[m][i] << "  ";
+            
+            fphoton_pol_lambda_theta_phi_Spvn << scientific << setprecision(6) << setw(16)
+                            << M_ll << "  "<< pT << "  " << dNd2pTd2M_pol_lambda_theta_phi[m][i] << "  ";
+            
+            fphoton_pol_lambda_phi_prep_Spvn << scientific << setprecision(6) << setw(16)
+                            << M_ll << "  "<< pT << "  " << dNd2pTd2M_pol_lambda_phi_prep[m][i] << "  ";
+            
+            fphoton_pol_lambda_theta_phi_prep_Spvn << scientific << setprecision(6) << setw(16)
+                            << M_ll << "  "<< pT << "  " << dNd2pTd2M_pol_lambda_theta_phi_prep[m][i] << "  ";
 
             for (int order=1; order < norder; order++) {
                 fphoton_eq_Spvn << scientific << setprecision(6) << setw(16)
@@ -2159,6 +2369,10 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
             fphoton_pol_lambda_theta_Spvn << endl;
             fphoton_pol_lambda_norm_Spvn << endl;
             fphoton_pol_lambda_phi_Spvn << endl;
+
+            fphoton_pol_lambda_theta_phi_Spvn << endl;
+            fphoton_pol_lambda_phi_prep_Spvn << endl;
+            fphoton_pol_lambda_theta_phi_prep_Spvn << endl;
             
         }
     }
@@ -2183,8 +2397,18 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
         fphoton_pol_lambda_phi_inte_Spvn << scientific << setprecision(6) << setw(16)
                         << M_ll << "  " << dNd2Mdy_pol_lambda_phi[m]/dNd2Mdy_pol_lambda_norm[m] << "  ";
         
-	fphoton_pol_lambda_norm_inte_Spvn << scientific << setprecision(6) << setw(16)
+	    fphoton_pol_lambda_norm_inte_Spvn << scientific << setprecision(6) << setw(16)
                         << M_ll << "  " << dNd2Mdy_pol_lambda_norm[m] << "  ";
+
+        fphoton_pol_lambda_theta_phi_inte_Spvn << scientific << setprecision(6) << setw(16)
+                        << M_ll << "  " << dNd2Mdy_pol_lambda_theta_phi[m]/dNd2Mdy_pol_lambda_norm[m] << "  ";
+        
+        fphoton_pol_lambda_phi_prep_inte_Spvn << scientific << setprecision(6) << setw(16)
+                        << M_ll << "  " << dNd2Mdy_pol_lambda_phi_prep[m]/dNd2Mdy_pol_lambda_norm[m] << "  ";
+        fphoton_pol_lambda_theta_phi_prep_inte_Spvn << scientific << setprecision(6) << setw(16)
+                        << M_ll << "  " << dNd2Mdy_pol_lambda_theta_phi_prep[m]/dNd2Mdy_pol_lambda_norm[m] << "  ";
+        
+
 
         for (int order = 0; order < norder; order++) {
             fphoton_eq_inte_Spvn << scientific << setprecision(6) << setw(16)
@@ -2216,6 +2440,10 @@ void PhotonEmission::outputPhoton_total_SpMatrix_and_SpvnpT(int hydro_mode) {
         fphoton_pol_lambda_theta_inte_Spvn << endl;
         fphoton_pol_lambda_norm_inte_Spvn << endl;
         fphoton_pol_lambda_phi_inte_Spvn << endl;
+
+        fphoton_pol_lambda_theta_phi_inte_Spvn << endl;
+        fphoton_pol_lambda_phi_prep_inte_Spvn << endl;
+        fphoton_pol_lambda_theta_phi_prep_inte_Spvn << endl;
 
     }
 }
