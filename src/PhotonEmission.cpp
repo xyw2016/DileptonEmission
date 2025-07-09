@@ -1783,7 +1783,7 @@ void PhotonEmission::outputPhoton_SpvnpT_pol(std::string path, std::string type_
   }
   
 
-  if (type_str.find("pol_lambda_norm") != std::string::npos)
+  if (type_str.find("pol_lambda_norm") == std::string::npos) 
   {
   // pT integrated
   for (int m = 0; m < nm; m++) {
@@ -1792,6 +1792,9 @@ void PhotonEmission::outputPhoton_SpvnpT_pol(std::string path, std::string type_
       fphoton_pol_lambda_theta_inte_Spvn << scientific << setprecision(6) << setw(16)
                       << M_ll_local << "  " << dNd2Mdy_pol_lambda_theta[m]/dNd2Mdy_pol_lambda_norm[m] << "  ";
       fphoton_pol_lambda_theta_inte_Spvn << endl;
+
+      std::cout<<type_str <<"  "<<dNd2Mdy_pol_lambda_theta[m]<< " "<<dNd2Mdy_pol_lambda_norm[m]<<std::endl;
+
 
   }
   }
