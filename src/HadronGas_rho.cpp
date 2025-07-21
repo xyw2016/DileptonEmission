@@ -1,5 +1,5 @@
 
-#include "HadronGas_rho_omega_phi.h"
+#include "HadronGas_rho.h"
 #include "ThermalPhoton.h"
 #include "data_struct.h"
 #include <algorithm>
@@ -22,10 +22,11 @@ using PhysConsts::me;
 
 using ARSENAL::createA3DMatrix;
 using ARSENAL::deleteA3DMatrix;
+
 using ARSENAL::createA2DMatrix;
 using ARSENAL::deleteA2DMatrix;
 
-HadronGas_rho_omega_phi::HadronGas_rho_omega_phi(std::shared_ptr<ParameterReader> paraRdr_in,
+HadronGas_rho::HadronGas_rho(std::shared_ptr<ParameterReader> paraRdr_in,
   std::string emissionProcess)
 : ThermalPhoton{paraRdr_in, emissionProcess} {
 
@@ -47,36 +48,34 @@ HadronGas_rho_omega_phi::HadronGas_rho_omega_phi(std::shared_ptr<ParameterReader
     nele_EOS = 13;
     index_pi = 6;
     index_k = 7;
-  }
+  }  
 
 
   readInEmissionTables(emissionProcess);
-  
-
-  
 
 }
-HadronGas_rho_omega_phi::~HadronGas_rho_omega_phi(){
-  deleteA3DMatrix(rateRho, nTemp, nK);
-  deleteA3DMatrix(rateRho_omega, nTemp, nK);
-  deleteA3DMatrix(rateRho_phi, nTemp, nK);
-  deleteA2DMatrix(eos_table,nTemp_EOS);
 
+HadronGas_rho::~HadronGas_rho(){
+  deleteA3DMatrix(rateRho, nTemp, nK);
+  deleteA3DMatrix(rateRhoL, nTemp, nK);
+  deleteA3DMatrix(rateRhoT, nTemp, nK);
+  deleteA2DMatrix(eos_table,nTemp_EOS);
  
 }
 
-double HadronGas_rho_omega_phi::nF(double x) {
+
+double HadronGas_rho::nF(double x) {
   double e = exp(-x);
   return e / (1. + e);
 }
 
-double HadronGas_rho_omega_phi::nB(double x) {
+double HadronGas_rho::nB(double x) {
   double e = exp(-x);
   return e / (1. - e);
 };
 
 
-void HadronGas_rho_omega_phi::readInEmissionTables(std::string emissionProcess) {
+void HadronGas_rho::readInEmissionTables(std::string emissionProcess) {
   std::ostringstream eqrate_filename_stream;
   eqrate_filename_stream << ratePath_ << "rate_" << emissionProcess
                          << "_eqrate.dat";
@@ -92,9 +91,10 @@ void HadronGas_rho_omega_phi::readInEmissionTables(std::string emissionProcess) 
       exit(-1);
   }
 
+
   rateRho = createA3DMatrix(nTemp, nK, nM, 0.);
-  rateRho_omega = createA3DMatrix(nTemp, nK, nM, 0.);
-  rateRho_phi = createA3DMatrix(nTemp, nK, nM, 0.);
+  rateRhoL = createA3DMatrix(nTemp, nK, nM, 0.);
+  rateRhoT = createA3DMatrix(nTemp, nK, nM, 0.);
   
   double T_dump, M_dump, k_dump;
 
@@ -102,7 +102,7 @@ void HadronGas_rho_omega_phi::readInEmissionTables(std::string emissionProcess) 
       for (int ik = 0; ik < nK; ik++) {
           for (int im = 0; im < nM; im++) {
                   fin >> T_dump >> M_dump >> k_dump
-                      >> rateRho[iT][ik][im]>> rateRho_omega[iT][ik][im]>> rateRho_phi[iT][ik][im];
+                      >> rateRhoL[iT][ik][im]>> rateRhoT[iT][ik][im]>>rateRho[iT][ik][im];
           
                   if (iT == 0 && ik == 0 )
                       M_list.push_back(M_dump);
@@ -161,19 +161,20 @@ void HadronGas_rho_omega_phi::readInEmissionTables(std::string emissionProcess) 
     for (int iele = 0; iele < nele_EOS; ++iele) {
         iss >> val;
         eos_table[iT][iele] = val;
-        
         if (iele == 0)
             T_list_EOS.push_back(eos_table[iT][iele]);
     }
     ++iT;
     if (iT >= nTemp_EOS) break;
-}
+  }
   fin_eos.close();
-  
+
 }
 
 
-int HadronGas_rho_omega_phi::getIdx(double xval, std::vector<double> &xTable) {
+
+
+int HadronGas_rho::getIdx(double xval, std::vector<double> &xTable) {
   // binary search
   if (xval > xTable[xTable.size() - 1]) return xTable.size() - 2;
   if (xval < xTable[0]) return 0;
@@ -190,7 +191,8 @@ int HadronGas_rho_omega_phi::getIdx(double xval, std::vector<double> &xTable) {
   return iL;
 }
 
-void HadronGas_rho_omega_phi::interp_eos(const double T, double& fugacity_pi, double& fugacity_k){
+
+void HadronGas_rho::interp_eos(const double T, double& fugacity_pi, double& fugacity_k){
 
   
 
@@ -218,21 +220,18 @@ void HadronGas_rho_omega_phi::interp_eos(const double T, double& fugacity_pi, do
   fugacity_pi = exp(mu_pi_eff / T);
   fugacity_k  = exp(mu_k_eff  / T);
 
-  // std::cout << std::fixed << std::setprecision(6) 
-  //         << T << " " << mu_pi_eff << " " << mu_k_eff << " "<< fugacity_pi<<" "<<fugacity_k<< std::endl;
 }
 
-  
-
-
-
-
-void HadronGas_rho_omega_phi::interp(
-  const double T, const double M, const double K, double &resRho, double &resRho_omega, double &resRho_phi) {
+void HadronGas_rho::interp(
+  const double T, const double M, const double K, double &resRho,double &resRhoL,double &resRhoT) { 
   const int i = getIdx(T, T_list);
   const int j = getIdx(K, K_list);
   const int k = getIdx(M, M_list);
+
   
+
+
+
   double a = (T - T_list[i]) / (T_list[i + 1] - T_list[i]);
   double b =
       (K - K_list[j]) / (K_list[j + 1] - K_list[j]);
@@ -246,8 +245,8 @@ void HadronGas_rho_omega_phi::interp(
 
 
   resRho = 0;
-  resRho_omega = 0;
-  resRho_phi = 0;
+  resRhoL = 0;
+  resRhoT = 0;
 
   for (int iT = 0; iT < 2; iT++) {
       for (int ik = 0; ik < 2; ik++) {
@@ -258,60 +257,49 @@ void HadronGas_rho_omega_phi::interp(
             
             double weight = wT * wK * wM;
             resRho += weight * rateRho[i + iT][j + ik][k + im];  
-            resRho_omega += weight * rateRho_omega[i + iT][j + ik][k + im];  
-            resRho_phi += weight * rateRho_phi[i + iT][j + ik][k + im];  
+            resRhoL += weight * rateRhoL[i + iT][j + ik][k + im];  
+            resRhoT += weight * rateRhoT[i + iT][j + ik][k + im];  
           }
       }
   }
+  resRho = resRho;
+  resRhoT = resRhoT/3.0;
+  resRhoL = resRhoL/3.0;
 }
 
-void HadronGas_rho_omega_phi::getRateFromTable(const double E,
+void HadronGas_rho::getRateFromTable(const double E,
   const double T_local, const double k_local, const double M_local, double &rateTot,
   double &rateT, double &rateL) {
   
   double rho_app = 0.0;
-  double omega_app = 0.0;
-  double phi_app = 0.0;
-
-  interp(T_local,  M_local, k_local,  rho_app,omega_app,phi_app);
+  double rho_appL = 0.0;
+  double rho_appT = 0.0;
+  interp(T_local,  M_local, k_local,  rho_app, rho_appL,rho_appT);
   
   double zk = 1;
   double zpi = 1;
   interp_eos(T_local,  zpi, zk);
-
   //NPA806(2008)339
   double rho_figucity_factor = zpi*zpi;
-  double omega_figucity_factor = rho_figucity_factor*zpi;
-  double phi_figucity_factor = zk*zk*0.75*0.75;
 
- 
+  double ImDV  = rho_app*rho_figucity_factor;
+  double ImDVL = rho_appL*rho_figucity_factor;
+  double ImDVT = rho_appT*rho_figucity_factor;
   
-  
-
-  double ImDV = rho_app;
-  double ImDV_omega = omega_app;
-  double ImDV_phi = phi_app;
   double M2 = M_local * M_local;
   double mass_rho0 = 0.853;
-  double gv2 = 5.9*5.9;
-
-  double mass_omega= 0.782;
-  double mass_phi = 1.02;
-  double gv2_omega = 20.5*4*M_PI;
-  double gv2_phi = 11.7*4*M_PI;
-  //rare mass for omega and phi
+  double gv2 = 5.9*5.9; 
   
   double prefactor = - alphaEM*alphaEM/pow(M_PI, 3.)/M2/pow(hbarC, 4.) ;
   double factorLM = (1+2*me*me/M2 )*sqrt(1-4*me*me/M2 );
 
- 
-  rateTot = factorLM*prefactor * nB(E / T_local)*(ImDV*pow(mass_rho0,4)*rho_figucity_factor/gv2
-                                        +ImDV_omega*pow(mass_omega,4)*omega_figucity_factor/gv2_omega 
-  					                            +ImDV_phi*pow(mass_phi,4)*phi_figucity_factor/gv2_phi);
- 
-   
-  rateT = 1./3. * rateTot;
-  rateL = 1./3. * rateTot;
+  
+
+  rateTot = factorLM*prefactor * nB(E / T_local)*ImDV*pow(mass_rho0,4)/gv2;  
+  rateT = factorLM*prefactor * nB(E / T_local)*ImDVT*pow(mass_rho0,4)/gv2;
+  rateL = factorLM*prefactor * nB(E / T_local)*ImDVL*pow(mass_rho0,4)/gv2;
+
+  
 }
 
 

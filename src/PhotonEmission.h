@@ -23,6 +23,7 @@ private:
   std::unique_ptr<ThermalPhoton> dilepton_QGP_thermal_LO;
   std::unique_ptr<ThermalPhoton> dilepton_QGP_thermal;
   std::unique_ptr<ThermalPhoton> HadronGas_rho_meson;
+  std::unique_ptr<ThermalPhoton> HadronGas_4piV;
 
   int CORES;
 
@@ -56,6 +57,7 @@ private:
   int calHGIdFlag;
   int emission_rate_flag;
   int test_code_flag;
+  int rho_rate_flag;
 
   double **lambda; // Lorentz boost
 

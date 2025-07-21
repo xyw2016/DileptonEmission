@@ -23,6 +23,8 @@
 #include "QGP_LO_analytic.h"
 #include "QGP_NLO.h"
 #include "HadronGas_rho_omega_phi.h"
+#include "HadronGas_rho.h"
+#include "HadronGas_4pi.h"
 #include "ThermalPhoton.h"
 #include "tensor_trans.h"
 
@@ -54,6 +56,7 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
   turn_on_muB_ = static_cast<int>(paraRdr->getVal("turn_on_muB", 1));
   test_code_flag = static_cast<int>(paraRdr->getVal("test_code_flag", 0));
   emission_rate_flag = paraRdr->getVal("dilepton_emission_rate");
+  rho_rate_flag = paraRdr->getVal("rho_rate_flag");
 
   // omp parameters
   CORES = 1;
@@ -384,8 +387,24 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
 
   dilepton_QGP_thermal_LO =
       std::unique_ptr<ThermalPhoton>(new QGP_LO(paraRdr, "QGP_LO_total"));
-  HadronGas_rho_meson =
+  if (rho_rate_flag == 0) // LHC and top RHIC
+  {
+    HadronGas_rho_meson =
+      std::unique_ptr<ThermalPhoton>(new HadronGas_rho_omega_phi(paraRdr, "HadronGas_rho_omega_phi"));
+  }
+  else if (rho_rate_flag == 1) // LHC and top RHIC
+  {
+    HadronGas_rho_meson =
       std::unique_ptr<ThermalPhoton>(new HadronGas_rho(paraRdr, "HadronGas_rho"));
+  }
+  else{
+    std::cout<<" wrong rho rate flag"<< std::endl;
+    exit(1);
+  }
+
+  HadronGas_4piV =
+      std::unique_ptr<ThermalPhoton>(new HadronGas_4pi(paraRdr, "HadronGas_4pi"));
+
   dilepton_QGP_thermal =
       std::unique_ptr<ThermalPhoton>(new QGP_NLO(paraRdr, "QGP_NLO_total"));
   dilepton_QGP_thermal->readEmissionrateFromFile(
@@ -825,6 +844,10 @@ hydro_mode) {
                                       p_lab_Min, flow_u_mu_Min, Eq_localrest_Tb, M_ll[j],
                                       visc_fac, bulkPi_fac, diff_fac, temp_local, muB_local,
                                       inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,n,i3);
+                              HadronGas_4piV->calThermalPhotonemission_3d(
+                                      p_lab_Min, flow_u_mu_Min, Eq_localrest_Tb, M_ll[j],
+                                      visc_fac, bulkPi_fac, diff_fac, temp_local, muB_local,
+                                      inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,n,i3);
                             }
 
                             //}
@@ -844,6 +867,7 @@ hydro_mode) {
     dilepton_QGP_thermal->reduce_multile_core();
     dilepton_QGP_thermal_LO->reduce_multile_core();
     HadronGas_rho_meson->reduce_multile_core();
+    HadronGas_4piV->reduce_multile_core();
 
     
     // Total number of elements that satisfy the condition
@@ -1012,8 +1036,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,
 
       for (long int icell = 0; icell <  endFO;
            icell++) // cell index inside each chunk
-//         for (long int icell = 0; icell < 10000;
-//             icell++) // cell index inside each chunk
+        // for (long int icell = 0; icell < 10000;
+        //     icell++) // cell index inside each chunk
        
            {
         if ((icell == endFO - 1) && (remainder != 0) && (n > remainder - 1))
@@ -1302,6 +1326,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,
                     p_lab_Min, flow_u_mu_Min, Eq_localrest_Tb, M_ll[j],
                     visc_fac, bulkPi_fac, diff_fac, temp_local, muB_local,
                     inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,n,i3);
+                  HadronGas_4piV->calThermalPhotonemission_3d(
+                    p_lab_Min, flow_u_mu_Min, Eq_localrest_Tb, M_ll[j],
+                    visc_fac, bulkPi_fac, diff_fac, temp_local, muB_local,
+                    inv_eplusp, rhoB_over_eplusp, volume, QGP_fraction,n,i3);
                   }
 
                 //}
@@ -1332,6 +1360,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in,
   dilepton_QGP_thermal->reduce_multile_core();
   dilepton_QGP_thermal_LO->reduce_multile_core();
   HadronGas_rho_meson->reduce_multile_core();
+  HadronGas_4piV->reduce_multile_core();
+
   
   // Total number of elements that satisfy the condition
   // int total_count = ncells;
@@ -1343,6 +1373,7 @@ void PhotonEmission::calPhoton_SpvnpT_individualchannel() {
   dilepton_QGP_thermal->calPhoton_SpvnpT_shell();
   dilepton_QGP_thermal_LO->calPhoton_SpvnpT_shell();
   HadronGas_rho_meson->calPhoton_SpvnpT_shell();
+  HadronGas_4piV->calPhoton_SpvnpT_shell();
 
   if (differential_flag == 1) {
     dilepton_QGP_thermal->calPhoton_SpMatrix_dTdtau(
@@ -1357,6 +1388,7 @@ void PhotonEmission::outputPhotonSpvn_individualchannel(std::string type_str ) {
   dilepton_QGP_thermal->outputPhoton_SpvnpT_shell(output_path,type_str);
   dilepton_QGP_thermal_LO->outputPhoton_SpvnpT_shell(output_path,type_str);
   HadronGas_rho_meson->outputPhoton_SpvnpT_shell(output_path,type_str);
+  HadronGas_4piV->outputPhoton_SpvnpT_shell(output_path,type_str);
 
   if (differential_flag == 1) {
     dilepton_QGP_thermal->outputPhoton_Spectra_dTdtau(
@@ -1377,10 +1409,12 @@ void PhotonEmission::calPhoton_total_Spvn() {
         for (int j = 0; j < nphi; j++) {
           for (int k = 0; k < nrapidity; k++) {
             dNd2pTdphidy_eq_lo[m][i][j][k] = dilepton_QGP_thermal_LO->get_dNd2pTdphidy_eq(m,i,j,k)
-                                           + HadronGas_rho_meson->get_dNd2pTdphidy_eq(m,i,j,k) ;
+                                           + HadronGas_rho_meson->get_dNd2pTdphidy_eq(m,i,j,k) 
+                                           + HadronGas_4piV->get_dNd2pTdphidy_eq(m,i,j,k) ;
             
             dNd2pTdphidy_tot_lo[m][i][j][k] = dilepton_QGP_thermal_LO->get_dNd2pTdphidy_tot(m,i,j,k)
-                                            + HadronGas_rho_meson->get_dNd2pTdphidy_tot(m,i,j,k) ;
+                                            + HadronGas_rho_meson->get_dNd2pTdphidy_tot(m,i,j,k)
+                                            + HadronGas_4piV->get_dNd2pTdphidy_eq(m,i,j,k);
             dNd2pTdphidy_pol_lambda_theta_lo[m][i][j][k] = dilepton_QGP_thermal_LO->get_dNd2pTdphidy_pol_lambda_theta(m,i,j,k) + HadronGas_rho_meson->get_dNd2pTdphidy_pol_lambda_theta(m,i,j,k) ;
 
             dNd2pTdphidy_pol_lambda_norm_lo[m][i][j][k] = dilepton_QGP_thermal_LO->get_dNd2pTdphidy_pol_lambda_norm(m,i,j,k) + HadronGas_rho_meson->get_dNd2pTdphidy_pol_lambda_norm(m,i,j,k) ;
@@ -1389,10 +1423,10 @@ void PhotonEmission::calPhoton_total_Spvn() {
 
 
             dNd2pTdphidy_eq_nlo[m][i][j][k] = dilepton_QGP_thermal->get_dNd2pTdphidy_eq(m,i,j,k)
-            + HadronGas_rho_meson->get_dNd2pTdphidy_eq(m,i,j,k) ;
+            + HadronGas_rho_meson->get_dNd2pTdphidy_eq(m,i,j,k)+ HadronGas_4piV->get_dNd2pTdphidy_eq(m,i,j,k) ;
 
             dNd2pTdphidy_tot_nlo[m][i][j][k] = dilepton_QGP_thermal->get_dNd2pTdphidy_tot(m,i,j,k)
-             + HadronGas_rho_meson->get_dNd2pTdphidy_tot(m,i,j,k) ;
+             + HadronGas_rho_meson->get_dNd2pTdphidy_tot(m,i,j,k)+ HadronGas_4piV->get_dNd2pTdphidy_eq(m,i,j,k)  ;
             dNd2pTdphidy_pol_lambda_theta_nlo[m][i][j][k] = dilepton_QGP_thermal->get_dNd2pTdphidy_pol_lambda_theta(m,i,j,k) + HadronGas_rho_meson->get_dNd2pTdphidy_pol_lambda_theta(m,i,j,k) ;
 
             dNd2pTdphidy_pol_lambda_norm_nlo[m][i][j][k] = dilepton_QGP_thermal->get_dNd2pTdphidy_pol_lambda_norm(m,i,j,k) + HadronGas_rho_meson->get_dNd2pTdphidy_pol_lambda_norm(m,i,j,k) ;
@@ -1701,6 +1735,13 @@ fphoton_eq_inte_Spvn << scientific << setprecision(6) << setw(16) << order
 fphoton_eq_inte_Spvn << endl;
 }
 
+
+  fphoton_eq_SpMatrix_dy.close();
+  fphoton_eq_SpMatrix.close();
+  fphoton_eq_Spvn.close();
+  fphoton_eq_inte_Spvn.close();
+
+
 }
 
 
@@ -1793,11 +1834,16 @@ void PhotonEmission::outputPhoton_SpvnpT_pol(std::string path, std::string type_
                       << M_ll_local << "  " << dNd2Mdy_pol_lambda_theta[m]/dNd2Mdy_pol_lambda_norm[m] << "  ";
       fphoton_pol_lambda_theta_inte_Spvn << endl;
 
-      std::cout<<type_str <<"  "<<dNd2Mdy_pol_lambda_theta[m]<< " "<<dNd2Mdy_pol_lambda_norm[m]<<std::endl;
+      //std::cout<<type_str <<"  "<<dNd2Mdy_pol_lambda_theta[m]<< " "<<dNd2Mdy_pol_lambda_norm[m]<<std::endl;
 
 
   }
   }
+
+  fphoton_pol_lambda_theta_SpMatrix_dy.close();
+  fphoton_pol_lambda_theta_SpMatrix.close();
+  fphoton_pol_lambda_theta_Spvn.close();
+  fphoton_pol_lambda_theta_inte_Spvn.close();
 
 
 }

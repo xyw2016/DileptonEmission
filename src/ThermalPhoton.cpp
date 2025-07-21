@@ -564,6 +564,11 @@ void ThermalPhoton::getPhotonemissionRate(
     double k = sqrt(Eq * Eq - M_ll * M_ll);
     getRateFromTable( Eq, T,  k, M_ll,
                       em_eqrate, em_eqrateT, em_eqrateL);
+  } 
+  else if (emissionProcess_name == "HadronGas_4pi") {
+    double k = sqrt(Eq * Eq - M_ll * M_ll);
+    getRateFromTable( Eq, T,  k, M_ll,
+                      em_eqrate, em_eqrateT, em_eqrateL);
   }  
   else {
     std::cout << " error!: emissionProcess! " << std::endl;
@@ -1859,6 +1864,14 @@ void ThermalPhoton::outputPhoton_SpvnpT(string path, string type_str,string type
     fphoton_eq_inte_Spvn << endl;
   }
 
+
+  fphoton_eq_SpMatrix_dy.close();
+  fphoton_eq_SpMatrix.close();
+  fphoton_eq_Spvn.close();
+  fphoton_eq_inte_Spvn.close();
+
+
+
 }
 
 
@@ -1962,6 +1975,13 @@ void ThermalPhoton::outputPhoton_SpvnpT_pol(std::string path, std::string type_s
 
   }
   }
+
+
+  fphoton_pol_lambda_theta_SpMatrix_dy.close();
+  fphoton_pol_lambda_theta_SpMatrix.close();
+  fphoton_pol_lambda_theta_Spvn.close();
+  fphoton_pol_lambda_theta_inte_Spvn.close();
+
 
 
 }
