@@ -705,7 +705,7 @@ void ThermalPhoton::calThermalPhotonemission_3d(
 
 
 
-  double factor_pol_1 = me*me/(p_lab_min_vec_square*p_lab_min_vec_square);
+  double factor_pol_1 = me*me/(M_ll*M_ll);
   double rho_delta= temp_eqT_sum - temp_eqL_sum;
   double rho_V = temp_eqT_sum*2 + temp_eqL_sum;
 

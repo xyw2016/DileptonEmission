@@ -305,12 +305,13 @@ void HadronGas_rho_omega_phi::getRateFromTable(const double E,
   double factorLM = (1+2*me*me/M2 )*sqrt(1-4*me*me/M2 );
 
  
-  rateTot = factorLM*prefactor * nB(E / T_local)*(ImDV*pow(mass_rho0,4)*rho_figucity_factor/gv2
-                                        +ImDV_omega*pow(mass_omega,4)*omega_figucity_factor/gv2_omega 
-  					                            +ImDV_phi*pow(mass_phi,4)*phi_figucity_factor/gv2_phi);
+  //rateTot = factorLM*prefactor * nB(E / T_local)*(ImDV*pow(mass_rho0,4)*rho_figucity_factor/gv2
+  //                                      +ImDV_omega*pow(mass_omega,4)*omega_figucity_factor/gv2_omega 
+  //					                            +ImDV_phi*pow(mass_phi,4)*phi_figucity_factor/gv2_phi);
+  rateTot = factorLM*prefactor * nB(E / T_local)*(ImDV*pow(mass_rho0,4)*rho_figucity_factor/gv2);
  
    
-  rateT = 1./3. * rateTot;
+  rateT = 2./3. * rateTot;
   rateL = 1./3. * rateTot;
 }
 
